@@ -97,7 +97,7 @@
     "approvalWorkflowActive": "审批工作流已激活。审批需要明确的用户操作。",
     "approvalWorkflowDisabled": "审批工作流已禁用。默认安全模式。",
     "dryRunModeActive": "更改将被记录但不会执行",
-    "liveModeActive": "更改将立即执行"
+    "liveModeActive": "更改将立即执行",
     "approved": "已批准",
     "rejected": "已拒绝",
     "completed": "已完成",
