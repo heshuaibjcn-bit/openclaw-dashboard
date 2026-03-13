@@ -197,33 +197,33 @@ export default function MemoryPage() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Memories</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalMemories')}</CardTitle>
             <Database className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Stored entries
+              {t('storedEntries')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">High Importance</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('highImportance')}</CardTitle>
             <Sparkles className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.highImportance}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Important memories
+              {t('importantMemories')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Score</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('avgScore')}</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
@@ -231,20 +231,20 @@ export default function MemoryPage() {
               {(stats.avgScore * 100).toFixed(0)}%
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Relevance score
+              {t('relevanceScore')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Agents</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('activeAgents')}</CardTitle>
             <Brain className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalAgents}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              With memory
+              {t('withMemory')}
             </p>
           </CardContent>
         </Card>
@@ -253,9 +253,9 @@ export default function MemoryPage() {
       {/* Search Interface */}
       <Card>
         <CardHeader>
-          <CardTitle>Search Memory</CardTitle>
+          <CardTitle>{t('searchMemory')}</CardTitle>
           <CardDescription>
-            Search through agent memory using semantic similarity
+            {t('searchThroughAgentMemory')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -282,14 +282,14 @@ export default function MemoryPage() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Filter:</span>
+            <span className="text-sm text-muted-foreground">{t('filter')}</span>
             <Select value={selectedAgent} onValueChange={(value) => value && setSelectedAgent(value)}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="All Agents" />
+                <SelectValue placeholder={t('allAgentsOption')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Agents</SelectItem>
-                <SelectItem value="main">Main (Shared)</SelectItem>
+                <SelectItem value="all">{t('allAgentsOption')}</SelectItem>
+                <SelectItem value="main">{t('mainShared')}</SelectItem>
                 {activeAgents.map(agent => (
                   <SelectItem key={agent.id} value={agent.id}>
                     {agent.name}
@@ -311,7 +311,7 @@ export default function MemoryPage() {
             </Select>
           </div>
           <div className="text-sm text-muted-foreground">
-            Showing {displayMemories.length} memories
+            {t('showingMemories', { count: displayMemories.length })}
           </div>
         </div>
       </div>
@@ -322,19 +322,19 @@ export default function MemoryPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-base">Editing Memory: {editingMemory.id}</CardTitle>
+                <CardTitle className="text-base">{t('editingMemory')}: {editingMemory.id}</CardTitle>
                 <CardDescription>
-                  Changes will be written directly to the source file
+                  {t('changesWillBeWritten')}
                 </CardDescription>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={handleCancelEdit}>
                   <X className="mr-2 h-4 w-4" />
-                  Cancel
+                  {t('cancel')}
                 </Button>
                 <Button size="sm" onClick={handleSaveMemory}>
                   <Save className="mr-2 h-4 w-4" />
-                  Save
+                  {t('save')}
                 </Button>
               </div>
             </div>
@@ -393,7 +393,7 @@ export default function MemoryPage() {
                         <div className="flex items-center gap-1 text-xs">
                           <Sparkles className={`h-3 w-3 ${getScoreColor(memory.score)}`} />
                           <span className={getScoreColor(memory.score)}>
-                            {Math.round(memory.score * 100)}% match
+                            {Math.round(memory.score * 100)}% {t('match')}
                           </span>
                         </div>
                       )}
@@ -429,11 +429,11 @@ export default function MemoryPage() {
             <CardContent className="flex flex-col items-center justify-center py-16">
               <Database className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-muted-foreground">
-                {searchQuery ? "No memories match your search" : "No memories found"}
+                {searchQuery ? t('noMemoriesMatchSearch') : t('noResults')}
               </p>
               {!searchQuery && selectedAgent !== "all" && (
                 <p className="text-sm text-muted-foreground mt-1">
-                  Try selecting "All Agents" to see all memories
+                  {t('trySelectingAllAgents')}
                 </p>
               )}
             </CardContent>

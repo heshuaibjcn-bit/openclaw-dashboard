@@ -140,7 +140,7 @@ export default function LogsPage() {
             onClick={() => setIsPaused(!isPaused)}
           >
             {isPaused ? <Play className="mr-2 h-4 w-4" /> : <Pause className="mr-2 h-4 w-4" />}
-            {isPaused ? "Resume" : "Pause"}
+            {isPaused ? t('resume') : t('pause')}
           </Button>
           <Button variant="outline" size="sm" onClick={handleRefresh}>
             <RefreshCw className="mr-2 h-4 w-4" />
@@ -153,52 +153,52 @@ export default function LogsPage() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Logs</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalLogs')}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Log entries
+              {t('logEntries')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Errors</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('errors')}</CardTitle>
             <AlertCircle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.errors}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Error messages
+              {t('errorMessages')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Warnings</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('warnings')}</CardTitle>
             <AlertTriangle className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.warnings}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Warning messages
+              {t('warningMessages')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Info</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('info')}</CardTitle>
             <Info className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.info}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Info messages
+              {t('infoMessages')}
             </p>
           </CardContent>
         </Card>
@@ -209,24 +209,24 @@ export default function LogsPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Log Stream</CardTitle>
+              <CardTitle>{t('logStream')}</CardTitle>
               <CardDescription>
                 {loading
-                  ? "Loading logs..."
-                  : `Showing ${filteredLogs.length} of ${logs?.length || 0} logs`}
+                  ? t('loading')
+                  : t('showingLogs', { count: filteredLogs.length, total: logs?.length || 0 })}
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
               <Select value={levelFilter} onValueChange={(value) => value && setLevelFilter(value)}>
                 <SelectTrigger className="w-32">
-                  <SelectValue placeholder="Level" />
+                  <SelectValue placeholder={t('level')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Levels</SelectItem>
-                  <SelectItem value="debug">Debug</SelectItem>
-                  <SelectItem value="info">Info</SelectItem>
-                  <SelectItem value="warn">Warning</SelectItem>
-                  <SelectItem value="error">Error</SelectItem>
+                  <SelectItem value="all">{t('allLevels')}</SelectItem>
+                  <SelectItem value="debug">{t('debug')}</SelectItem>
+                  <SelectItem value="info">{t('info')}</SelectItem>
+                  <SelectItem value="warn">{t('warning')}</SelectItem>
+                  <SelectItem value="error">{t('error')}</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -257,7 +257,7 @@ export default function LogsPage() {
             >
               {loading ? (
                 <div className="flex items-center justify-center py-8">
-                  <p className="text-muted-foreground">Loading logs...</p>
+                  <p className="text-muted-foreground">{t('loading')}</p>
                 </div>
               ) : filteredLogs.length > 0 ? (
                 filteredLogs.map((log) => {
@@ -292,8 +292,8 @@ export default function LogsPage() {
                   <FileText className="h-12 w-12 text-muted-foreground mb-4" />
                   <p className="text-muted-foreground">
                     {searchQuery || levelFilter !== "all"
-                      ? "No logs match your filters"
-                      : "No logs available"}
+                      ? t('noLogsMatchFilters')
+                      : t('noLogsAvailable')}
                   </p>
                 </div>
               )}
@@ -311,7 +311,7 @@ export default function LogsPage() {
           onChange={(e) => setAutoScroll(e.target.checked)}
           className="h-4 w-4"
         />
-        <label htmlFor="autoScroll">Auto-scroll to latest</label>
+        <label htmlFor="autoScroll">{t('autoScrollToLatest')}</label>
       </div>
     </div>
   );
