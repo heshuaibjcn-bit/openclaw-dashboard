@@ -216,7 +216,11 @@ export default function DashboardPage() {
             }`} />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold capitalize">{systemHealth.gatewayStatus}</div>
+            <div className={`text-2xl font-bold capitalize ${
+              systemHealth.gatewayStatus === "healthy" ? "text-green-500" :
+              systemHealth.gatewayStatus === "degraded" ? "text-yellow-500" :
+              "text-red-500"
+            }`}>{systemHealth.gatewayStatus}</div>
             <p className="text-xs text-muted-foreground mt-1">
               {t('overview.metrics.uptime')}: {systemHealth.uptime}
             </p>
