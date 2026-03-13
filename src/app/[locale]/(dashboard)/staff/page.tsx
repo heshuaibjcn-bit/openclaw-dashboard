@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,8 @@ interface StaffMember {
 }
 
 export default function StaffPage() {
+  const t = useTranslations('staff');
+  const tCommon = useTranslations('common');
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -172,13 +175,13 @@ export default function StaffPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Staff</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Monitor agent work status and activity
+            {t('subtitle')}
           </p>
         </div>
         <Button variant="outline" size="sm">
-          Refresh
+          {tCommon('refresh')}
         </Button>
       </div>
 

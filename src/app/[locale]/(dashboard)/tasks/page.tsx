@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,8 @@ interface Task {
 }
 
 export default function TasksPage() {
+  const t = useTranslations('tasks');
+  const tCommon = useTranslations('common');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -227,9 +230,9 @@ export default function TasksPage() {
     const diffTime = date.getTime() - now.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return "Today";
-    if (diffDays === 1) return "Tomorrow";
-    if (diffDays === -1) return "Yesterday";
+    if (diffDays === 0) return tCommon('today');
+    if (diffDays === 1) return tCommon('tomorrow');
+    if (diffDays === -1) return tCommon('yesterday');
     if (diffDays < -1) return `${Math.abs(diffDays)} days ago`;
     if (diffDays <= 7) return `In ${diffDays} days`;
     return date.toLocaleDateString();
@@ -239,14 +242,14 @@ export default function TasksPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Tasks</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Track and manage your tasks
+            {t('subtitle')}
           </p>
         </div>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          New Task
+          {tCommon('create')} {t('title')}
         </Button>
       </div>
 
@@ -254,65 +257,65 @@ export default function TasksPage() {
       <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.total')}</CardTitle>
             <CheckSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              All tasks
+              {t('stats.totalDesc')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.pending')}</CardTitle>
             <Circle className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.pending}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Awaiting start
+              {t('stats.pendingDesc')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.inProgress')}</CardTitle>
             <Clock className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.inProgress}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Active tasks
+              {t('stats.inProgressDesc')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.completed')}</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.completed}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Finished tasks
+              {t('stats.completedDesc')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Blocked</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.blocked')}</CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.blocked}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Need attention
+              {t('stats.blockedDesc')}
             </p>
           </CardContent>
         </Card>
@@ -325,7 +328,7 @@ export default function TasksPage() {
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search tasks..."
+                placeholder={t('searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
@@ -333,39 +336,39 @@ export default function TasksPage() {
             </div>
             <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value ?? 'all')}>
               <SelectTrigger className="w-40">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={tCommon('status')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="in-progress">In Progress</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="blocked">Blocked</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
+                <SelectItem value="all">{tCommon('all')} {tCommon('status')}</SelectItem>
+                <SelectItem value="pending">{t('status.pending')}</SelectItem>
+                <SelectItem value="in-progress">{t('status.inProgress')}</SelectItem>
+                <SelectItem value="completed">{t('status.completed')}</SelectItem>
+                <SelectItem value="blocked">{t('status.blocked')}</SelectItem>
+                <SelectItem value="cancelled">{t('status.cancelled')}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={priorityFilter} onValueChange={(value) => setPriorityFilter(value ?? 'all')}>
               <SelectTrigger className="w-40">
-                <SelectValue placeholder="Priority" />
+                <SelectValue placeholder={tCommon('priority')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Priority</SelectItem>
-                <SelectItem value="critical">Critical</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="all">{tCommon('all')} {tCommon('priority')}</SelectItem>
+                <SelectItem value="critical">{t('severity.critical')}</SelectItem>
+                <SelectItem value="high">{t('severity.high')}</SelectItem>
+                <SelectItem value="medium">{t('severity.medium')}</SelectItem>
+                <SelectItem value="low">{t('severity.low')}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={sortBy} onValueChange={(value) => setSortBy((value ?? 'createdAt') as typeof sortBy)}>
               <SelectTrigger className="w-40">
                 <ArrowUpDown className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder={tCommon('sortBy')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="updated">Last Updated</SelectItem>
-                <SelectItem value="created">Created</SelectItem>
-                <SelectItem value="priority">Priority</SelectItem>
-                <SelectItem value="due">Due Date</SelectItem>
+                <SelectItem value="created">{tCommon('date')}</SelectItem>
+                <SelectItem value="priority">{tCommon('priority')}</SelectItem>
+                <SelectItem value="due">Due {tCommon('date')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -389,8 +392,8 @@ export default function TasksPage() {
               <CheckSquare className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-muted-foreground">
                 {searchQuery || statusFilter !== "all" || priorityFilter !== "all"
-                  ? "No tasks match your filters"
-                  : "No tasks found"}
+                  ? t('noTasksFiltered')
+                  : t('noTasks')}
               </p>
             </CardContent>
           </Card>

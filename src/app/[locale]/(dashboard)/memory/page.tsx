@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,8 @@ import type { MemoryEntry } from "@/lib/openclaw";
 import { getAllAgents } from "@/lib/openclaw/config-reader";
 
 export default function MemoryPage() {
+  const t = useTranslations('memory');
+  const tCommon = useTranslations('common');
   const { data: memories, loading, search } = useMemorySearch();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAgent, setSelectedAgent] = useState<string>("all");
@@ -179,14 +182,14 @@ export default function MemoryPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Memory</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Search and browse agent memory with agent-based filtering
+            {t('subtitle')}
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
           <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh
+          {tCommon('refresh')}
         </Button>
       </div>
 

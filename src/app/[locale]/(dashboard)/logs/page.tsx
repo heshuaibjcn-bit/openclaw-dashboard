@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,8 @@ const levelBadges = {
 } as const;
 
 export default function LogsPage() {
+  const t = useTranslations('logs');
+  const tCommon = useTranslations('common');
   const { data: logs, loading, refetch } = useLogs();
   const [filteredLogs, setFilteredLogs] = useState<LogEntry[]>([]);
   const [levelFilter, setLevelFilter] = useState<string>("all");
@@ -125,9 +128,9 @@ export default function LogsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Logs</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Real-time gateway and agent logs
+            {t('subtitle')}
           </p>
         </div>
         <div className="flex gap-2">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,8 @@ import { useAgents } from "@/lib/openclaw";
 import type { Agent } from "@/lib/openclaw";
 
 export default function AgentsPage() {
+  const t = useTranslations('agents');
+  const tCommon = useTranslations('common');
   const { data: agents, loading, refetch } = useAgents();
   const [searchQuery, setSearchQuery] = useState("");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -105,19 +108,19 @@ export default function AgentsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Agents</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Configure and manage your AI agents
+            {t('subtitle')}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleRefresh}>
             <RefreshCw className="mr-2 h-4 w-4" />
-            Refresh
+            {tCommon('refresh')}
           </Button>
           <Button size="sm">
             <Plus className="mr-2 h-4 w-4" />
-            New Agent
+            {tCommon('create')} {t('title')}
           </Button>
         </div>
       </div>
@@ -126,20 +129,20 @@ export default function AgentsPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Agents</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.total')}</CardTitle>
             <Bot className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{agents?.length || 0}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Configured agents
+              {t('stats.totalDesc')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Agents</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.active')}</CardTitle>
             <Sparkles className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -147,14 +150,14 @@ export default function AgentsPage() {
               {agents?.filter((a) => a.status === "active").length || 0}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Currently running
+              {t('stats.activeDesc')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Capabilities</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.capabilities')}</CardTitle>
             <Settings className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -162,7 +165,7 @@ export default function AgentsPage() {
               {new Set(agents?.flatMap((a) => a.capabilities)).size || 0}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Unique capabilities
+              {t('stats.capabilitiesDesc')}
             </p>
           </CardContent>
         </Card>
@@ -173,17 +176,17 @@ export default function AgentsPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>All Agents</CardTitle>
+              <CardTitle>{t('allAgents')}</CardTitle>
               <CardDescription>
                 {loading
-                  ? "Loading agents..."
-                  : `Showing ${filteredAgents.length} of ${agents?.length || 0} agents`}
+                  ? t('loading')
+                  : t('showing', { count: filteredAgents.length, total: agents?.length || 0 })}
               </CardDescription>
             </div>
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search agents..."
+                placeholder={t('searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-8 w-64"

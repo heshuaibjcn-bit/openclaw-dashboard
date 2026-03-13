@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,8 @@ interface UsageData {
 }
 
 export default function UsagePage() {
+  const t = useTranslations('usage');
+  const tCommon = useTranslations('common');
   const [data, setData] = useState<UsageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<"today" | "7days" | "30days">("7days");
@@ -113,9 +116,9 @@ export default function UsagePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Usage & Cost</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Monitor token consumption and costs
+            {t('subtitle')}
           </p>
         </div>
         <div className="flex gap-2">

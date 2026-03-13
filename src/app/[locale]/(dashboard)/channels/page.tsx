@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,6 +54,8 @@ const channelNames = {
 };
 
 export default function ChannelsPage() {
+  const t = useTranslations('channels');
+  const tCommon = useTranslations('common');
   const { data: channels, loading, refetch } = useChannels();
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
 
@@ -96,14 +99,14 @@ export default function ChannelsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Channels</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Manage communication channels for agent interactions
+            {t('subtitle')}
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={handleRefresh}>
           <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh
+          {tCommon('refresh')}
         </Button>
       </div>
 

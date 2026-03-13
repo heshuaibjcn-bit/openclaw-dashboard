@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,8 @@ import {
 import { useGatewayHealth, useSessions, useAgents } from "@/lib/openclaw";
 
 export default function GatewayPage() {
+  const t = useTranslations('gateway');
+  const tCommon = useTranslations('common');
   const { data: health, loading: healthLoading, refetch: refetchHealth } = useGatewayHealth();
   const { data: sessions, loading: sessionsLoading } = useSessions();
   const { data: agents, loading: agentsLoading } = useAgents();
@@ -26,14 +29,14 @@ export default function GatewayPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Gateway Status</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Monitor your OpenClaw Gateway connection and performance
+            {t('subtitle')}
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={handleRefresh}>
           <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh
+          {tCommon('refresh')}
         </Button>
       </div>
 

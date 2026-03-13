@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,8 @@ interface ChatMessage {
 }
 
 export default function ChatPage() {
+  const t = useTranslations('chat');
+  const tCommon = useTranslations('common');
   const { data: agents } = useAgents();
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -159,15 +162,15 @@ export default function ChatPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Chat</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Interact directly with your AI agents
+            {t('subtitle')}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleClear}>
             <Trash2 className="mr-2 h-4 w-4" />
-            Clear
+            {tCommon('delete')}
           </Button>
           <Button variant="outline" size="sm" onClick={handleRegenerate} disabled={isLoading}>
             <RefreshCw className="mr-2 h-4 w-4" />

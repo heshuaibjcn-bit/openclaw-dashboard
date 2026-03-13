@@ -79,13 +79,26 @@
     "info": "Info",
     "none": "None",
     "all": "All",
-    "filter": "Filter"
+    "filter": "Filter",
+    "priority": "Priority",
+    "sort": "Sort",
+    "sortBy": "Sort by",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "yesterday": "Yesterday"
   },
   "severity": {
     "critical": "Critical",
     "high": "High",
     "medium": "Medium",
     "low": "Low"
+  },
+  "taskStatus": {
+    "pending": "Pending",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "blocked": "Blocked",
+    "cancelled": "Cancelled"
   },
   "overview": {
     "title": "Overview",
@@ -144,19 +157,35 @@
   },
   "settings": {
     "title": "Settings",
-    "subtitle": "Configure your OpenClaw Dashboard preferences",
-    "sections": {
-      "general": "General",
-      "appearance": "Appearance",
-      "notifications": "Notifications",
-      "security": "Security",
-      "api": "API Configuration",
-      "advanced": "Advanced"
-    }
+    "subtitle": "Configure your OpenClaw Dashboard preferences"
   },
   "tasks": {
     "title": "Tasks",
-    "subtitle": "Manage and monitor your tasks"
+    "subtitle": "Manage and monitor your tasks",
+    "stats": {
+      "total": "Total Tasks",
+      "totalDesc": "All tasks",
+      "pending": "Pending",
+      "pendingDesc": "Awaiting start",
+      "inProgress": "In Progress",
+      "inProgressDesc": "Active tasks",
+      "completed": "Completed",
+      "completedDesc": "Finished tasks",
+      "blocked": "Blocked",
+      "blockedDesc": "Need attention"
+    },
+    "searchPlaceholder": "Search tasks...",
+    "noTasks": "No tasks found",
+    "noTasksFiltered": "No tasks match your filters",
+    "table": {
+      "task": "Task",
+      "status": "Status",
+      "priority": "Priority",
+      "project": "Project",
+      "assigned": "Assigned",
+      "due": "Due",
+      "actions": "Actions"
+    }
   },
   "usage": {
     "title": "Usage",
@@ -172,7 +201,19 @@
   },
   "agents": {
     "title": "Agents",
-    "subtitle": "Configure and monitor AI agents"
+    "subtitle": "Configure and monitor AI agents",
+    "stats": {
+      "total": "Total Agents",
+      "totalDesc": "Configured agents",
+      "active": "Active Agents",
+      "activeDesc": "Currently running",
+      "capabilities": "Capabilities",
+      "capabilitiesDesc": "Unique capabilities"
+    },
+    "searchPlaceholder": "Search agents...",
+    "loading": "Loading agents...",
+    "allAgents": "All Agents",
+    "showing": "Showing {count} of {total} agents"
   },
   "channels": {
     "title": "Channels",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,8 @@ import {
 } from "lucide-react";
 
 export default function SettingsPage() {
+  const t = useTranslations('settings');
+  const tCommon = useTranslations('common');
   const [saved, setSaved] = useState(false);
   const [connectorStatus, setConnectorStatus] = useState({
     gateway: { status: "connected" as "connected" | "disconnected" | "degraded", latency: 45 },
@@ -151,19 +154,19 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Configure security, connectors, and system behavior
+            {t('subtitle')}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleReset}>
             <RefreshCw className="mr-2 h-4 w-4" />
-            Reset
+            {tCommon('refresh')}
           </Button>
           <Button size="sm" onClick={handleSave}>
             <Save className="mr-2 h-4 w-4" />
-            Save Changes
+            {tCommon('save')}
           </Button>
         </div>
       </div>

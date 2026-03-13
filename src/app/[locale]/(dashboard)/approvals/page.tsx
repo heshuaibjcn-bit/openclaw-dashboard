@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -62,6 +63,8 @@ const riskColors = {
 };
 
 export default function ApprovalsPage() {
+  const t = useTranslations('approvals');
+  const tCommon = useTranslations('common');
   const [actions, setActions] = useState<ApprovalAction[]>([]);
   const [filteredActions, setFilteredActions] = useState<ApprovalAction[]>([]);
   const [selectedAction, setSelectedAction] = useState<ApprovalAction | null>(null);
@@ -249,9 +252,9 @@ export default function ApprovalsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Approval Actions</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Review and manage approval workflow for sensitive operations
+            {t('subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">

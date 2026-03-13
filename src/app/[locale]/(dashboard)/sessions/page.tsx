@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,8 @@ import { useSessions } from "@/lib/openclaw";
 import type { Session } from "@/lib/openclaw";
 
 export default function SessionsPage() {
+  const t = useTranslations('sessions');
+  const tCommon = useTranslations('common');
   const { data: sessions, loading, refetch } = useSessions();
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -54,14 +57,14 @@ export default function SessionsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Sessions</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Monitor and manage active agent sessions
+            {t('subtitle')}
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={handleRefresh}>
           <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh
+          {tCommon('refresh')}
         </Button>
       </div>
 

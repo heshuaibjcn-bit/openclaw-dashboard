@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,8 @@ interface FileContent {
 }
 
 export default function DocumentsPage() {
+  const t = useTranslations('documents');
+  const tCommon = useTranslations('common');
   const [documents, setDocuments] = useState<Record<string, DocumentNode[]>>({});
   const [selectedAgent, setSelectedAgent] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -286,14 +289,14 @@ export default function DocumentsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Documents</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('title')}</h2>
           <p className="text-muted-foreground">
-            Source file workspace for OpenClaw configuration and agent knowledge
+            {t('subtitle')}
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={loadData}>
           <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh
+          {tCommon('refresh')}
         </Button>
       </div>
 
