@@ -283,7 +283,19 @@
     "connectionRate": "Connection rate",
     "managingChannels": "Managing {count} communication channels",
     "noChannelsConfigured": "No channels configured",
-    "addChannels": "Add channels to enable agent communication"
+    "addChannels": "Add channels to enable agent communication",
+    "feishu": "Feishu",
+    "feishuDesc": "Enterprise messaging platform",
+    "imessage": "iMessage",
+    "imessageDesc": "Apple messaging service",
+    "telegram": "Telegram",
+    "telegramDesc": "Cloud-based messaging",
+    "notConnected": "Not Connected",
+    "features": "Features",
+    "botWebhook": "Bot, Webhook",
+    "dmGroups": "DM, Groups",
+    "botChannels": "Bot, Channels",
+    "available": "Available"
   },
   "logs": {
     "title": "Logs",
@@ -422,7 +434,10 @@
     "fromAgents": "From agents",
     "totalTokens": "Total tokens",
     "pressEnter": "Press Enter to send, Shift+Enter for new line",
-    "sending": "Sending..."
+    "sending": "Sending...",
+    "userMessages": "User Messages",
+    "agentResponses": "Agent Responses",
+    "tokensUsed": "Tokens Used"
   },
   "documents": {
     "title": "Documents",

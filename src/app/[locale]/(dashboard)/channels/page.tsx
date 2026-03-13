@@ -263,23 +263,23 @@ export default function ChannelsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-blue-500" />
-              <CardTitle className="text-base">Feishu</CardTitle>
+              <CardTitle className="text-base">{t('feishu')}</CardTitle>
             </div>
-            <CardDescription>Enterprise messaging platform</CardDescription>
+            <CardDescription>{t('feishuDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Status</span>
+                <span className="text-muted-foreground">{t('status')}</span>
                 {channels?.find((c) => c.type === "feishu")?.status === "connected" ? (
-                  <Badge variant="default">Connected</Badge>
+                  <Badge variant="default">{tCommon('connected')}</Badge>
                 ) : (
-                  <Badge variant="secondary">Not Connected</Badge>
+                  <Badge variant="secondary">{t('notConnected')}</Badge>
                 )}
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Features</span>
-                <span>Bot, Webhook</span>
+                <span className="text-muted-foreground">{t('features')}</span>
+                <span>{t('botWebhook')}</span>
               </div>
             </div>
           </CardContent>
@@ -289,23 +289,23 @@ export default function ChannelsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Smartphone className="h-5 w-5 text-green-500" />
-              <CardTitle className="text-base">iMessage</CardTitle>
+              <CardTitle className="text-base">{t('imessage')}</CardTitle>
             </div>
-            <CardDescription>Apple messaging service</CardDescription>
+            <CardDescription>{t('imessageDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Status</span>
+                <span className="text-muted-foreground">{t('status')}</span>
                 {channels?.find((c) => c.type === "imessage")?.status === "connected" ? (
-                  <Badge variant="default">Connected</Badge>
+                  <Badge variant="default">{tCommon('connected')}</Badge>
                 ) : (
-                  <Badge variant="secondary">Not Connected</Badge>
+                  <Badge variant="secondary">{t('notConnected')}</Badge>
                 )}
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Features</span>
-                <span>DM, Groups</span>
+                <span className="text-muted-foreground">{t('features')}</span>
+                <span>{t('dmGroups')}</span>
               </div>
             </div>
           </CardContent>
@@ -315,19 +315,19 @@ export default function ChannelsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Send className="h-5 w-5 text-purple-500" />
-              <CardTitle className="text-base">Telegram</CardTitle>
+              <CardTitle className="text-base">{t('telegram')}</CardTitle>
             </div>
-            <CardDescription>Cloud-based messaging</CardDescription>
+            <CardDescription>{t('telegramDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Status</span>
-                <Badge variant="outline">Available</Badge>
+                <span className="text-muted-foreground">{t('status')}</span>
+                <Badge variant="outline">{t('available')}</Badge>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Features</span>
-                <span>Bot, Channels</span>
+                <span className="text-muted-foreground">{t('features')}</span>
+                <span>{t('botChannels')}</span>
               </div>
             </div>
           </CardContent>
