@@ -88,8 +88,8 @@
         "Add real-time updates",
         "Verify status updates correctly"
       ],
-      "passes": false,
-      "notes": "Gateway monitoring"
+      "passes": true,
+      "notes": "Gateway monitoring complete - connection status, health metrics, channel status, active sessions, agent information, refresh button, all working with API hooks"
     },
     {
       "id": "sessions-list",

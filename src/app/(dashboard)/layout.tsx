@@ -2,6 +2,7 @@
 
 import {
   Sidebar,
+  SidebarProvider,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
@@ -86,8 +87,9 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   return (
-    <div className="flex min-h-screen w-full">
-      <Sidebar className="border-r">
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full">
+        <Sidebar className="border-r">
         <SidebarHeader className="border-b p-4">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -167,5 +169,6 @@ export default function DashboardLayout({
         <div className="p-6">{children}</div>
       </main>
     </div>
+    </SidebarProvider>
   );
 }
