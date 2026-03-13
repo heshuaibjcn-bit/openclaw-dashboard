@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,19 +45,20 @@ const channelIcons = {
   email: Mail,
 };
 
-const channelNames = {
-  imessage: "iMessage",
-  feishu: "Feishu",
-  telegram: "Telegram",
-  discord: "Discord",
-  email: "Email",
-};
-
 export default function ChannelsPage() {
   const t = useTranslations('channels');
   const tCommon = useTranslations('common');
   const { data: channels, loading, refetch } = useChannels();
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
+  const locale = useLocale();
+
+  const channelNames = {
+    imessage: t('imessage'),
+    feishu: t('feishu'),
+    telegram: t('telegram'),
+    discord: "Discord",
+    email: tCommon('type') === 'email' ? 'Email' : 'Email',
+  };
 
   const handleRefresh = () => {
     refetch();

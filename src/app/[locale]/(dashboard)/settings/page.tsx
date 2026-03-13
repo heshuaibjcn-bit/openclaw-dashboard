@@ -334,7 +334,7 @@ export default function SettingsPage() {
                     <div className="flex items-center gap-2">
                       <Label className="font-medium">{t('enableApprovalActions')}</Label>
                       <Badge variant={appSettings.approvalActionsEnabled ? "destructive" : "secondary"}>
-                        {appSettings.approvalActionsEnabled ? "Enabled" : "Disabled"}
+                        {appSettings.approvalActionsEnabled ? tCommon('enabled') : tCommon('disabled')}
                       </Badge>
                     </div>
                     <Switch
@@ -343,9 +343,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {appSettings.approvalActionsEnabled
-                      ? "Approval workflow is active. Approvals require explicit user action."
-                      : "Approval workflow is disabled. Default safe mode."}
+                    {appSettings.approvalActionsEnabled ? tCommon('approvalWorkflowActive') : tCommon('approvalWorkflowDisabled')}
                   </p>
                 </div>
               </div>
@@ -356,7 +354,7 @@ export default function SettingsPage() {
                     <div className="flex items-center gap-2">
                       <Label className="font-medium">{t('dryRunMode')}</Label>
                       <Badge variant={appSettings.approvalActionsDryRun ? "outline" : "default"}>
-                        {appSettings.approvalActionsDryRun ? "Dry-Run" : "Live"}
+                        {appSettings.approvalActionsDryRun ? tCommon('dryRunShort') : tCommon('live')}
                       </Badge>
                     </div>
                     <Switch
@@ -391,7 +389,7 @@ export default function SettingsPage() {
                     <div className="flex items-center gap-2">
                       <Label className="font-medium">{t('enableImportMutations')}</Label>
                       <Badge variant={appSettings.importMutationEnabled ? "destructive" : "secondary"}>
-                        {appSettings.importMutationEnabled ? "Enabled" : "Disabled"}
+                        {appSettings.importMutationEnabled ? tCommon('enabled') : tCommon('disabled')}
                       </Badge>
                     </div>
                     <Switch
@@ -413,7 +411,7 @@ export default function SettingsPage() {
                     <div className="flex items-center gap-2">
                       <Label className="font-medium">{t('dryRunImports')}</Label>
                       <Badge variant={appSettings.importMutationDryRun ? "outline" : "default"}>
-                        {appSettings.importMutationDryRun ? "Dry-Run" : "Live"}
+                        {appSettings.importMutationDryRun ? tCommon('dryRunShort') : tCommon('live')}
                       </Badge>
                     </div>
                     <Switch
