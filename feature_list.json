@@ -133,8 +133,8 @@
         "Display recent messages per channel",
         "Verify channel status updates"
       ],
-      "passes": false,
-      "notes": "Channel monitoring"
+      "passes": true,
+      "notes": "Channel monitoring complete - channel table with status, channel type cards (Feishu, iMessage, Telegram), stats overview, settings dialog, switch controls"
     },
     {
       "id": "logs-viewer",
@@ -148,8 +148,8 @@
         "Add auto-scroll toggle",
         "Verify logs stream correctly"
       ],
-      "passes": false,
-      "notes": "Logs viewing"
+      "passes": true,
+      "notes": "Logs viewer complete - real-time log stream, level filtering (debug/info/warn/error), search functionality, auto-scroll with pause/resume, export logs, stats overview"
     },
     {
       "id": "memory-browser",
