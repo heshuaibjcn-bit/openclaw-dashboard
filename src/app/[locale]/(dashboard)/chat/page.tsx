@@ -269,7 +269,7 @@ export default function ChatPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">{t('status')}</span>
-                  <Badge variant="default">{t('active')}</Badge>
+                  <Badge variant="default" className="bg-green-500 hover:bg-green-600">{t('active')}</Badge>
                 </div>
               </div>
             )}

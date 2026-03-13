@@ -48,7 +48,7 @@ export default function GatewayPage() {
               <Activity className="h-5 w-5" />
               <CardTitle>{t('connectionStatus')}</CardTitle>
             </div>
-            <Badge variant={health?.status === "healthy" ? "default" : "destructive"}>
+            <Badge variant={health?.status === "healthy" ? "default" : "destructive"} className={health?.status === "healthy" ? "bg-green-500 hover:bg-green-600" : ""}>
               {health?.status === "healthy" ? t('connected') : t('disconnected')}
             </Badge>
           </div>
@@ -143,10 +143,10 @@ export default function GatewayPage() {
                     <span className="font-medium">{channel.name}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant={channel.enabled ? "default" : "secondary"}>
+                    <Badge variant={channel.enabled ? "default" : "secondary"} className={channel.enabled ? "bg-green-500 hover:bg-green-600" : ""}>
                       {channel.enabled ? t('enabled') : t('disabled')}
                     </Badge>
-                    <Badge variant={channel.status === "OK" ? "default" : "destructive"}>
+                    <Badge variant={channel.status === "OK" ? "default" : "destructive"} className={channel.status === "OK" ? "bg-green-500 hover:bg-green-600" : ""}>
                       {channel.status}
                     </Badge>
                   </div>
@@ -227,7 +227,7 @@ export default function GatewayPage() {
                         {t('created')}: {new Date(agent.createdAt).toLocaleString()}
                       </p>
                     </div>
-                    <Badge variant={agent.status === "active" ? "default" : "secondary"}>
+                    <Badge variant={agent.status === "active" ? "default" : "secondary"} className={agent.status === "active" ? "bg-green-500 hover:bg-green-600" : ""}>
                       {agent.status}
                     </Badge>
                   </div>

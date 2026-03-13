@@ -218,6 +218,7 @@ export default function AgentsPage() {
                       </div>
                       <Badge
                         variant={agent.status === "active" ? "default" : "secondary"}
+                        className={agent.status === "active" ? "bg-green-500 hover:bg-green-600" : ""}
                       >
                         {agent.status}
                       </Badge>
