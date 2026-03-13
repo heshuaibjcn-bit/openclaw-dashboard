@@ -420,9 +420,9 @@ export default function UsagePage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
             <AlertTriangle className="h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">Unable to load usage data</p>
+            <p className="text-muted-foreground">{t('unableToLoadUsageData')}</p>
             <p className="text-sm text-muted-foreground mt-2">
-              Check your connection to OpenClaw Gateway
+              {t('checkConnection')}
             </p>
           </CardContent>
         </Card>

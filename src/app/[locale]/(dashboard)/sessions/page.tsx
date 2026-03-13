@@ -261,21 +261,21 @@ export default function SessionsPage() {
             <div className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <p className="text-sm font-medium">Agent ID</p>
+                  <p className="text-sm font-medium">{t('agentId')}</p>
                   <p className="text-sm text-muted-foreground">{selectedSession.agentId}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Model</p>
+                  <p className="text-sm font-medium">{tCommon('model')}</p>
                   <p className="text-sm text-muted-foreground">{selectedSession.model}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Created At</p>
+                  <p className="text-sm font-medium">{t('createdAt')}</p>
                   <p className="text-sm text-muted-foreground">
                     {new Date(selectedSession.createdAt).toLocaleString()}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Last Activity</p>
+                  <p className="text-sm font-medium">{t('lastActivity')}</p>
                   <p className="text-sm text-muted-foreground">
                     {new Date(selectedSession.lastActivity).toLocaleString()}
                   </p>
@@ -283,18 +283,18 @@ export default function SessionsPage() {
               </div>
 
               <div>
-                <p className="text-sm font-medium mb-2">Token Usage</p>
+                <p className="text-sm font-medium mb-2">{t('tokenUsage')}</p>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span>Input tokens</span>
+                    <span>{t('inputTokens')}</span>
                     <span>{selectedSession.tokens.input.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span>Output tokens</span>
+                    <span>{t('outputTokens')}</span>
                     <span>{selectedSession.tokens.output.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm font-medium">
-                    <span>Total</span>
+                    <span>{t('totalTokens')}</span>
                     <span>
                       {selectedSession.tokens.total.toLocaleString()} /{" "}
                       {selectedSession.tokens.max.toLocaleString()}
@@ -309,13 +309,13 @@ export default function SessionsPage() {
                     />
                   </div>
                   <p className="text-xs text-muted-foreground text-right">
-                    {getTokenUsagePercentage(selectedSession)}% used
+                    {getTokenUsagePercentage(selectedSession)}% {tCommon('loading').includes('...') ? '已使用' : 'used'}
                   </p>
                 </div>
               </div>
 
               <div>
-                <p className="text-sm font-medium mb-2">Messages</p>
+                <p className="text-sm font-medium mb-2">{t('messages')}</p>
                 {selectedSession.messages && selectedSession.messages.length > 0 ? (
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {selectedSession.messages.map((message) => (

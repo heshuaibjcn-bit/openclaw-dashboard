@@ -89,7 +89,17 @@
     "configure": "Configure",
     "manage": "Manage",
     "monitor": "Monitor",
-    "progress": "Progress"
+    "progress": "Progress",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "completed": "Completed",
+    "editing": "Editing",
+    "agentId": "Agent ID",
+    "createdAt": "Created At",
+    "tokenUsage": "Token Usage",
+    "messages": "Messages",
+    "unableToLoadData": "Unable to load data"
   },
   "severity": {
     "critical": "Critical",
@@ -256,7 +266,20 @@
     },
     "searchPlaceholder": "Search tasks...",
     "noTasks": "No tasks found",
-    "noTasksFiltered": "No tasks match your filters"
+    "noTasksFiltered": "No tasks match your filters",
+    "status": {
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "blocked": "Blocked",
+      "cancelled": "Cancelled"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    }
   },
   "usage": {
     "title": "Usage",
@@ -312,7 +335,9 @@
     "partial": "Partial",
     "topConsumers": "Top Consumers",
     "ofTotal": "{percentage}% of total",
-    "avgPer1MTokens": "Avg: ${cost} per 1M tokens"
+    "avgPer1MTokens": "Avg: ${cost} per 1M tokens",
+    "unableToLoadUsageData": "Unable to load usage data",
+    "checkConnection": "Check your connection to OpenClaw Gateway"
   },
   "staff": {
     "title": "Staff",
@@ -363,7 +388,18 @@
     "acrossAllSessions": "Across all sessions",
     "avgUsage": "Avg Usage",
     "runningDuration": "Running duration",
-    "tokenUtilization": "Token utilization"
+    "tokenUtilization": "Token utilization",
+    "agentId": "Agent ID",
+    "createdAt": "Created At",
+    "lastActivity": "Last Activity",
+    "tokenUsage": "Token Usage",
+    "inputTokens": "Input tokens",
+    "outputTokens": "Output tokens",
+    "totalTokens": "Total tokens",
+    "messages": "Messages",
+    "userMessages": "User messages",
+    "agentResponses": "Agent responses",
+    "totalMessages": "Total messages"
   },
   "agents": {
     "title": "Agents",
@@ -618,7 +654,8 @@
     "changesSavedAutomatically": "Changes are saved automatically",
     "cancel": "Cancel",
     "save": "Save",
-    "noContent": "No content available"
+    "noContent": "No content available",
+    "changesWillBeWritten": "Changes will be written directly to the source file"
   },
   "gateway": {
     "title": "Gateway",

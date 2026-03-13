@@ -379,19 +379,19 @@ export default function DocumentsPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-base">Editing: {editingFile.path}</CardTitle>
+                <CardTitle className="text-base">{tCommon('editing')}: {editingFile.path}</CardTitle>
                 <CardDescription>
-                  Changes will be written directly to the source file
+                  {t('changesWillBeWritten')}
                 </CardDescription>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={handleCancelEdit}>
                   <X className="mr-2 h-4 w-4" />
-                  Cancel
+                  {tCommon('cancel')}
                 </Button>
                 <Button size="sm" onClick={handleSaveFile}>
                   <Save className="mr-2 h-4 w-4" />
-                  Save
+                  {tCommon('save')}
                 </Button>
               </div>
             </div>

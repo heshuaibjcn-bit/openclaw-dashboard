@@ -451,18 +451,18 @@ export default function SettingsPage() {
                   id="gatewayUrl"
                   value={appSettings.gatewayUrl}
                   onChange={(e) => setSettings({ ...appSettings, gatewayUrl: e.target.value })}
-                  placeholder="http://127.0.0.1:18789"
+                  placeholder={t('gatewayUrlPlaceholder')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="gatewayToken">Auth Token (Optional)</Label>
+                <Label htmlFor="gatewayToken">{t('authToken')}</Label>
                 <Input
                   id="gatewayToken"
                   type="password"
                   value={appSettings.gatewayToken}
                   onChange={(e) => setSettings({ ...appSettings, gatewayToken: e.target.value })}
-                  placeholder="Enter your gateway token"
+                  placeholder={t('authTokenPlaceholder')}
                 />
               </div>
 

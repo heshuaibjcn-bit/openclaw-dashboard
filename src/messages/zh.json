@@ -89,7 +89,17 @@
     "configure": "配置",
     "manage": "管理",
     "monitor": "监控",
-    "progress": "进度"
+    "progress": "进度",
+    "pending": "待处理",
+    "approved": "已批准",
+    "rejected": "已拒绝",
+    "completed": "已完成",
+    "editing": "正在编辑",
+    "agentId": "代理 ID",
+    "createdAt": "创建时间",
+    "tokenUsage": "令牌使用",
+    "messages": "消息",
+    "unableToLoadData": "无法加载数据"
   },
   "severity": {
     "critical": "严重",
@@ -256,7 +266,20 @@
     },
     "searchPlaceholder": "搜索任务...",
     "noTasks": "未找到任务",
-    "noTasksFiltered": "没有符合条件的任务"
+    "noTasksFiltered": "没有符合条件的任务",
+    "status": {
+      "pending": "待处理",
+      "inProgress": "进行中",
+      "completed": "已完成",
+      "blocked": "已阻塞",
+      "cancelled": "已取消"
+    },
+    "priority": {
+      "low": "低",
+      "medium": "中",
+      "high": "高",
+      "critical": "严重"
+    }
   },
   "usage": {
     "title": "使用情况",
@@ -312,7 +335,9 @@
     "partial": "部分",
     "topConsumers": "主要消耗者",
     "ofTotal": "{percentage}% 总计",
-    "avgPer1MTokens": "平均：${cost} / 100万令牌"
+    "avgPer1MTokens": "平均：${cost} / 100万令牌",
+    "unableToLoadUsageData": "无法加载使用数据",
+    "checkConnection": "检查您与 OpenClaw 网关的连接"
   },
   "staff": {
     "title": "员工",
@@ -363,7 +388,18 @@
     "acrossAllSessions": "所有会话总计",
     "avgUsage": "平均使用",
     "runningDuration": "运行时长",
-    "tokenUtilization": "令牌利用率"
+    "tokenUtilization": "令牌利用率",
+    "agentId": "代理 ID",
+    "createdAt": "创建时间",
+    "lastActivity": "最后活动",
+    "tokenUsage": "令牌使用",
+    "inputTokens": "输入令牌",
+    "outputTokens": "输出令牌",
+    "totalTokens": "总令牌",
+    "messages": "消息",
+    "userMessages": "用户消息",
+    "agentResponses": "代理响应",
+    "totalMessages": "总消息"
   },
   "agents": {
     "title": "代理",
@@ -618,7 +654,8 @@
     "changesSavedAutomatically": "更改将自动保存",
     "cancel": "取消",
     "save": "保存",
-    "noContent": "无可用内容"
+    "noContent": "无可用内容",
+    "changesWillBeWritten": "更改将直接写入源文件"
   },
   "gateway": {
     "title": "网关",

@@ -152,28 +152,28 @@ export default function TasksPage() {
   const getStatusBadge = (status: Task["status"]) => {
     switch (status) {
       case "pending":
-        return <Badge variant="outline">Pending</Badge>;
+        return <Badge variant="outline">{t('status.pending')}</Badge>;
       case "in-progress":
-        return <Badge variant="default">In Progress</Badge>;
+        return <Badge variant="default">{t('status.inProgress')}</Badge>;
       case "completed":
-        return <Badge variant="default" className="bg-green-500">Completed</Badge>;
+        return <Badge variant="default" className="bg-green-500">{t('status.completed')}</Badge>;
       case "blocked":
-        return <Badge variant="destructive">Blocked</Badge>;
+        return <Badge variant="destructive">{t('status.blocked')}</Badge>;
       case "cancelled":
-        return <Badge variant="secondary">Cancelled</Badge>;
+        return <Badge variant="secondary">{t('status.cancelled')}</Badge>;
     }
   };
 
   const getPriorityBadge = (priority: Task["priority"]) => {
     switch (priority) {
       case "low":
-        return <Badge variant="outline" className="text-gray-500 border-gray-500">Low</Badge>;
+        return <Badge variant="outline" className="text-gray-500 border-gray-500">{t('priority.low')}</Badge>;
       case "medium":
-        return <Badge variant="outline" className="text-blue-500 border-blue-500">Medium</Badge>;
+        return <Badge variant="outline" className="text-blue-500 border-blue-500">{t('priority.medium')}</Badge>;
       case "high":
-        return <Badge variant="outline" className="text-orange-500 border-orange-500">High</Badge>;
+        return <Badge variant="outline" className="text-orange-500 border-orange-500">{t('priority.high')}</Badge>;
       case "critical":
-        return <Badge variant="destructive">Critical</Badge>;
+        return <Badge variant="destructive">{t('priority.critical')}</Badge>;
     }
   };
 
