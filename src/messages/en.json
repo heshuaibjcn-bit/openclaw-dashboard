@@ -88,7 +88,8 @@
     "yesterday": "Yesterday",
     "configure": "Configure",
     "manage": "Manage",
-    "monitor": "Monitor"
+    "monitor": "Monitor",
+    "progress": "Progress"
   },
   "severity": {
     "critical": "Critical",
@@ -189,7 +190,35 @@
   "staff": {
     "title": "Staff",
     "subtitle": "Manage your AI staff members",
-    "loading": "Loading staff data..."
+    "loading": "Loading staff data...",
+    "totalAgents": "Total Agents",
+    "configuredAgents": "Configured agents",
+    "working": "Working",
+    "activelyProcessing": "Actively processing",
+    "standby": "Standby",
+    "awaitingTasks": "Awaiting tasks",
+    "outputToday": "Output Today",
+    "tasksCompleted": "Tasks completed",
+    "offline": "Offline",
+    "notActive": "Not active",
+    "loadingStaffStatus": "Loading staff status...",
+    "noAgentsConfigured": "No agents configured",
+    "currentlyProcessing": "Currently Processing",
+    "nextUp": "Next Up",
+    "noTasksScheduled": "No tasks scheduled",
+    "status": "Status",
+    "uptime": "Uptime",
+    "output": "Output",
+    "lastActivity": "Last Activity",
+    "started": "Started",
+    "scheduled": "Scheduled",
+    "statusLegend": "Status Legend",
+    "understandingAgentStatus": "Understanding agent status",
+    "workingDesc": "Agent is actively processing a task",
+    "standbyDesc": "Has queued tasks but not currently executing",
+    "offlineDesc": "Agent is not active or enabled",
+    "errorDesc": "Agent has encountered an error",
+    "error": "Error"
   },
   "sessions": {
     "title": "Sessions",

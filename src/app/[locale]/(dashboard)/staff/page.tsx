@@ -120,13 +120,13 @@ export default function StaffPage() {
   const getStatusBadge = (status: StaffMember["status"]) => {
     switch (status) {
       case "working":
-        return <Badge variant="default" className="bg-green-500">Working</Badge>;
+        return <Badge variant="default" className="bg-green-500">{t('working')}</Badge>;
       case "standby":
-        return <Badge variant="outline" className="border-yellow-500 text-yellow-500">Standby</Badge>;
+        return <Badge variant="outline" className="border-yellow-500 text-yellow-500">{t('standby')}</Badge>;
       case "offline":
-        return <Badge variant="secondary">Offline</Badge>;
+        return <Badge variant="secondary">{t('offline')}</Badge>;
       case "error":
-        return <Badge variant="destructive">Error</Badge>;
+        return <Badge variant="destructive">{t('error')}</Badge>;
     }
   };
 
@@ -189,65 +189,65 @@ export default function StaffPage() {
       <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Agents</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalAgents')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Configured agents
+              {t('configuredAgents')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Working</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('working')}</CardTitle>
             <Play className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.working}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Actively processing
+              {t('activelyProcessing')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Standby</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('standby')}</CardTitle>
             <Pause className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.standby}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Awaiting tasks
+              {t('awaitingTasks')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Output Today</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('outputToday')}</CardTitle>
             <MessageSquare className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalOutput}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Tasks completed
+              {t('tasksCompleted')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Offline</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('offline')}</CardTitle>
             <Clock className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.offline}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Not active
+              {t('notActive')}
             </p>
           </CardContent>
         </Card>
@@ -260,7 +260,7 @@ export default function StaffPage() {
             <CardContent className="flex items-center justify-center py-16">
               <div className="text-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
-                <p className="text-muted-foreground">Loading staff status...</p>
+                <p className="text-muted-foreground">{t('loadingStaffStatus')}</p>
               </div>
             </CardContent>
           </Card>
@@ -268,7 +268,7 @@ export default function StaffPage() {
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">
               <Users className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No agents configured</p>
+              <p className="text-muted-foreground">{t('noAgentsConfigured')}</p>
             </CardContent>
           </Card>
         ) : (
@@ -305,12 +305,12 @@ export default function StaffPage() {
                       <div className="rounded-lg border bg-muted/50 p-3 space-y-2">
                         <div className="flex items-center gap-2 text-sm font-medium text-green-600">
                           <Play className="h-4 w-4" />
-                          <span>Currently Processing</span>
+                          <span>{t('currentlyProcessing')}</span>
                         </div>
                         <p className="text-sm">{member.currentTask.title}</p>
                         <div className="space-y-1">
                           <div className="flex items-center justify-between text-xs">
-                            <span className="text-muted-foreground">Progress</span>
+                            <span className="text-muted-foreground">{tCommon('progress')}</span>
                             <span>{member.currentTask.progress}%</span>
                           </div>
                           <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
@@ -322,24 +322,24 @@ export default function StaffPage() {
                         </div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <Clock className="h-3 w-3" />
-                          <span>Started {formatLastActivity(member.currentTask.startedAt)}</span>
+                          <span>{t('started')} {formatLastActivity(member.currentTask.startedAt)}</span>
                         </div>
                       </div>
                     ) : member.nextTask ? (
                       <div className="rounded-lg border bg-muted/50 p-3 space-y-2">
                         <div className="flex items-center gap-2 text-sm font-medium text-yellow-600">
                           <Pause className="h-4 w-4" />
-                          <span>Next Up</span>
+                          <span>{t('nextUp')}</span>
                         </div>
                         <p className="text-sm">{member.nextTask.title}</p>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <Calendar className="h-3 w-3" />
-                          <span>Scheduled {formatLastActivity(member.nextTask.scheduledAt)}</span>
+                          <span>{t('scheduled')} {formatLastActivity(member.nextTask.scheduledAt)}</span>
                         </div>
                       </div>
                     ) : (
                       <div className="rounded-lg border bg-muted/50 p-3">
-                        <p className="text-sm text-muted-foreground">No tasks scheduled</p>
+                        <p className="text-sm text-muted-foreground">{t('noTasksScheduled')}</p>
                       </div>
                     )}
                   </div>
@@ -348,22 +348,22 @@ export default function StaffPage() {
                   <div className="w-48 space-y-4">
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Status</span>
+                        <span className="text-muted-foreground">{t('status')}</span>
                         <div className="flex items-center gap-1">
                           {getStatusIcon(member.status)}
                           <span className="font-medium capitalize">{member.status}</span>
                         </div>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Uptime</span>
+                        <span className="text-muted-foreground">{t('uptime')}</span>
                         <span className="font-medium">{formatUptime(member.uptime)}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Output</span>
+                        <span className="text-muted-foreground">{t('output')}</span>
                         <span className="font-medium">{member.recentOutput.count} tasks</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Last Activity</span>
+                        <span className="text-muted-foreground">{t('lastActivity')}</span>
                         <span className="font-medium">{formatLastActivity(member.recentOutput.lastActivity)}</span>
                       </div>
                     </div>
@@ -378,8 +378,8 @@ export default function StaffPage() {
       {/* Legend */}
       <Card>
         <CardHeader>
-          <CardTitle>Status Legend</CardTitle>
-          <CardDescription>Understanding agent status</CardDescription>
+          <CardTitle>{t('statusLegend')}</CardTitle>
+          <CardDescription>{t('understandingAgentStatus')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
@@ -388,9 +388,9 @@ export default function StaffPage() {
                 <Play className="h-4 w-4 text-green-500" />
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium">Working</p>
+                <p className="text-sm font-medium">{t('working')}</p>
                 <p className="text-xs text-muted-foreground">
-                  Agent is actively processing a task
+                  {t('workingDesc')}
                 </p>
               </div>
             </div>
@@ -399,9 +399,9 @@ export default function StaffPage() {
                 <Pause className="h-4 w-4 text-yellow-500" />
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium">Standby</p>
+                <p className="text-sm font-medium">{t('standby')}</p>
                 <p className="text-xs text-muted-foreground">
-                  Has queued tasks but not currently executing
+                  {t('standbyDesc')}
                 </p>
               </div>
             </div>
@@ -410,9 +410,9 @@ export default function StaffPage() {
                 <Clock className="h-4 w-4 text-gray-500" />
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium">Offline</p>
+                <p className="text-sm font-medium">{t('offline')}</p>
                 <p className="text-xs text-muted-foreground">
-                  Agent is not active or enabled
+                  {t('offlineDesc')}
                 </p>
               </div>
             </div>
@@ -421,9 +421,9 @@ export default function StaffPage() {
                 <AlertCircle className="h-4 w-4 text-red-500" />
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium">Error</p>
+                <p className="text-sm font-medium">{t('error')}</p>
                 <p className="text-xs text-muted-foreground">
-                  Agent has encountered an error
+                  {t('errorDesc')}
                 </p>
               </div>
             </div>

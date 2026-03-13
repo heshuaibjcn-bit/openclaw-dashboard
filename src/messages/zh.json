@@ -88,7 +88,8 @@
     "yesterday": "昨天",
     "configure": "配置",
     "manage": "管理",
-    "monitor": "监控"
+    "monitor": "监控",
+    "progress": "进度"
   },
   "severity": {
     "critical": "严重",
@@ -189,7 +190,35 @@
   "staff": {
     "title": "员工",
     "subtitle": "管理您的 AI 员工",
-    "loading": "加载员工数据中..."
+    "loading": "加载员工数据中...",
+    "totalAgents": "总代理",
+    "configuredAgents": "已配置代理",
+    "working": "工作中",
+    "activelyProcessing": "正在处理",
+    "standby": "待命",
+    "awaitingTasks": "等待任务",
+    "outputToday": "今日产出",
+    "tasksCompleted": "完成任务",
+    "offline": "离线",
+    "notActive": "未激活",
+    "loadingStaffStatus": "加载员工状态中...",
+    "noAgentsConfigured": "未配置代理",
+    "currentlyProcessing": "正在处理",
+    "nextUp": "下一个",
+    "noTasksScheduled": "无计划任务",
+    "status": "状态",
+    "uptime": "运行时间",
+    "output": "产出",
+    "lastActivity": "最后活动",
+    "started": "开始于",
+    "scheduled": "计划于",
+    "statusLegend": "状态图例",
+    "understandingAgentStatus": "了解代理状态",
+    "workingDesc": "代理正在积极处理任务",
+    "standbyDesc": "有排队任务但当前未执行",
+    "offlineDesc": "代理未激活或未启用",
+    "errorDesc": "代理遇到错误",
+    "error": "错误"
   },
   "sessions": {
     "title": "会话",
