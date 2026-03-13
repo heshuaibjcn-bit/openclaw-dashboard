@@ -30,8 +30,14 @@ export class OpenClawAPIClient {
   }
 
   private getDefaultBaseUrl(): string {
-    // Connect to OpenClaw Gateway
-    return process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:18789";
+    // Connect to local Next.js API routes
+    // These routes read from OpenClaw's local files
+    if (typeof window !== 'undefined') {
+      // Browser: use relative path to current domain
+      return '';
+    }
+    // Server: use absolute URL to localhost
+    return process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
   }
 
   private getDefaultAuthToken(): string {
@@ -84,7 +90,7 @@ export class OpenClawAPIClient {
   }
 
   async getHealth(): Promise<GatewayHealth> {
-    return this.request<GatewayHealth>("/");
+    return this.request<GatewayHealth>("/api/health");
   }
 
   async getAgents(): Promise<Agent[]> {
