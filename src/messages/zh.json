@@ -261,7 +261,22 @@
   "usage": {
     "title": "使用情况",
     "subtitle": "监控您的资源使用和统计",
-    "loading": "加载使用数据中..."
+    "loading": "加载使用数据中...",
+    "today": "今天",
+    "days7": "7 天",
+    "days30": "30 天",
+    "tokensUsed": "已使用令牌",
+    "inSelectedPeriod": "选定期间内",
+    "requests": "请求",
+    "totalRequests": "总请求数",
+    "successful": "成功",
+    "failed": "失败",
+    "avgResponseTime": "平均响应时间",
+    "p50": "p50",
+    "p95": "p95",
+    "p99": "p99",
+    "todayVsYesterday": "今天与昨天对比",
+    "change": "变化"
   },
   "staff": {
     "title": "员工",
@@ -357,6 +372,7 @@
     "activeConnections": "活跃连接",
     "activeChannels": "活跃频道",
     "connectionRate": "连接率",
+    "successRate": "成功率",
     "managingChannels": "管理 {count} 个通信频道",
     "noChannelsConfigured": "未配置频道",
     "addChannels": "添加频道以启用代理通信",

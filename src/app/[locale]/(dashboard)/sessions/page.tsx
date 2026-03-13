@@ -133,7 +133,7 @@ export default function SessionsPage() {
                 : "-"}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Running duration
+              {t('runningDuration')}
             </p>
           </CardContent>
         </Card>
@@ -144,7 +144,7 @@ export default function SessionsPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>All Sessions</CardTitle>
+              <CardTitle>{tCommon('all')} {t('title')}</CardTitle>
               <CardDescription>
                 {loading
                   ? t('loading')

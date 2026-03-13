@@ -127,21 +127,21 @@ export default function UsagePage() {
             size="sm"
             onClick={() => setTimeRange("today")}
           >
-            Today
+            {t('today')}
           </Button>
           <Button
             variant={timeRange === "7days" ? "default" : "outline"}
             size="sm"
             onClick={() => setTimeRange("7days")}
           >
-            7 Days
+            {t('days7')}
           </Button>
           <Button
             variant={timeRange === "30days" ? "default" : "outline"}
             size="sm"
             onClick={() => setTimeRange("30days")}
           >
-            30 Days
+            {t('days30')}
           </Button>
         </div>
       </div>

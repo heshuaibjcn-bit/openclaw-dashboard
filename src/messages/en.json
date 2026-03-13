@@ -261,7 +261,22 @@
   "usage": {
     "title": "Usage",
     "subtitle": "Monitor your resource usage and statistics",
-    "loading": "Loading usage data..."
+    "loading": "Loading usage data...",
+    "today": "Today",
+    "days7": "7 Days",
+    "days30": "30 Days",
+    "tokensUsed": "Tokens Used",
+    "inSelectedPeriod": "In selected period",
+    "requests": "Requests",
+    "totalRequests": "Total requests",
+    "successful": "Successful",
+    "failed": "Failed",
+    "avgResponseTime": "Avg Response Time",
+    "p50": "p50",
+    "p95": "p95",
+    "p99": "p99",
+    "todayVsYesterday": "Today vs Yesterday",
+    "change": "Change"
   },
   "staff": {
     "title": "Staff",
@@ -357,6 +372,7 @@
     "activeConnections": "Active connections",
     "activeChannels": "Active channels",
     "connectionRate": "Connection rate",
+    "successRate": "Success rate",
     "managingChannels": "Managing {count} communication channels",
     "noChannelsConfigured": "No channels configured",
     "addChannels": "Add channels to enable agent communication",
