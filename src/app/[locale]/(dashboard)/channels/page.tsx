@@ -69,7 +69,7 @@ export default function ChannelsPage() {
       case "connected":
         return <CheckCircle2 className="h-4 w-4 text-green-500" />;
       case "disconnected":
-        return <XCircle className="h-4 w-4 text-gray-500" />;
+        return <XCircle className="h-4 w-4 text-red-500" />;
       case "error":
         return <AlertCircle className="h-4 w-4 text-red-500" />;
       default:
@@ -82,7 +82,7 @@ export default function ChannelsPage() {
       case "connected":
         return <Badge variant="default" className="bg-green-500 hover:bg-green-600">Connected</Badge>;
       case "disconnected":
-        return <Badge variant="secondary">Disconnected</Badge>;
+        return <Badge variant="destructive" className="bg-red-500 hover:bg-red-600">Disconnected</Badge>;
       case "error":
         return <Badge variant="destructive">Error</Badge>;
       default:
@@ -275,7 +275,7 @@ export default function ChannelsPage() {
                 {channels?.find((c) => c.type === "feishu")?.status === "connected" ? (
                   <Badge variant="default" className="bg-green-500 hover:bg-green-600">{tCommon('connected')}</Badge>
                 ) : (
-                  <Badge variant="secondary">{t('notConnected')}</Badge>
+                  <Badge variant="destructive" className="bg-red-500 hover:bg-red-600">{t('notConnected')}</Badge>
                 )}
               </div>
               <div className="flex items-center justify-between">
@@ -301,7 +301,7 @@ export default function ChannelsPage() {
                 {channels?.find((c) => c.type === "imessage")?.status === "connected" ? (
                   <Badge variant="default" className="bg-green-500 hover:bg-green-600">{tCommon('connected')}</Badge>
                 ) : (
-                  <Badge variant="secondary">{t('notConnected')}</Badge>
+                  <Badge variant="destructive" className="bg-red-500 hover:bg-red-600">{t('notConnected')}</Badge>
                 )}
               </div>
               <div className="flex items-center justify-between">
