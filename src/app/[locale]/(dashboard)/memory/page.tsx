@@ -50,6 +50,27 @@ export default function MemoryPage() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Translate metadata types to display names
+  const getMetadataTypeName = (type: string): string => {
+    const typeMap: Record<string, { en: string; zh: string }> = {
+      "preference": { en: "Preference", zh: "偏好" },
+      "project": { en: "Project", zh: "项目" },
+      "agent": { en: "Agent", zh: "代理" },
+      "performance": { en: "Performance", zh: "性能" },
+      "configuration": { en: "Configuration", zh: "配置" },
+    };
+    return typeMap[type]?.[locale] || type;
+  };
+
+  const getMetadataImportanceName = (importance: string): string => {
+    const importanceMap: Record<string, { en: string; zh: string }> = {
+      "high": { en: "High", zh: "高" },
+      "medium": { en: "Medium", zh: "中" },
+      "low": { en: "Low", zh: "低" },
+    };
+    return importanceMap[importance]?.[locale] || importance;
+  };
+
   useEffect(() => {
     // Load active agents from openclaw.json
     const agents = getAllAgents().filter(a => a.status === "active");
@@ -379,14 +400,14 @@ export default function MemoryPage() {
                       </div>
 
                       <Badge variant="outline" className="text-xs">
-                        {String(memory.metadata.type)}
+                        {getMetadataTypeName(String(memory.metadata.type))}
                       </Badge>
 
                       <Badge
                         variant={memory.metadata.importance === "high" ? "default" : "secondary"}
                         className="text-xs"
                       >
-                        {String(memory.metadata.importance)}
+                        {getMetadataImportanceName(String(memory.metadata.importance))}
                       </Badge>
 
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
