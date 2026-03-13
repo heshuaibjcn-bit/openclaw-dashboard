@@ -405,7 +405,7 @@ export default function MemoryPage() {
 
                       <Badge
                         variant={memory.metadata.importance === "high" ? "default" : "secondary"}
-                        className="text-xs"
+                        className={`text-xs ${memory.metadata.importance === "high" ? "bg-red-500 hover:bg-red-600" : ""}`}
                       >
                         {getMetadataImportanceName(String(memory.metadata.importance))}
                       </Badge>

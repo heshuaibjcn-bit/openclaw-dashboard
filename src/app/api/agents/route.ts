@@ -10,13 +10,18 @@ export async function GET() {
 
     const agents = await Promise.all(validAgentDirs.map(async (agentId) => {
       try {
-        const configPath = path.join(agentsPath, agentId, 'agent', 'config.json');
-        const configContent = await fs.readFile(configPath, 'utf-8');
-        const config = JSON.parse(configContent);
+        // Try to read models.json first (current OpenClaw structure)
+        const modelsPath = path.join(agentsPath, agentId, 'agent', 'models.json');
+        const modelsContent = await fs.readFile(modelsPath, 'utf-8');
+        const models = JSON.parse(modelsContent);
+
+        // Get model from first model entry
+        const modelId = models.length > 0 ? models[0].id : 'unknown';
 
         // Get recent session info
         const sessionsPath = path.join(agentsPath, agentId, 'sessions', 'sessions.json');
         let recentActivity = new Date().toISOString();
+        let hasActiveSessions = false;
         try {
           const sessionsContent = await fs.readFile(sessionsPath, 'utf-8');
           const sessions = JSON.parse(sessionsContent);
@@ -24,16 +29,20 @@ export async function GET() {
           if (sessionKeys.length > 0) {
             const latestSession = sessions[sessionKeys[0]];
             recentActivity = new Date(latestSession.updatedAt).toISOString();
+            // Consider agent as active if there are recent sessions (last 24 hours)
+            const lastActivityTime = new Date(latestSession.updatedAt).getTime();
+            const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+            hasActiveSessions = lastActivityTime > oneDayAgo;
           }
         } catch {}
 
         return {
           id: agentId,
-          name: config.name || agentId,
-          model: config.model || 'unknown',
-          status: 'active',
-          capabilities: config.capabilities || [],
-          createdAt: config.createdAt || new Date().toISOString(),
+          name: agentId.charAt(0).toUpperCase() + agentId.slice(1), // Capitalize first letter
+          model: modelId,
+          status: hasActiveSessions ? 'active' : 'inactive',
+          capabilities: [],
+          createdAt: new Date().toISOString(),
           currentTask: null,
           nextTask: null,
           recentOutput: {
