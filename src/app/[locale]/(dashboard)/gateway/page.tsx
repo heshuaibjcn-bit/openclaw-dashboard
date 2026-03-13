@@ -46,16 +46,16 @@ export default function GatewayPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Activity className="h-5 w-5" />
-              <CardTitle>Connection Status</CardTitle>
+              <CardTitle>{t('connectionStatus')}</CardTitle>
             </div>
             <Badge variant={health?.status === "healthy" ? "default" : "destructive"}>
-              {health?.status === "healthy" ? "Connected" : "Disconnected"}
+              {health?.status === "healthy" ? t('connected') : t('disconnected')}
             </Badge>
           </div>
           <CardDescription>
             {health?.status === "healthy"
-              ? "Your gateway is connected and operational"
-              : "Unable to connect to OpenClaw Gateway"}
+              ? t('gatewayConnectedOperational')
+              : t('unableToConnect')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -65,14 +65,14 @@ export default function GatewayPage() {
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Server className="h-4 w-4" />
-                    <span>Version</span>
+                    <span>{t('version')}</span>
                   </div>
                   <p className="text-lg font-semibold">{health.version}</p>
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Clock className="h-4 w-4" />
-                    <span>Uptime</span>
+                    <span>{t('uptime')}</span>
                   </div>
                   <p className="text-lg font-semibold">
                     {Math.floor(health.uptime / 3600)}h {Math.floor((health.uptime % 3600) / 60)}m
@@ -81,7 +81,7 @@ export default function GatewayPage() {
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Activity className="h-4 w-4" />
-                    <span>Platform</span>
+                    <span>{t('platform')}</span>
                   </div>
                   <p className="text-lg font-semibold">{health.os}</p>
                 </div>
@@ -91,21 +91,21 @@ export default function GatewayPage() {
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Zap className="h-4 w-4" />
-                    <span>Node Version</span>
+                    <span>{t('nodeVersion')}</span>
                   </div>
                   <p className="text-lg font-semibold">{health.nodeVersion}</p>
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <TrendingUp className="h-4 w-4" />
-                    <span>Active Sessions</span>
+                    <span>{t('activeSessions')}</span>
                   </div>
                   <p className="text-lg font-semibold">{health.sessions}</p>
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Server className="h-4 w-4" />
-                    <span>Configured Agents</span>
+                    <span>{t('configuredAgents')}</span>
                   </div>
                   <p className="text-lg font-semibold">{health.agents}</p>
                 </div>
@@ -115,7 +115,7 @@ export default function GatewayPage() {
             <div className="flex items-center justify-center py-8">
               <div className="text-center">
                 <p className="text-muted-foreground">
-                  {healthLoading ? t('loading') : "Unable to connect to gateway"}
+                  {healthLoading ? t('loading') : t('unableToConnectToGateway')}
                 </p>
               </div>
             </div>
@@ -126,8 +126,8 @@ export default function GatewayPage() {
       {/* Channel Status */}
       <Card>
         <CardHeader>
-          <CardTitle>Channel Status</CardTitle>
-          <CardDescription>Connected communication channels</CardDescription>
+          <CardTitle>{t('channelStatus')}</CardTitle>
+          <CardDescription>{t('connectedCommunicationChannels')}</CardDescription>
         </CardHeader>
         <CardContent>
           {health?.channels ? (
@@ -144,7 +144,7 @@ export default function GatewayPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant={channel.enabled ? "default" : "secondary"}>
-                      {channel.enabled ? "Enabled" : "Disabled"}
+                      {channel.enabled ? t('enabled') : t('disabled')}
                     </Badge>
                     <Badge variant={channel.status === "OK" ? "default" : "destructive"}>
                       {channel.status}
@@ -164,8 +164,8 @@ export default function GatewayPage() {
       {/* Active Sessions */}
       <Card>
         <CardHeader>
-          <CardTitle>Active Sessions</CardTitle>
-          <CardDescription>Currently active agent sessions</CardDescription>
+          <CardTitle>{t('activeSessions')}</CardTitle>
+          <CardDescription>{t('currentlyActiveAgentSessions')}</CardDescription>
         </CardHeader>
         <CardContent>
           {sessionsLoading ? (
@@ -179,17 +179,17 @@ export default function GatewayPage() {
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
                       <p className="font-medium">{session.id}</p>
-                      <p className="text-sm text-muted-foreground">Model: {session.model}</p>
+                      <p className="text-sm text-muted-foreground">{t('model')}: {session.model}</p>
                       <p className="text-sm text-muted-foreground">
-                        Created: {new Date(session.createdAt).toLocaleString()}
+                        {t('created')}: {new Date(session.createdAt).toLocaleString()}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-medium">
-                        {session.tokens.total.toLocaleString()} / {session.tokens.max.toLocaleString()} tokens
+                        {session.tokens.total.toLocaleString()} / {session.tokens.max.toLocaleString()} {t('tokens')}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {Math.round((session.tokens.total / session.tokens.max) * 100)}% used
+                        {Math.round((session.tokens.total / session.tokens.max) * 100)}% {t('used')}
                       </p>
                     </div>
                   </div>
@@ -198,7 +198,7 @@ export default function GatewayPage() {
             </div>
           ) : (
             <div className="flex items-center justify-center py-8">
-              <p className="text-muted-foreground">No active sessions</p>
+              <p className="text-muted-foreground">{t('noActiveSessions')}</p>
             </div>
           )}
         </CardContent>
@@ -207,8 +207,8 @@ export default function GatewayPage() {
       {/* Agent Information */}
       <Card>
         <CardHeader>
-          <CardTitle>Agent Information</CardTitle>
-          <CardDescription>Configured AI agents</CardDescription>
+          <CardTitle>{t('agentInformation')}</CardTitle>
+          <CardDescription>{t('configuredAIAgents')}</CardDescription>
         </CardHeader>
         <CardContent>
           {agentsLoading ? (
@@ -222,9 +222,9 @@ export default function GatewayPage() {
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
                       <p className="font-medium">{agent.name}</p>
-                      <p className="text-sm text-muted-foreground">Model: {agent.model}</p>
+                      <p className="text-sm text-muted-foreground">{t('model')}: {agent.model}</p>
                       <p className="text-sm text-muted-foreground">
-                        Created: {new Date(agent.createdAt).toLocaleString()}
+                        {t('created')}: {new Date(agent.createdAt).toLocaleString()}
                       </p>
                     </div>
                     <Badge variant={agent.status === "active" ? "default" : "secondary"}>
@@ -243,7 +243,7 @@ export default function GatewayPage() {
             </div>
           ) : (
             <div className="flex items-center justify-center py-8">
-              <p className="text-muted-foreground">No agents configured</p>
+              <p className="text-muted-foreground">{t('noAgentsConfigured')}</p>
             </div>
           )}
         </CardContent>
