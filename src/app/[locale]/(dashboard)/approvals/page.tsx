@@ -270,7 +270,7 @@ export default function ApprovalsPage() {
           </div>
           <Button variant="outline" size="sm" onClick={loadActions}>
             <RefreshCw className="mr-2 h-4 w-4" />
-            Refresh
+            {tCommon('refresh')}
           </Button>
         </div>
       </div>

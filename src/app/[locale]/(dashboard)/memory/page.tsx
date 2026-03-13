@@ -454,40 +454,40 @@ export default function MemoryPage() {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Brain className="h-5 w-5 text-primary" />
-                <h4 className="font-medium">Semantic Search</h4>
+                <h4 className="font-medium">{t('semanticSearch')}</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                Memories are stored as vector embeddings using Jina embeddings, allowing for semantic similarity search.
+                {t('semanticSearchDesc')}
               </p>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Database className="h-5 w-5 text-primary" />
-                <h4 className="font-medium">Persistent Storage</h4>
+                <h4 className="font-medium">{t('persistentStorage')}</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                All memories are persisted in LanceDB, ensuring they survive agent restarts and context window resets.
+                {t('persistentStorageDesc')}
               </p>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Bot className="h-5 w-5 text-primary" />
-                <h4 className="font-medium">Agent-Specific Memory</h4>
+                <h4 className="font-medium">{t('agentSpecificMemory')}</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                Filter memories by agent to view knowledge specific to each agent. "Main" shows shared system-wide memories.
+                {t('agentSpecificMemoryDesc')}
               </p>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Edit className="h-5 w-5 text-primary" />
-                <h4 className="font-medium">Direct Editing</h4>
+                <h4 className="font-medium">{t('directEditing')}</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                Click the edit button to modify memory entries directly. Changes are written back to the source files.
+                {t('directEditingDesc')}
               </p>
             </div>
           </div>

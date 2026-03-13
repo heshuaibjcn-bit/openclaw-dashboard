@@ -449,7 +449,12 @@
     "directEditing": "Direct Editing",
     "match": "match",
     "noMemoriesMatchSearch": "No memories match your search",
-    "trySelectingAllAgents": "Try selecting \"All Agents\" to see all memories"
+    "trySelectingAllAgents": "Try selecting \"All Agents\" to see all memories",
+    "semanticSearchDesc": "Memories are stored as vector embeddings using Jina embeddings, allowing for semantic similarity search.",
+    "persistentStorageDesc": "All memories are persisted in LanceDB, ensuring they survive agent restarts and context window resets.",
+    "agentSpecificMemory": "Agent-Specific Memory",
+    "agentSpecificMemoryDesc": "Filter memories by agent to view knowledge specific to each agent. \"Main\" shows shared system-wide memories.",
+    "directEditingDesc": "Click the edit button to modify memory entries directly. Changes are written back to the source files."
   },
   "approvals": {
     "title": "Approvals",
