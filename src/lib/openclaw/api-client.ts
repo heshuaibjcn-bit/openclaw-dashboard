@@ -30,11 +30,11 @@ export class OpenClawAPIClient {
   }
 
   private getDefaultBaseUrl(): string {
+    // Always use the same origin (Next.js API routes)
     if (typeof window !== "undefined") {
-      // Browser: use the same host
       return window.location.origin;
     }
-    return "http://127.0.0.1:18789";
+    return process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
   }
 
   private getDefaultAuthToken(): string {
@@ -87,21 +87,7 @@ export class OpenClawAPIClient {
   }
 
   async getHealth(): Promise<GatewayHealth> {
-    // This would call the actual OpenClaw health endpoint
-    // For now, return mock data
-    return {
-      status: "healthy",
-      uptime: 1234567,
-      version: "2026.3.8",
-      os: "macos 26.3.1",
-      nodeVersion: "24.14.0",
-      channels: [
-        { name: "iMessage", enabled: true, status: "OK" },
-        { name: "Feishu", enabled: true, status: "OK" },
-      ],
-      sessions: 1,
-      agents: 1,
-    };
+    return this.request<GatewayHealth>("/api/health");
   }
 
   async getAgents(): Promise<Agent[]> {

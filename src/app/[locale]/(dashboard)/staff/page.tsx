@@ -61,61 +61,7 @@ export default function StaffPage() {
   // Transform agents data to staff members format
   const staff = useMemo(() => {
     if (!agents || agents.length === 0) {
-      // Fallback to mock data
-      return [
-        {
-          id: "agent-main",
-          name: isZh ? "主助手" : "Main Assistant",
-          model: "zai/glm-5",
-          status: "working" as const,
-          currentTask: {
-            id: "task-1",
-            title: isZh ? "正在处理代码审查请求" : "Processing code review requests",
-            progress: 65,
-            startedAt: new Date(Date.now() - 1000 * 60 * 15),
-          },
-          nextTask: {
-            id: "task-2",
-            title: isZh ? "生成文档" : "Generate documentation",
-            scheduledAt: new Date(Date.now() + 1000 * 60 * 30),
-          },
-          recentOutput: {
-            count: 23,
-            lastActivity: new Date(Date.now() - 1000 * 30),
-          },
-          capabilities: ["code-review", "documentation", "analysis"],
-          uptime: 1000 * 60 * 60 * 4.5,
-        },
-        {
-          id: "agent-helper",
-          name: isZh ? "助手机器人" : "Helper Bot",
-          model: "zai/glm-4.7",
-          status: "standby" as const,
-          nextTask: {
-            id: "task-3",
-            title: isZh ? "Bug 调查" : "Bug investigation",
-            scheduledAt: new Date(Date.now() + 1000 * 60 * 10),
-          },
-          recentOutput: {
-            count: 15,
-            lastActivity: new Date(Date.now() - 1000 * 60 * 45),
-          },
-          capabilities: ["debug", "testing", "support"],
-          uptime: 1000 * 60 * 60 * 2,
-        },
-        {
-          id: "agent-docs",
-          name: isZh ? "文档代理" : "Documentation Agent",
-          model: "zai/glm-4.7-flash",
-          status: "offline" as const,
-          recentOutput: {
-            count: 8,
-            lastActivity: new Date(Date.now() - 1000 * 60 * 60 * 2),
-          },
-          capabilities: ["documentation", "writing"],
-          uptime: 0,
-        },
-      ];
+      return [];
     }
 
     // Get runtime status for each agent
@@ -138,7 +84,7 @@ export default function StaffPage() {
         uptime: runtimeStatus.uptime || 0,
       };
     });
-  }, [agents, runtimeData, isZh]);
+  }, [agents, runtimeData]);
 
   const handleRefresh = () => {
     refetchAgents();

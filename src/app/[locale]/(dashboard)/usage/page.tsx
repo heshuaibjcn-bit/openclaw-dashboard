@@ -54,43 +54,20 @@ export default function UsagePage() {
 
   const loading = usageLoading || subscriptionLoading;
 
-  // Process data from API or fallback to mock
+  // Process data from API
   const data = useMemo(() => {
-    if (!usageData || !subscriptionData) {
-      // Fallback to mock data
-      return {
-        today: { tokens: 45000, cost: 0.45 },
-        last7days: { tokens: 280000, cost: 2.80 },
-        last30days: { tokens: 950000, cost: 9.50 },
-        quota: {
-          limit: subscriptionData?.quota?.limit || 1000000,
-          used: subscriptionData?.quota?.used || 280000,
-          remaining: subscriptionData?.quota?.remaining || 720000,
-          window: subscriptionData?.quota?.window || "Week",
-          resetAt: subscriptionData?.quota?.resetAt || "2025-03-20T00:00:00Z",
-        },
-        attribution: usageData?.attribution || [
-          { id: "task1", name: "Code Review", type: "task", tokens: 85000, cost: 0.85, percentage: 30.4 },
-          { id: "task2", name: "Documentation", type: "task", tokens: 62000, cost: 0.62, percentage: 22.1 },
-          { id: "task3", name: "Bug Fix", type: "task", tokens: 48000, cost: 0.48, percentage: 17.1 },
-          { id: "agent1", name: "Main Agent", type: "agent", tokens: 155000, cost: 1.55, percentage: 55.4 },
-          { id: "agent2", name: "Helper Agent", type: "agent", tokens: 125000, cost: 1.25, percentage: 44.6 },
-        ],
-      };
-    }
-
     return {
-      today: usageData.today || { tokens: 0, cost: 0 },
-      last7days: usageData.last7days || { tokens: 0, cost: 0 },
-      last30days: usageData.last30days || { tokens: 0, cost: 0 },
+      today: usageData?.today || { tokens: 0, cost: 0 },
+      last7days: usageData?.last7days || { tokens: 0, cost: 0 },
+      last30days: usageData?.last30days || { tokens: 0, cost: 0 },
       quota: {
-        limit: subscriptionData.quota?.limit || 1000000,
-        used: subscriptionData.quota?.used || 0,
-        remaining: subscriptionData.quota?.remaining || 0,
-        window: subscriptionData.quota?.window || "Week",
-        resetAt: subscriptionData.quota?.resetAt || "",
+        limit: subscriptionData?.quota?.limit || 1000000,
+        used: subscriptionData?.quota?.used || 0,
+        remaining: subscriptionData?.quota?.remaining || 0,
+        window: subscriptionData?.quota?.window || "Week",
+        resetAt: subscriptionData?.quota?.resetAt || "",
       },
-      attribution: usageData.attribution || [],
+      attribution: usageData?.attribution || [],
     };
   }, [usageData, subscriptionData]);
 

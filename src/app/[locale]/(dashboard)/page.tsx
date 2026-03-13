@@ -105,65 +105,8 @@ export default function DashboardPage() {
     };
   }, [healthData, agents, sessions, channels]);
 
-  const pendingItems = useMemo(() => {
-    if (!runtimeData?.pendingItems) {
-      // Fallback to mock data
-      return [
-        {
-          id: "pending-1",
-          type: "approval" as const,
-          title: isZh ? "API 密钥更改请求" : "API key change request",
-          description: isZh ? "请求更新生产环境的 API 密钥" : "Request to update API key for production environment",
-          severity: "high" as const,
-          timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-          source: "agent-main",
-        },
-        {
-          id: "pending-2",
-          type: "exception" as const,
-          title: isZh ? "会话超时错误" : "Session timeout error",
-          description: isZh ? "代理会话超过最大持续时间" : "Agent session exceeded maximum duration",
-          severity: "medium" as const,
-          timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-          source: "agent-helper",
-        },
-        {
-          id: "pending-3",
-          type: "alert" as const,
-          title: isZh ? "内存使用警告" : "Memory usage warning",
-          description: isZh ? "LanceDB 内存索引接近大小限制" : "LanceDB memory index approaching size limit",
-          severity: "low" as const,
-          timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
-        },
-      ];
-    }
-    return runtimeData.pendingItems;
-  }, [runtimeData, isZh]);
-
-  const risks = useMemo(() => {
-    if (!runtimeData?.risks) {
-      // Fallback to mock data
-      return [
-        {
-          id: "risk-1",
-          type: "budget" as const,
-          title: isZh ? "令牌预算不足" : "Token budget running low",
-          description: isZh ? "当前窗口已使用 72%，还剩 3 天" : "Current window at 72% capacity with 3 days remaining",
-          severity: "medium" as const,
-          affected: ["agent-main", "agent-helper"],
-        },
-        {
-          id: "risk-2",
-          type: "stalled" as const,
-          title: isZh ? "文档任务停滞" : "Documentation task stalled",
-          description: isZh ? "任务'生成 API 文档'已进行 4 小时" : "Task 'Generate API docs' has been in progress for 4 hours",
-          severity: "low" as const,
-          affected: ["agent-docs"],
-        },
-      ];
-    }
-    return runtimeData.risks;
-  }, [runtimeData, isZh]);
+  const pendingItems = runtimeData?.pendingItems || [];
+  const risks = runtimeData?.risks || [];
 
   const staffStatus = useMemo(() => {
     const activeAgents = agents?.filter((a: any) => a.status === "active") || [];
