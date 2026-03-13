@@ -210,7 +210,7 @@ export default function MemoryPage() {
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">Filter by type:</span>
-          <Select value={selectedTag} onValueChange={setSelectedTag}>
+          <Select value={selectedTag} onValueChange={(value) => setSelectedTag(value)}>
             <SelectTrigger className="w-40">
               <SelectValue />
             </SelectTrigger>

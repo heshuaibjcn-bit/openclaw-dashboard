@@ -229,7 +229,7 @@ export default function AgentsPage() {
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Capabilities</p>
                       <div className="flex flex-wrap gap-1">
-                        {agent.capabilities.map((cap) => (
+                        {agent.capabilities.map((cap: string) => (
                           <Badge key={cap} variant="outline" className="text-xs">
                             {cap}
                           </Badge>
@@ -318,7 +318,7 @@ export default function AgentsPage() {
               <Select
                 value={editingAgent.model}
                 onValueChange={(value) =>
-                  setEditingAgent({ ...editingAgent, model: value })
+                  value && setEditingAgent({ ...editingAgent, model: value })
                 }
               >
                 <SelectTrigger>

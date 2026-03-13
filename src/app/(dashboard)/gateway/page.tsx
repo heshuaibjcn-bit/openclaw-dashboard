@@ -129,7 +129,7 @@ export default function GatewayPage() {
         <CardContent>
           {health?.channels ? (
             <div className="space-y-2">
-              {health.channels.map((channel) => (
+              {health.channels.map((channel: { name: string; enabled: boolean; status: string }) => (
                 <div key={channel.name} className="flex items-center justify-between rounded-lg border p-3">
                   <div className="flex items-center gap-3">
                     <div
@@ -229,7 +229,7 @@ export default function GatewayPage() {
                     </Badge>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {agent.capabilities.map((cap) => (
+                    {agent.capabilities.map((cap: string) => (
                       <Badge key={cap} variant="outline" className="text-xs">
                         {cap}
                       </Badge>

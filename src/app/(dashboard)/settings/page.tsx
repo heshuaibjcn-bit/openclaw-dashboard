@@ -206,7 +206,7 @@ export default function SettingsPage() {
                 <Label htmlFor="defaultModel">Default Model</Label>
                 <Select
                   value={settings.defaultModel}
-                  onValueChange={(value) => setSettings({ ...settings, defaultModel: value })}
+                  onValueChange={(value) => value && setSettings({ ...settings, defaultModel: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -299,7 +299,7 @@ export default function SettingsPage() {
                 <Label htmlFor="channelPolicy">Default Channel Policy</Label>
                 <Select
                   value={settings.defaultChannelPolicy}
-                  onValueChange={(value) => setSettings({ ...settings, defaultChannelPolicy: value })}
+                  onValueChange={(value) => value && setSettings({ ...settings, defaultChannelPolicy: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -371,7 +371,7 @@ export default function SettingsPage() {
                 <Label htmlFor="embeddingModel">Embedding Model</Label>
                 <Select
                   value={settings.embeddingModel}
-                  onValueChange={(value) => setSettings({ ...settings, embeddingModel: value })}
+                  onValueChange={(value) => value && setSettings({ ...settings, embeddingModel: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -403,7 +403,7 @@ export default function SettingsPage() {
                 <Label htmlFor="theme">Theme</Label>
                 <Select
                   value={settings.theme}
-                  onValueChange={(value) => setSettings({ ...settings, theme: value })}
+                  onValueChange={(value) => value && setSettings({ ...settings, theme: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />

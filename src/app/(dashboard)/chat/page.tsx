@@ -240,7 +240,7 @@ export default function ChatPage() {
             <CardDescription>Choose which agent to chat with</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Select value={selectedAgent} onValueChange={setSelectedAgent}>
+            <Select value={selectedAgent} onValueChange={(value) => value && setSelectedAgent(value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select agent" />
               </SelectTrigger>
@@ -274,7 +274,7 @@ export default function ChatPage() {
             <div className="pt-4 border-t space-y-2">
               <p className="text-xs text-muted-foreground">Capabilities</p>
               <div className="flex flex-wrap gap-1">
-                {agents?.find((a) => a.id === selectedAgent)?.capabilities.map((cap) => (
+                {agents?.find((a) => a.id === selectedAgent)?.capabilities.map((cap: string) => (
                   <Badge key={cap} variant="outline" className="text-xs">
                     {cap}
                   </Badge>

@@ -214,7 +214,7 @@ export default function LogsPage() {
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
-              <Select value={levelFilter} onValueChange={setLevelFilter}>
+              <Select value={levelFilter} onValueChange={(value) => setLevelFilter(value)}>
                 <SelectTrigger className="w-32">
                   <SelectValue placeholder="Level" />
                 </SelectTrigger>
