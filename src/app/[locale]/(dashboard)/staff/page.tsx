@@ -51,6 +51,20 @@ export default function StaffPage() {
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Translate capability codes to display names
+  const getCapabilityName = (cap: string): string => {
+    const capabilityMap: Record<string, { en: string; zh: string }> = {
+      "code-review": { en: "Code Review", zh: "代码审查" },
+      "documentation": { en: "Documentation", zh: "文档编写" },
+      "analysis": { en: "Analysis", zh: "分析" },
+      "debug": { en: "Debug", zh: "调试" },
+      "testing": { en: "Testing", zh: "测试" },
+      "support": { en: "Support", zh: "支持" },
+      "writing": { en: "Writing", zh: "写作" },
+    };
+    return capabilityMap[cap]?.[locale] || cap;
+  };
+
   useEffect(() => {
     // Simulate data loading
     const loadData = async () => {
@@ -297,7 +311,7 @@ export default function StaffPage() {
                     <div className="flex flex-wrap gap-2">
                       {member.capabilities.map((cap) => (
                         <Badge key={cap} variant="outline" className="text-xs">
-                          {cap}
+                          {getCapabilityName(cap)}
                         </Badge>
                       ))}
                     </div>
