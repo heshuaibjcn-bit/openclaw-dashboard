@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,7 @@ import { getAllAgents } from "@/lib/openclaw/config-reader";
 export default function MemoryPage() {
   const t = useTranslations('memory');
   const tCommon = useTranslations('common');
+  const locale = useLocale();
   const { data: memories, loading, search } = useMemorySearch();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAgent, setSelectedAgent] = useState<string>("all");
