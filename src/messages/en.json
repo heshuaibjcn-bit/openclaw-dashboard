@@ -70,6 +70,8 @@
     "offline": "Offline",
     "connected": "Connected",
     "disconnected": "Disconnected",
+    "healthy": "Healthy",
+    "unhealthy": "Unhealthy",
     "pending": "Pending",
     "completed": "Completed",
     "failed": "Failed",

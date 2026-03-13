@@ -70,6 +70,8 @@
     "offline": "离线",
     "connected": "已连接",
     "disconnected": "已断开",
+    "healthy": "健康",
+    "unhealthy": "不健康",
     "pending": "待处理",
     "completed": "已完成",
     "failed": "失败",
