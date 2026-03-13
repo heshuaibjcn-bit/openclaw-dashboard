@@ -100,14 +100,14 @@ export default function MemoryPage() {
     main: [
       {
         id: "1",
-        content: "User prefers dark mode interface settings across all applications",
+        content: locale === 'zh' ? "用户在所有应用程序中偏好深色模式界面设置" : "User prefers dark mode interface settings across all applications",
         metadata: { type: "preference", importance: "high", agent: "main" },
         createdAt: new Date(Date.now() - 1000 * 60 * 30),
         score: 0.95,
       },
       {
         id: "2",
-        content: "Project uses Next.js 15 with App Router and TypeScript for the dashboard",
+        content: locale === 'zh' ? "项目使用 Next.js 15 和 App Router 以及 TypeScript 构建仪表板" : "Project uses Next.js 15 with App Router and TypeScript for the dashboard",
         metadata: { type: "project", importance: "high", agent: "main" },
         createdAt: new Date(Date.now() - 1000 * 60 * 60),
         score: 0.89,
@@ -120,14 +120,18 @@ export default function MemoryPage() {
     mockMemoriesByAgent[agent.id] = [
       {
         id: `${agent.id}-1`,
-        content: `${agent.name} specializes in ${agent.capabilities?.join(", ") || "general tasks"}`,
+        content: locale === 'zh'
+          ? `${agent.name} 专长于 ${agent.capabilities?.join("、") || "常规任务"}`
+          : `${agent.name} specializes in ${agent.capabilities?.join(", ") || "general tasks"}`,
         metadata: { type: "agent", importance: "medium", agent: agent.id },
         createdAt: new Date(Date.now() - 1000 * 60 * 45),
         score: 0.92,
       },
       {
         id: `${agent.id}-2`,
-        content: `Recent activity: Processed 15 tasks with 98% success rate`,
+        content: locale === 'zh'
+          ? "最近活动：处理了 15 个任务，成功率为 98%"
+          : `Recent activity: Processed 15 tasks with 98% success rate`,
         metadata: { type: "performance", importance: "low", agent: agent.id },
         createdAt: new Date(Date.now() - 1000 * 60 * 90),
         score: 0.78,

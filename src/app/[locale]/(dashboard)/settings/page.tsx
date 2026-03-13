@@ -285,7 +285,7 @@ export default function SettingsPage() {
                     ) : (
                       <Unlock className="h-4 w-4 text-orange-500" />
                     )}
-                    <Label className="font-medium">Read-Only Mode</Label>
+                    <Label className="font-medium">{t('readOnlyMode')}</Label>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {appSettings.readonlyMode
@@ -303,7 +303,7 @@ export default function SettingsPage() {
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="h-4 w-4 text-blue-500" />
-                    <Label className="font-medium">Local Token Auth</Label>
+                    <Label className="font-medium">{t('localTokenAuth')}</Label>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Require local token for sensitive operations
@@ -332,7 +332,7 @@ export default function SettingsPage() {
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Label className="font-medium">Enable Approval Actions</Label>
+                      <Label className="font-medium">{t('enableApprovalActions')}</Label>
                       <Badge variant={appSettings.approvalActionsEnabled ? "destructive" : "secondary"}>
                         {appSettings.approvalActionsEnabled ? "Enabled" : "Disabled"}
                       </Badge>
@@ -354,7 +354,7 @@ export default function SettingsPage() {
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Label className="font-medium">Dry-Run Mode</Label>
+                      <Label className="font-medium">{t('dryRunMode')}</Label>
                       <Badge variant={appSettings.approvalActionsDryRun ? "outline" : "default"}>
                         {appSettings.approvalActionsDryRun ? "Dry-Run" : "Live"}
                       </Badge>
@@ -389,7 +389,7 @@ export default function SettingsPage() {
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Label className="font-medium">Enable Import Mutations</Label>
+                      <Label className="font-medium">{t('enableImportMutations')}</Label>
                       <Badge variant={appSettings.importMutationEnabled ? "destructive" : "secondary"}>
                         {appSettings.importMutationEnabled ? "Enabled" : "Disabled"}
                       </Badge>
@@ -411,7 +411,7 @@ export default function SettingsPage() {
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Label className="font-medium">Dry-Run Imports</Label>
+                      <Label className="font-medium">{t('dryRunImports')}</Label>
                       <Badge variant={appSettings.importMutationDryRun ? "outline" : "default"}>
                         {appSettings.importMutationDryRun ? "Dry-Run" : "Live"}
                       </Badge>

@@ -550,6 +550,7 @@
     "approvedActions": "Approved actions",
     "rejectedActions": "Rejected actions",
     "requiresAttention": "Requires attention",
+    "highRisk": "High Risk",
     "noActionsMatchFilters": "No actions match your filters",
     "noApprovalActionsFound": "No approval actions found",
     "channelSettings": "channel settings and preferences",

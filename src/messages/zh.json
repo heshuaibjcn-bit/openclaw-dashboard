@@ -550,6 +550,7 @@
     "approvedActions": "已批准操作",
     "rejectedActions": "已拒绝操作",
     "requiresAttention": "需要关注",
+    "highRisk": "高风险",
     "noActionsMatchFilters": "没有符合条件的操作",
     "noApprovalActionsFound": "未找到审批操作",
     "channelSettings": "频道设置和偏好",
