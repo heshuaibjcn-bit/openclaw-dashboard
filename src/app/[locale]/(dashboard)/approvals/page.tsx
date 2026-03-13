@@ -556,38 +556,38 @@ export default function ApprovalsPage() {
       {/* Info Card */}
       <Card>
         <CardHeader>
-          <CardTitle>About Approval Actions</CardTitle>
-          <CardDescription>How the approval workflow protects your system</CardDescription>
+          <CardTitle>{t('aboutApprovalActions')}</CardTitle>
+          <CardDescription>{t('aboutDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-yellow-500" />
-                <h4 className="font-medium">Pending Actions</h4>
+                <h4 className="font-medium">{t('pendingActions.title')}</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                Actions awaiting your review. Approve or reject within the expiration time.
+                {t('pendingActions.description')}
               </p>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-orange-500" />
-                <h4 className="font-medium">Risk Levels</h4>
+                <h4 className="font-medium">{t('riskLevels.title')}</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                Each action is tagged with a risk level. High and critical risks require extra attention.
+                {t('riskLevels.description')}
               </p>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Archive className="h-5 w-5 text-blue-500" />
-                <h4 className="font-medium">Action History</h4>
+                <h4 className="font-medium">{t('actionHistory.title')}</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                All approval decisions are recorded. View approved and rejected actions at any time.
+                {t('actionHistory.description')}
               </p>
             </div>
           </div>
