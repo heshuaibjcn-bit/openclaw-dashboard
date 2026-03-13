@@ -14,6 +14,7 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
+import Link from "next/link";
 import {
   LayoutDashboard,
   Activity,
@@ -29,7 +30,6 @@ import {
   CheckSquare,
   Shield,
 } from "lucide-react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -109,6 +109,14 @@ export default function DashboardLayout({
 
   return (
     <SidebarProvider>
+      {/* Skip to main content link for accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:ring-2 focus:ring-ring"
+      >
+        {t('sidebar.header.title')}
+      </a>
+
       <div className="flex min-h-screen w-full">
         <Sidebar className="border-r">
         <SidebarHeader className="border-b p-4">
@@ -209,7 +217,7 @@ export default function DashboardLayout({
         </SidebarFooter>
       </Sidebar>
 
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto" id="main-content">
         <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex h-14 items-center justify-between px-6">
             <h1 className="text-lg font-semibold">{t('sidebar.header.title')}</h1>

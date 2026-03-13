@@ -250,7 +250,7 @@
       "id": "14",
       "title": "Add Accessibility Improvements",
       "description": "Improve accessibility across the dashboard by adding ARIA labels, keyboard navigation, and screen reader support.",
-      "status": "pending",
+      "status": "completed",
       "priority": "medium",
       "acceptanceCriteria": [
         "Add ARIA labels to all interactive elements",
