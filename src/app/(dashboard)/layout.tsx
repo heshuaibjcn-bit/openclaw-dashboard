@@ -24,6 +24,9 @@ import {
   Database,
   Settings,
   HelpCircle,
+  TrendingUp,
+  Users,
+  CheckSquare,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -34,6 +37,21 @@ const navItems = [
     title: "Overview",
     url: "/",
     icon: LayoutDashboard,
+  },
+  {
+    title: "Usage",
+    url: "/usage",
+    icon: TrendingUp,
+  },
+  {
+    title: "Staff",
+    url: "/staff",
+    icon: Users,
+  },
+  {
+    title: "Tasks",
+    url: "/tasks",
+    icon: CheckSquare,
   },
   {
     title: "Gateway",
@@ -109,11 +127,12 @@ export default function DashboardLayout({
         </SidebarHeader>
 
         <SidebarContent>
+          {/* Main Navigation */}
           <SidebarGroup>
-            <SidebarGroupLabel>Main</SidebarGroupLabel>
+            <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {navItems.map((item) => (
+                {navItems.slice(0, 4).map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild
@@ -133,8 +152,59 @@ export default function DashboardLayout({
 
           <SidebarSeparator />
 
+          {/* System Status */}
           <SidebarGroup>
             <SidebarGroupLabel>System</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {navItems.slice(4, 7).map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.url}
+                      tooltip={item.title}
+                    >
+                      <Link href={item.url}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          <SidebarSeparator />
+
+          {/* AI & Memory */}
+          <SidebarGroup>
+            <SidebarGroupLabel>AI & Memory</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {navItems.slice(7).map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.url}
+                      tooltip={item.title}
+                    >
+                      <Link href={item.url}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          <SidebarSeparator />
+
+          {/* Settings */}
+          <SidebarGroup>
+            <SidebarGroupLabel>Settings</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {secondaryItems.map((item) => (

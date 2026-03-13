@@ -1,0 +1,394 @@
+{
+  "title": "OpenClaw Dashboard - Feature List V2 (Control Center Integration)",
+  "version": "2.0",
+  "last_updated": "2025-03-13",
+  "features": [
+    {
+      "id": "enhanced-overview",
+      "name": "Enhanced Overview Page (总览)",
+      "status": "completed",
+      "priority": "critical",
+      "description": "Enhanced overview page with system status, pending items, risks, staff busy status, and operational summary",
+      "steps": [
+        "Add pending items card showing approvals, exceptions, action queue",
+        "Add risks section with budget risks, stalled executions, system alerts",
+        "Add staff busy status showing who's working vs standby",
+        "Add operational summary with key metrics",
+        "Add inline search functionality",
+        "Integrate with approval actions and exception streams"
+      ],
+      "files": [
+        "src/app/(dashboard)/page.tsx",
+        "src/lib/openclaw/types.ts",
+        "src/lib/openclaw/api-client.ts",
+        "src/lib/openclaw/react-hooks.tsx"
+      ],
+      "passes": true,
+      "notes": "Implemented with pending items, risks, staff status, and search"
+    },
+    {
+      "id": "usage-page",
+      "name": "Usage/Cost Page (用量)",
+      "status": "completed",
+      "priority": "high",
+      "description": "New usage page showing token consumption attribution, cost trends, subscription window, and quota usage",
+      "steps": [
+        "Create usage page with today/7day/30day trends",
+        "Add token consumption attribution by task/agent",
+        "Add cost analysis with burn rate",
+        "Add subscription window and quota tracking",
+        "Add data connection status indicators",
+        "Integrate with CODEX_HOME and subscription snapshot"
+      ],
+      "files": [
+        "src/app/(dashboard)/usage/page.tsx",
+        "src/lib/openclaw/types.ts",
+        "src/lib/openclaw/api-client.ts",
+        "src/lib/openclaw/react-hooks.tsx"
+      ],
+      "passes": true,
+      "notes": "Created with mock data, ready for API integration"
+    },
+    {
+      "id": "staff-page",
+      "name": "Staff Page (员工)",
+      "status": "completed",
+      "priority": "high",
+      "description": "New staff page showing who is actually working vs on standby, recent output, and scheduling status",
+      "steps": [
+        "Create staff page with live execution status",
+        "Distinguish 'working' from 'has backlog'",
+        "Show current processing item vs next item",
+        "Display recent output and productivity metrics",
+        "Add scheduling status indicators",
+        "Integrate with openclaw.json agent roster"
+      ],
+      "files": [
+        "src/app/(dashboard)/staff/page.tsx",
+        "src/lib/openclaw/types.ts",
+        "src/lib/openclaw/api-client.ts",
+        "src/lib/openclaw/react-hooks.tsx"
+      ],
+      "passes": true,
+      "notes": "Created with working/standby/offline distinction"
+    },
+    {
+      "id": "enhanced-tasks",
+      "name": "Enhanced Tasks Page (任务)",
+      "status": "completed",
+      "priority": "high",
+      "description": "Enhanced tasks page with task board, scheduling, approvals, execution chain, and execution evidence",
+      "steps": [
+        "Add task board with project mapping",
+        "Add scheduling view",
+        "Add approvals queue with approve/reject actions",
+        "Add execution chain visualization",
+        "Add execution evidence from session data",
+        "Distinguish planned vs actual execution"
+      ],
+      "files": [
+        "src/app/(dashboard)/tasks/page.tsx",
+        "src/lib/openclaw/types.ts",
+        "src/lib/openclaw/api-client.ts",
+        "src/lib/openclaw/react-hooks.tsx"
+      ],
+      "passes": true,
+      "notes": "Created with status/priority filtering and search"
+    },
+    {
+      "id": "enhanced-docs",
+      "name": "Enhanced Documents Page (文档)",
+      "status": "pending",
+      "priority": "medium",
+      "description": "Enhanced documents page as source file workspace based on active agents from openclaw.json",
+      "steps": [
+        "Read agent list from openclaw.json",
+        "Show shared documents and agent-specific docs",
+        "Add file editing with direct source file write-back",
+        "Filter by active agents only (don't show deleted agents)",
+        "Add 'Main' for root-level OpenClaw files",
+        "Integrate with OPENCLAW_HOME path"
+      ],
+      "files": [
+        "src/app/(dashboard)/documents/page.tsx",
+        "src/lib/openclaw/types.ts",
+        "src/lib/openclaw/api-client.ts"
+      ],
+      "passes": false,
+      "notes": "Direct file I/O, no stale copies"
+    },
+    {
+      "id": "enhanced-memory",
+      "name": "Enhanced Memory Page (记忆)",
+      "status": "pending",
+      "priority": "medium",
+      "description": "Enhanced memory page as workspace based on active agents from openclaw.json",
+      "steps": [
+        "Read agent list from openclaw.json for filtering",
+        "Show daily memory and long-term memory",
+        "Add memory editing with direct source file write-back",
+        "Filter by active agents only",
+        "Add semantic search with LanceDB integration",
+        "Integrate with OPENCLAW_HOME path"
+      ],
+      "files": [
+        "src/app/(dashboard)/memory/page.tsx (enhance existing)",
+        "src/lib/openclaw/types.ts",
+        "src/lib/openclaw/api-client.ts"
+      ],
+      "passes": false,
+      "notes": "Enhance existing memory page with file I/O and agent filtering"
+    },
+    {
+      "id": "enhanced-settings",
+      "name": "Enhanced Settings Page (设置)",
+      "status": "pending",
+      "priority": "medium",
+      "description": "Enhanced settings page with security modes, connector status, and data pipeline expectations",
+      "steps": [
+        "Add security mode configuration (READONLY_MODE, etc.)",
+        "Add connector status dashboard",
+        "Add data pipeline expectations display",
+        "Show which data sources are connected vs degraded",
+        "Add approval actions gate controls",
+        "Add import/export mutation controls"
+      ],
+      "files": [
+        "src/app/(dashboard)/settings/page.tsx (enhance existing)",
+        "src/lib/openclaw/types.ts",
+        "src/lib/openclaw/api-client.ts"
+      ],
+      "passes": false,
+      "notes": "Show explicit 'not connected' states instead of fake zeros"
+    },
+    {
+      "id": "runtime-integration",
+      "name": "Runtime Files Integration",
+      "status": "completed",
+      "priority": "high",
+      "description": "Integrate with runtime files (projects.json, tasks.json, budgets.json, etc.)",
+      "steps": [
+        "Create runtime file reader for projects.json",
+        "Create runtime file reader for tasks.json",
+        "Create runtime file reader for budgets.json",
+        "Add acks.json support for action queue",
+        "Add approval-actions.log support",
+        "Add operation-audit.log support"
+      ],
+      "files": [
+        "src/lib/openclaw/runtime-reader.ts",
+        "src/lib/openclaw/types.ts"
+      ],
+      "passes": true,
+      "notes": "Created runtime-reader.ts with all file types"
+    },
+    {
+      "id": "openclaw-json-integration",
+      "name": "OpenClaw.json Integration",
+      "status": "completed",
+      "priority": "high",
+      "description": "Read openclaw.json to get active agent roster for filtering",
+      "steps": [
+        "Create openclaw.json reader",
+        "Parse active agents from configuration",
+        "Filter documents/memory by active agents",
+        "Display agent roster in staff page",
+        "Handle missing openclaw.json gracefully"
+      ],
+      "files": [
+        "src/lib/openclaw/config-reader.ts",
+        "src/lib/openclaw/types.ts"
+      ],
+      "passes": true,
+      "notes": "Created config-reader.ts for openclaw.json"
+    },
+    {
+      "id": "subscription-integration",
+      "name": "Subscription/Codex Integration",
+      "status": "completed",
+      "priority": "medium",
+      "description": "Integrate with CODEX_HOME and subscription snapshot for usage data",
+      "steps": [
+        "Create subscription snapshot reader",
+        "Parse Codex quota window",
+        "Calculate burn rate",
+        "Handle missing subscription data gracefully",
+        "Support alternative providers (API keys, OpenAI, etc.)"
+      ],
+      "files": [
+        "src/lib/openclaw/subscription-reader.ts",
+        "src/lib/openclaw/types.ts"
+      ],
+      "passes": true,
+      "notes": "Created subscription-reader.ts"
+    },
+    {
+      "id": "approval-actions",
+      "name": "Approval Actions System",
+      "status": "pending",
+      "priority": "medium",
+      "description": "Implement approval actions with approve/reject functionality",
+      "steps": [
+        "Create approval queue reader",
+        "Add approve/reject API endpoints",
+        "Add dry-run mode support",
+        "Add gate controls (APPROVAL_ACTIONS_ENABLED)",
+        "Add audit logging for approvals",
+        "Integrate with runtime/approval-actions.log"
+      ],
+      "files": [
+        "src/lib/openclaw/api-client.ts",
+        "src/lib/openclaw/approval-system.ts",
+        "src/app/(dashboard)/approvals/page.tsx"
+      ],
+      "passes": false,
+      "notes": "Default disabled: APPROVAL_ACTIONS_ENABLED=false, dry-run=true"
+    },
+    {
+      "id": "search-api",
+      "name": "Search API Integration",
+      "status": "pending",
+      "priority": "low",
+      "description": "Integrate with search APIs for tasks, projects, sessions, exceptions",
+      "steps": [
+        "Create search API client methods",
+        "Add search to overview page",
+        "Add safe substring search for each entity type",
+        "Display search results inline",
+        "Add search to dedicated search page if needed"
+      ],
+      "files": [
+        "src/lib/openclaw/api-client.ts",
+        "src/app/(dashboard)/search/page.tsx"
+      ],
+      "passes": false,
+      "notes": "Safe search only, no injection risks"
+    },
+    {
+      "id": "bilingual-support",
+      "name": "Bilingual Support (Chinese/English)",
+      "status": "pending",
+      "priority": "low",
+      "description": "Add Chinese/English language support throughout dashboard",
+      "steps": [
+        "Create i18n configuration",
+        "Add language toggle to header",
+        "Translate all static text",
+        "Add URL parameter support (?lang=zh|en)",
+        "Store language preference"
+      ],
+      "files": [
+        "src/lib/i18n.ts",
+        "src/components/lang-toggle.tsx",
+        "src/app/(dashboard)/layout.tsx"
+      ],
+      "passes": false,
+      "notes": "Use URL param ?lang=zh|en like control-center"
+    },
+    {
+      "id": "replay-index",
+      "name": "Replay Index Page",
+      "status": "pending",
+      "priority": "low",
+      "description": "Add replay/debug index for timeline, digest, export, bundle",
+      "steps": [
+        "Create replay index reader",
+        "Display available replays",
+        "Add replay viewing capability",
+        "Integrate with runtime digests and exports",
+        "Add debug timeline view"
+      ],
+      "files": [
+        "src/app/(dashboard)/replay/page.tsx",
+        "src/lib/openclaw/replay-reader.ts"
+      ],
+      "passes": false,
+      "notes": "For debugging and audit trails"
+    },
+    {
+      "id": "cron-monitoring",
+      "name": "Cron Monitoring Page",
+      "status": "pending",
+      "priority": "low",
+      "description": "Add cron/scheduled task monitoring page",
+      "steps": [
+        "Create cron status reader",
+        "Display scheduled tasks",
+        "Show cron health status",
+        "Add cron history logs",
+        "Integrate with /cron endpoint"
+      ],
+      "files": [
+        "src/app/(dashboard)/cron/page.tsx",
+        "src/lib/openclaw/api-client.ts"
+      ],
+      "passes": false,
+      "notes": "Monitor automated/scheduled tasks"
+    },
+    {
+      "id": "ui-polish",
+      "name": "UI Polish - Pixel-Office Style",
+      "status": "pending",
+      "priority": "medium",
+      "description": "Polish UI to match Mission Control v3 pixel-office style",
+      "steps": [
+        "Update card styles to Apple-like层次",
+        "Refine execution chain card layout",
+        "Add proper text wrapping for long titles",
+        "Update navigation structure (usage below overview)",
+        "Polish color scheme and spacing",
+        "Add loading states and transitions"
+      ],
+      "files": [
+        "src/app/(dashboard)/layout.tsx",
+        "src/components/ui/*.tsx",
+        "tailwind.config.ts"
+      ],
+      "passes": false,
+      "notes": "Match control-center's polished visual style"
+    }
+  ],
+  "implementation_order": [
+    "enhanced-overview",
+    "runtime-integration",
+    "openclaw-json-integration",
+    "usage-page",
+    "staff-page",
+    "enhanced-tasks",
+    "enhanced-memory",
+    "enhanced-docs",
+    "enhanced-settings",
+    "approval-actions",
+    "subscription-integration",
+    "search-api",
+    "ui-polish",
+    "bilingual-support",
+    "replay-index",
+    "cron-monitoring"
+  ],
+  "env_vars": {
+    "GATEWAY_URL": "ws://127.0.0.1:18789",
+    "OPENCLAW_HOME": "~/.openclaw",
+    "CODEX_HOME": "~/.codex",
+    "OPENCLAW_SUBSCRIPTION_SNAPSHOT_PATH": "",
+    "READONLY_MODE": "true",
+    "LOCAL_TOKEN_AUTH_REQUIRED": "true",
+    "APPROVAL_ACTIONS_ENABLED": "false",
+    "APPROVAL_ACTIONS_DRY_RUN": "true",
+    "IMPORT_MUTATION_ENABLED": "false",
+    "IMPORT_MUTATION_DRY_RUN": "false",
+    "UI_PORT": "3000"
+  },
+  "api_endpoints_to_integrate": [
+    "GET /snapshot",
+    "GET /projects",
+    "GET /tasks",
+    "GET /sessions",
+    "GET /exceptions",
+    "GET /api/action-queue",
+    "GET /api/usage-cost",
+    "GET /cron",
+    "POST /api/approvals/:approvalId/approve|reject",
+    "GET /api/search/*"
+  ]
+}
