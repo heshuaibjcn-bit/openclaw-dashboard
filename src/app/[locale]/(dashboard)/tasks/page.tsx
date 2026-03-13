@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,8 @@ interface Task {
 export default function TasksPage() {
   const t = useTranslations('tasks');
   const tCommon = useTranslations('common');
+  const locale = useLocale();
+  const isZh = locale === 'zh';
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -68,14 +70,14 @@ export default function TasksPage() {
         setTasks([
           {
             id: "task-1",
-            title: "Review PR #234 for authentication module",
-            description: "Review the authentication changes and test the flow",
+            title: isZh ? "审查认证模块的 PR #234" : "Review PR #234 for authentication module",
+            description: isZh ? "审查认证更改并测试流程" : "Review the authentication changes and test the flow",
             status: "in-progress",
             priority: "high",
             projectId: "proj-auth",
-            projectTitle: "Authentication System",
+            projectTitle: isZh ? "认证系统" : "Authentication System",
             assignedTo: "agent-main",
-            assigneeName: "Main Assistant",
+            assigneeName: isZh ? "主助手" : "Main Assistant",
             dueDate: new Date(Date.now() + 1000 * 60 * 60 * 4).toISOString(),
             createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
             updatedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
@@ -85,14 +87,14 @@ export default function TasksPage() {
           },
           {
             id: "task-2",
-            title: "Generate API documentation",
-            description: "Create comprehensive API docs for the new endpoints",
+            title: isZh ? "生成 API 文档" : "Generate API documentation",
+            description: isZh ? "为新端点创建全面的 API 文档" : "Create comprehensive API docs for the new endpoints",
             status: "pending",
             priority: "medium",
             projectId: "proj-docs",
-            projectTitle: "Documentation",
+            projectTitle: isZh ? "文档" : "Documentation",
             assignedTo: "agent-docs",
-            assigneeName: "Documentation Agent",
+            assigneeName: isZh ? "文档代理" : "Documentation Agent",
             dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
             createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
             updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
@@ -100,14 +102,14 @@ export default function TasksPage() {
           },
           {
             id: "task-3",
-            title: "Investigate memory leak in session manager",
-            description: "Debug and fix the memory leak issue",
+            title: isZh ? "调查会话管理器中的内存泄漏" : "Investigate memory leak in session manager",
+            description: isZh ? "调试并修复内存泄漏问题" : "Debug and fix the memory leak issue",
             status: "blocked",
             priority: "critical",
             projectId: "proj-bugfix",
-            projectTitle: "Bug Fixes",
+            projectTitle: isZh ? "Bug 修复" : "Bug Fixes",
             assignedTo: "agent-helper",
-            assigneeName: "Helper Bot",
+            assigneeName: isZh ? "助手机器人" : "Helper Bot",
             dueDate: new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString(),
             createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
             updatedAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
@@ -115,14 +117,14 @@ export default function TasksPage() {
           },
           {
             id: "task-4",
-            title: "Update user guide for new features",
-            description: "Add documentation for recently released features",
+            title: isZh ? "更新新功能的用户指南" : "Update user guide for new features",
+            description: isZh ? "为最近发布的功能添加文档" : "Add documentation for recently released features",
             status: "completed",
             priority: "low",
             projectId: "proj-docs",
-            projectTitle: "Documentation",
+            projectTitle: isZh ? "文档" : "Documentation",
             assignedTo: "agent-docs",
-            assigneeName: "Documentation Agent",
+            assigneeName: isZh ? "文档代理" : "Documentation Agent",
             createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
             updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
             tags: ["documentation"],
