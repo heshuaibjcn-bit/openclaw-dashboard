@@ -76,6 +76,8 @@ export default function DashboardPage() {
   const loading = healthLoading || agentsLoading || sessionsLoading || channelsLoading || runtimeLoading;
 
   const systemHealth = useMemo(() => {
+    const totalChannels = channels?.length || 0;
+
     if (!healthData) {
       return {
         gatewayStatus: "healthy" as "healthy" | "degraded" | "unhealthy",
@@ -83,6 +85,7 @@ export default function DashboardPage() {
         activeSessions: 0,
         totalAgents: 0,
         connectedChannels: 0,
+        totalChannels,
         tokenUsage: { used: 0, limit: 1000000, percentage: 0 },
         recentErrors: 0,
         warnings: 0,
@@ -99,6 +102,7 @@ export default function DashboardPage() {
       activeSessions: healthData.sessions || sessions?.length || 0,
       totalAgents: healthData.agents || agents?.length || 0,
       connectedChannels: channels?.filter((c: any) => c.status === "connected").length || 0,
+      totalChannels,
       tokenUsage: { used: 0, limit: 1000000, percentage: 0 }, // Will be updated from runtime data
       recentErrors: 0,
       warnings: 0,
@@ -256,10 +260,20 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t('overview.metrics.channels')}</CardTitle>
-            <Radio className="h-4 w-4 text-green-500" />
+            <Radio className={`h-4 w-4 ${
+              systemHealth.totalChannels === 0 ? "text-gray-500" :
+              systemHealth.connectedChannels === systemHealth.totalChannels ? "text-green-500" :
+              systemHealth.connectedChannels > 0 ? "text-yellow-500" :
+              "text-red-500"
+            }`} />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{systemHealth.connectedChannels}</div>
+            <div className={`text-2xl font-bold ${
+              systemHealth.totalChannels === 0 ? "text-gray-500" :
+              systemHealth.connectedChannels === systemHealth.totalChannels ? "text-green-500" :
+              systemHealth.connectedChannels > 0 ? "text-yellow-500" :
+              "text-red-500"
+            }`}>{systemHealth.connectedChannels}</div>
             <p className="text-xs text-muted-foreground mt-1">
               {t('overview.metrics.connected')}
             </p>
