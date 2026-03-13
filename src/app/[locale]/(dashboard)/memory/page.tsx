@@ -103,14 +103,46 @@ export default function MemoryPage() {
     setEditingMemory({ id: memory.id, content: memory.content });
   };
 
-  const handleSaveMemory = () => {
+  const handleSaveMemory = async () => {
     if (!editingMemory) return;
 
-    // TODO: Implement file write-back API
-    console.log("Saving memory:", editingMemory.id, editingMemory.content);
+    try {
+      // Find the memory entry to get its metadata
+      const allMemories = Object.values(mockMemoriesByAgent).flat();
+      const memoryEntry = allMemories.find(m => m.id === editingMemory.id);
 
-    // Update the memory in the list
-    setEditingMemory(null);
+      const response = await fetch(`/api/memory/${editingMemory.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: editingMemory.content,
+          metadata: memoryEntry?.metadata,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save memory');
+      }
+
+      const result = await response.json();
+
+      // Update the memory in the list
+      if (memoryEntry) {
+        memoryEntry.content = editingMemory.content;
+      }
+
+      setEditingMemory(null);
+
+      // Show success message (optional - could add a toast notification)
+      console.log('Memory saved successfully:', result);
+    } catch (error) {
+      console.error('Error saving memory:', error);
+      // Show error to user (optional - could add a toast notification)
+      alert(`Failed to save memory: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
 
   const handleCancelEdit = () => {

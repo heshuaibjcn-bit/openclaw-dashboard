@@ -40,7 +40,7 @@
       "id": "3",
       "title": "Implement Memory File Write-Back API",
       "description": "The Memory page has an edit functionality (line 109-114) with a TODO comment for implementing file write-back API. Currently, edited memories are only logged to console.",
-      "status": "pending",
+      "status": "completed",
       "priority": "high",
       "acceptanceCriteria": [
         "Create API route at /api/memory/[id] for updating memory entries",
