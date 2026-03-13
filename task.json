@@ -22,7 +22,7 @@
       "id": "2",
       "title": "Fix Settings Page Translation Gaps",
       "description": "The Settings page (/settings) has 25+ hardcoded English strings that need internationalization. This includes form labels, button text, and descriptions.",
-      "status": "pending",
+      "status": "completed",
       "priority": "medium",
       "acceptanceCriteria": [
         "All hardcoded English strings in settings page are replaced with t() translation keys",

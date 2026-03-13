@@ -174,7 +174,7 @@ export default function SettingsPage() {
       {saved && (
         <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
           <CheckCircle2 className="h-4 w-4" />
-          Settings saved successfully
+          {t('settingsSaved')}
         </div>
       )}
 
@@ -201,7 +201,7 @@ export default function SettingsPage() {
               </div>
               {connectorStatus.gateway.status === "connected" && (
                 <p className="text-xs text-muted-foreground">
-                  Latency: {connectorStatus.gateway.latency}ms
+                  {t('latency')} {connectorStatus.gateway.latency}ms
                 </p>
               )}
             </div>
@@ -216,7 +216,7 @@ export default function SettingsPage() {
               </div>
               {connectorStatus.runtime.status === "connected" && (
                 <p className="text-xs text-muted-foreground">
-                  {connectorStatus.runtime.files} files loaded
+                  {connectorStatus.runtime.files} {t('filesLoaded')}
                 </p>
               )}
             </div>
@@ -231,7 +231,7 @@ export default function SettingsPage() {
                 </div>
                 {connectorStatus.subscription.status === "partial" && (
                   <p className="text-xs text-muted-foreground">
-                    Best-effort mode
+                    {t('bestEffortMode')}
                   </p>
                 )}
               </div>
@@ -246,7 +246,7 @@ export default function SettingsPage() {
                 </div>
                 {connectorStatus.memory.status === "connected" && (
                   <p className="text-xs text-muted-foreground">
-                    Vector search active
+                    {t('vectorSearchActive')}
                   </p>
                 )}
               </div>
@@ -289,8 +289,8 @@ export default function SettingsPage() {
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {appSettings.readonlyMode
-                      ? "All write operations are disabled. Dashboard is in safe viewing mode."
-                      : "Write operations may be enabled depending on other appSettings."}
+                      ? t('readOnlyModeEnabled')
+                      : t('readOnlyModeDisabled')}
                   </p>
                 </div>
                 <Switch
@@ -306,7 +306,7 @@ export default function SettingsPage() {
                     <Label className="font-medium">{t('localTokenAuth')}</Label>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Require local token for sensitive operations
+                    {t('localTokenAuthDesc')}
                   </p>
                 </div>
                 <Switch
@@ -324,7 +324,7 @@ export default function SettingsPage() {
                 <CardTitle>{t('approvalActions')}</CardTitle>
               </div>
               <CardDescription>
-                Control approval/rejection workflow for sensitive operations
+                {t('approvalWorkflowControl')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -364,8 +364,8 @@ export default function SettingsPage() {
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {appSettings.approvalActionsDryRun
-                      ? "Approvals are simulated but not executed. Safe for testing."
-                      : "Approvals will be executed immediately. Use with caution!"}
+                      ? t('dryRunModeEnabled')
+                      : t('dryRunModeDisabled')}
                   </p>
                 </div>
               </div>
@@ -379,7 +379,7 @@ export default function SettingsPage() {
                 <CardTitle>{t('importExportMutations')}</CardTitle>
               </div>
               <CardDescription>
-                Control data import/export and modification operations
+                {t('importExportControl')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -399,8 +399,8 @@ export default function SettingsPage() {
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {appSettings.importMutationEnabled
-                      ? "Import operations can modify runtime state. High risk!"
-                      : "Import operations are read-only or disabled. Safe mode."}
+                      ? t('importEnabled')
+                      : t('importDisabled')}
                   </p>
                 </div>
               </div>
@@ -421,8 +421,8 @@ export default function SettingsPage() {
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {appSettings.importMutationDryRun
-                      ? "Imports are validated but not applied. Safe for testing."
-                      : "Imports will modify runtime state immediately!"}
+                      ? t('importDryRunEnabled')
+                      : t('importDryRunDisabled')}
                   </p>
                 </div>
               </div>
@@ -439,12 +439,12 @@ export default function SettingsPage() {
                 <CardTitle>{t('gatewayConfiguration')}</CardTitle>
               </div>
               <CardDescription>
-                Configure your OpenClaw Gateway connection
+                {t('configureGatewayConnection')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="gatewayUrl">Gateway URL</Label>
+                <Label htmlFor="gatewayUrl">{t('gatewayUrl')}</Label>
                 <Input
                   id="gatewayUrl"
                   value={appSettings.gatewayUrl}
@@ -466,9 +466,9 @@ export default function SettingsPage() {
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Auto Reconnect</Label>
+                  <Label>{t('autoReconnect')}</Label>
                   <p className="text-xs text-muted-foreground">
-                    Automatically reconnect to gateway on disconnect
+                    {t('automaticallyReconnect')}
                   </p>
                 </div>
                 <Switch
@@ -478,7 +478,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="reconnectInterval">Reconnect Interval (ms)</Label>
+                <Label htmlFor="reconnectInterval">{t('reconnectInterval')}</Label>
                 <Input
                   id="reconnectInterval"
                   type="number"
@@ -499,12 +499,12 @@ export default function SettingsPage() {
                 <CardTitle>{t('agentDefaults')}</CardTitle>
               </div>
               <CardDescription>
-                Configure default agent behavior
+                {t('configureAgentBehavior')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="defaultModel">Default Model</Label>
+                <Label htmlFor="defaultModel">{t('defaultModel')}</Label>
                 <Select
                   value={appSettings.defaultModel}
                   onValueChange={(value) => value && setSettings({ ...appSettings, defaultModel: value })}
@@ -522,7 +522,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="maxTokens">Max Tokens</Label>
+                <Label htmlFor="maxTokens">{t('maxTokens')}</Label>
                 <Input
                   id="maxTokens"
                   type="number"
@@ -532,7 +532,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="temperature">Temperature (0-1)</Label>
+                <Label htmlFor="temperature">{t('temperature')}</Label>
                 <Input
                   id="temperature"
                   type="number"
@@ -545,7 +545,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="maxConcurrency">Max Concurrency</Label>
+                <Label htmlFor="maxConcurrency">{t('maxConcurrency')}</Label>
                 <Input
                   id="maxConcurrency"
                   type="number"
@@ -566,15 +566,15 @@ export default function SettingsPage() {
                 <CardTitle>{t('channelConfiguration')}</CardTitle>
               </div>
               <CardDescription>
-                Manage communication channels
+                {t('manageChannels')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Feishu Integration</Label>
+                  <Label>{t('feishuIntegration')}</Label>
                   <p className="text-xs text-muted-foreground">
-                    Enable Feishu enterprise messaging
+                    {t('enableFeishuMessaging')}
                   </p>
                 </div>
                 <Switch
@@ -585,9 +585,9 @@ export default function SettingsPage() {
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>iMessage Integration</Label>
+                  <Label>{t('imessageIntegration')}</Label>
                   <p className="text-xs text-muted-foreground">
-                    Enable iMessage support
+                    {t('enableImessageSupport')}
                   </p>
                 </div>
                 <Switch
@@ -597,7 +597,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="channelPolicy">Default Channel Policy</Label>
+                <Label htmlFor="channelPolicy">{t('defaultChannelPolicy')}</Label>
                 <Select
                   value={appSettings.defaultChannelPolicy}
                   onValueChange={(value) => value && setSettings({ ...appSettings, defaultChannelPolicy: value })}
@@ -625,15 +625,15 @@ export default function SettingsPage() {
                 <CardTitle>{t('memoryConfiguration')}</CardTitle>
               </div>
               <CardDescription>
-                Configure LanceDB memory storage
+                {t('configureLanceDBStorage')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Enable Memory</Label>
+                  <Label>{t('enableMemory')}</Label>
                   <p className="text-xs text-muted-foreground">
-                    Store and retrieve agent memories
+                    {t('enableMemoryStore')}
                   </p>
                 </div>
                 <Switch
@@ -644,9 +644,9 @@ export default function SettingsPage() {
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Auto Capture</Label>
+                  <Label>{t('autoCapture')}</Label>
                   <p className="text-xs text-muted-foreground">
-                    Automatically capture important information
+                    {t('autoCaptureInfo')}
                   </p>
                 </div>
                 <Switch
@@ -657,9 +657,9 @@ export default function SettingsPage() {
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Auto Recall</Label>
+                  <Label>{t('autoRecall')}</Label>
                   <p className="text-xs text-muted-foreground">
-                    Automatically retrieve relevant memories
+                    {t('autoRecallInfo')}
                   </p>
                 </div>
                 <Switch
@@ -669,7 +669,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="embeddingModel">Embedding Model</Label>
+                <Label htmlFor="embeddingModel">{t('embeddingModel')}</Label>
                 <Select
                   value={appSettings.embeddingModel}
                   onValueChange={(value) => value && setSettings({ ...appSettings, embeddingModel: value })}
@@ -696,12 +696,12 @@ export default function SettingsPage() {
                 <CardTitle>{t('interfaceSettings')}</CardTitle>
               </div>
               <CardDescription>
-                Customize your dashboard appearance
+                {t('customizeDashboard')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="theme">Theme</Label>
+                <Label htmlFor="theme">{t('theme')}</Label>
                 <Select
                   value={appSettings.theme}
                   onValueChange={(value) => value && setSettings({ ...appSettings, theme: value })}
@@ -710,18 +710,18 @@ export default function SettingsPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
+                    <SelectItem value="light">{t('light')}</SelectItem>
+                    <SelectItem value="dark">{t('dark')}</SelectItem>
+                    <SelectItem value="system">{t('system')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Auto Refresh</Label>
+                  <Label>{t('autoRefresh')}</Label>
                   <p className="text-xs text-muted-foreground">
-                    Automatically refresh dashboard data
+                    {t('automaticallyRefreshData')}
                   </p>
                 </div>
                 <Switch
@@ -731,7 +731,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="refreshInterval">Refresh Interval (ms)</Label>
+                <Label htmlFor="refreshInterval">{t('refreshInterval')}</Label>
                 <Input
                   id="refreshInterval"
                   type="number"
