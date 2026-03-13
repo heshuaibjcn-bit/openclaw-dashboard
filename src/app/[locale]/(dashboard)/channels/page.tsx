@@ -80,7 +80,7 @@ export default function ChannelsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "connected":
-        return <Badge variant="default">Connected</Badge>;
+        return <Badge variant="default" className="bg-green-500 hover:bg-green-600">Connected</Badge>;
       case "disconnected":
         return <Badge variant="secondary">Disconnected</Badge>;
       case "error":
@@ -273,7 +273,7 @@ export default function ChannelsPage() {
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">{t('status')}</span>
                 {channels?.find((c) => c.type === "feishu")?.status === "connected" ? (
-                  <Badge variant="default">{tCommon('connected')}</Badge>
+                  <Badge variant="default" className="bg-green-500 hover:bg-green-600">{tCommon('connected')}</Badge>
                 ) : (
                   <Badge variant="secondary">{t('notConnected')}</Badge>
                 )}
@@ -299,7 +299,7 @@ export default function ChannelsPage() {
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">{t('status')}</span>
                 {channels?.find((c) => c.type === "imessage")?.status === "connected" ? (
-                  <Badge variant="default">{tCommon('connected')}</Badge>
+                  <Badge variant="default" className="bg-green-500 hover:bg-green-600">{tCommon('connected')}</Badge>
                 ) : (
                   <Badge variant="secondary">{t('notConnected')}</Badge>
                 )}
