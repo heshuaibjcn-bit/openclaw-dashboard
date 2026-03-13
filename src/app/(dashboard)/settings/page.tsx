@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,16 +22,40 @@ import {
   MessageSquare,
   Database,
   Shield,
+  ShieldAlert,
+  ShieldCheck,
   Palette,
   Server,
   Save,
   RefreshCw,
   CheckCircle2,
+  AlertTriangle,
+  Lock,
+  Unlock,
+  XCircle,
+  CheckCircle,
+  TrendingUp,
+  Brain,
+  Plug,
 } from "lucide-react";
 
 export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
-  const [settings, setSettings] = useState({
+  const [connectorStatus, setConnectorStatus] = useState({
+    gateway: { status: "connected" as "connected" | "disconnected" | "degraded", latency: 45 },
+    runtime: { status: "connected" as "connected" | "disconnected" | "degraded", files: 6 },
+    subscription: { status: "partial" as "connected" | "disconnected" | "partial" },
+    memory: { status: "connected" as "connected" | "disconnected" | "degraded", type: "LanceDB" },
+  });
+  const [appSettings, setSettings] = useState({
+    // Security
+    readonlyMode: true,
+    localTokenAuth: true,
+    approvalActionsEnabled: false,
+    approvalActionsDryRun: true,
+    importMutationEnabled: false,
+    importMutationDryRun: false,
+
     // Gateway
     gatewayUrl: "http://127.0.0.1:18789",
     gatewayToken: "",
@@ -61,9 +85,19 @@ export default function SettingsPage() {
     refreshInterval: 30000,
   });
 
+  // Update connector status based on security settings
+  useEffect(() => {
+    if (appSettings.readonlyMode) {
+      setConnectorStatus(prev => ({
+        ...prev,
+        runtime: { ...prev.runtime, status: "connected" },
+      }));
+    }
+  }, [appSettings.readonlyMode]);
+
   const handleSave = () => {
     // Save settings
-    console.log("Saving settings:", settings);
+    console.log("Saving settings:", appSettings);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
@@ -71,6 +105,12 @@ export default function SettingsPage() {
   const handleReset = () => {
     // Reset to defaults
     setSettings({
+      readonlyMode: true,
+      localTokenAuth: true,
+      approvalActionsEnabled: false,
+      approvalActionsDryRun: true,
+      importMutationEnabled: false,
+      importMutationDryRun: false,
       gatewayUrl: "http://127.0.0.1:18789",
       gatewayToken: "",
       autoReconnect: true,
@@ -92,13 +132,28 @@ export default function SettingsPage() {
     });
   };
 
+  const getConnectorBadge = (status: string) => {
+    switch (status) {
+      case "connected":
+        return <Badge variant="default" className="bg-green-500"><CheckCircle className="mr-1 h-3 w-3" />Connected</Badge>;
+      case "disconnected":
+        return <Badge variant="secondary"><XCircle className="mr-1 h-3 w-3" />Not Connected</Badge>;
+      case "degraded":
+        return <Badge variant="outline" className="border-yellow-500 text-yellow-500"><AlertTriangle className="mr-1 h-3 w-3" />Degraded</Badge>;
+      case "partial":
+        return <Badge variant="outline" className="border-blue-500 text-blue-500"><Plug className="mr-1 h-3 w-3" />Partial</Badge>;
+      default:
+        return <Badge variant="secondary">Unknown</Badge>;
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
           <p className="text-muted-foreground">
-            Configure your OpenClaw Dashboard
+            Configure security, connectors, and system behavior
           </p>
         </div>
         <div className="flex gap-2">
@@ -120,14 +175,259 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <Tabs defaultValue="gateway" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5 lg:w-auto">
+      {/* Connector Status Dashboard */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Plug className="h-5 w-5" />
+            <CardTitle>Connector Status</CardTitle>
+          </div>
+          <CardDescription>
+            Real-time status of data sources and external connections
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm">
+                  <Server className="h-4 w-4" />
+                  <span className="font-medium">Gateway</span>
+                </div>
+                {getConnectorBadge(connectorStatus.gateway.status)}
+              </div>
+              {connectorStatus.gateway.status === "connected" && (
+                <p className="text-xs text-muted-foreground">
+                  Latency: {connectorStatus.gateway.latency}ms
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm">
+                  <Database className="h-4 w-4" />
+                  <span className="font-medium">Runtime Data</span>
+                </div>
+                {getConnectorBadge(connectorStatus.runtime.status)}
+              </div>
+              {connectorStatus.runtime.status === "connected" && (
+                <p className="text-xs text-muted-foreground">
+                  {connectorStatus.runtime.files} files loaded
+                </p>
+              )}
+            </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm">
+                    <TrendingUp className="h-4 w-4" />
+                    <span className="font-medium">Subscription</span>
+                  </div>
+                  {getConnectorBadge(connectorStatus.subscription.status)}
+                </div>
+                {connectorStatus.subscription.status === "partial" && (
+                  <p className="text-xs text-muted-foreground">
+                    Best-effort mode
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Brain className="h-4 w-4" />
+                    <span className="font-medium">Memory ({connectorStatus.memory.type})</span>
+                  </div>
+                  {getConnectorBadge(connectorStatus.memory.status)}
+                </div>
+                {connectorStatus.memory.status === "connected" && (
+                  <p className="text-xs text-muted-foreground">
+                    Vector search active
+                  </p>
+                )}
+              </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Tabs defaultValue="security" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-6 lg:w-auto">
+          <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="gateway">Gateway</TabsTrigger>
           <TabsTrigger value="agents">Agents</TabsTrigger>
           <TabsTrigger value="channels">Channels</TabsTrigger>
           <TabsTrigger value="memory">Memory</TabsTrigger>
           <TabsTrigger value="ui">Interface</TabsTrigger>
         </TabsList>
+
+        {/* Security Settings */}
+        <TabsContent value="security" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                <CardTitle>Security Mode</CardTitle>
+              </div>
+              <CardDescription>
+                Control write access and authentication for the dashboard
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/50">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    {appSettings.readonlyMode ? (
+                      <Lock className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Unlock className="h-4 w-4 text-orange-500" />
+                    )}
+                    <Label className="font-medium">Read-Only Mode</Label>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {appSettings.readonlyMode
+                      ? "All write operations are disabled. Dashboard is in safe viewing mode."
+                      : "Write operations may be enabled depending on other appSettings."}
+                  </p>
+                </div>
+                <Switch
+                  checked={appSettings.readonlyMode}
+                  onCheckedChange={(checked) => setSettings({ ...settings, readonlyMode: checked })}
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-4 rounded-lg border">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-blue-500" />
+                    <Label className="font-medium">Local Token Auth</Label>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Require local token for sensitive operations
+                  </p>
+                </div>
+                <Switch
+                  checked={appSettings.localTokenAuth}
+                  onCheckedChange={(checked) => setSettings({ ...settings, localTokenAuth: checked })}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <ShieldAlert className="h-5 w-5" />
+                <CardTitle>Approval Actions</CardTitle>
+              </div>
+              <CardDescription>
+                Control approval/rejection workflow for sensitive operations
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/50">
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Label className="font-medium">Enable Approval Actions</Label>
+                      <Badge variant={appSettings.approvalActionsEnabled ? "destructive" : "secondary"}>
+                        {appSettings.approvalActionsEnabled ? "Enabled" : "Disabled"}
+                      </Badge>
+                    </div>
+                    <Switch
+                      checked={appSettings.approvalActionsEnabled}
+                      onCheckedChange={(checked) => setSettings({ ...settings, approvalActionsEnabled: checked })}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {appSettings.approvalActionsEnabled
+                      ? "Approval workflow is active. Approvals require explicit user action."
+                      : "Approval workflow is disabled. Default safe mode."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 rounded-lg border">
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Label className="font-medium">Dry-Run Mode</Label>
+                      <Badge variant={appSettings.approvalActionsDryRun ? "outline" : "default"}>
+                        {appSettings.approvalActionsDryRun ? "Dry-Run" : "Live"}
+                      </Badge>
+                    </div>
+                    <Switch
+                      checked={appSettings.approvalActionsDryRun}
+                      onCheckedChange={(checked) => setSettings({ ...settings, approvalActionsDryRun: checked })}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {appSettings.approvalActionsDryRun
+                      ? "Approvals are simulated but not executed. Safe for testing."
+                      : "Approvals will be executed immediately. Use with caution!"}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                <CardTitle>Import/Export Mutations</CardTitle>
+              </div>
+              <CardDescription>
+                Control data import/export and modification operations
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/50">
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Label className="font-medium">Enable Import Mutations</Label>
+                      <Badge variant={appSettings.importMutationEnabled ? "destructive" : "secondary"}>
+                        {appSettings.importMutationEnabled ? "Enabled" : "Disabled"}
+                      </Badge>
+                    </div>
+                    <Switch
+                      checked={appSettings.importMutationEnabled}
+                      onCheckedChange={(checked) => setSettings({ ...settings, importMutationEnabled: checked })}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {appSettings.importMutationEnabled
+                      ? "Import operations can modify runtime state. High risk!"
+                      : "Import operations are read-only or disabled. Safe mode."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 rounded-lg border">
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Label className="font-medium">Dry-Run Imports</Label>
+                      <Badge variant={appSettings.importMutationDryRun ? "outline" : "default"}>
+                        {appSettings.importMutationDryRun ? "Dry-Run" : "Live"}
+                      </Badge>
+                    </div>
+                    <Switch
+                      checked={appSettings.importMutationDryRun}
+                      onCheckedChange={(checked) => setSettings({ ...settings, importMutationDryRun: checked })}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {appSettings.importMutationDryRun
+                      ? "Imports are validated but not applied. Safe for testing."
+                      : "Imports will modify runtime state immediately!"}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Gateway Settings */}
         <TabsContent value="gateway" className="space-y-4">
@@ -146,7 +446,7 @@ export default function SettingsPage() {
                 <Label htmlFor="gatewayUrl">Gateway URL</Label>
                 <Input
                   id="gatewayUrl"
-                  value={settings.gatewayUrl}
+                  value={appSettings.gatewayUrl}
                   onChange={(e) => setSettings({ ...settings, gatewayUrl: e.target.value })}
                   placeholder="http://127.0.0.1:18789"
                 />
@@ -157,7 +457,7 @@ export default function SettingsPage() {
                 <Input
                   id="gatewayToken"
                   type="password"
-                  value={settings.gatewayToken}
+                  value={appSettings.gatewayToken}
                   onChange={(e) => setSettings({ ...settings, gatewayToken: e.target.value })}
                   placeholder="Enter your gateway token"
                 />
@@ -171,7 +471,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
                 <Switch
-                  checked={settings.autoReconnect}
+                  checked={appSettings.autoReconnect}
                   onCheckedChange={(checked) => setSettings({ ...settings, autoReconnect: checked })}
                 />
               </div>
@@ -181,7 +481,7 @@ export default function SettingsPage() {
                 <Input
                   id="reconnectInterval"
                   type="number"
-                  value={settings.reconnectInterval}
+                  value={appSettings.reconnectInterval}
                   onChange={(e) => setSettings({ ...settings, reconnectInterval: parseInt(e.target.value) })}
                 />
               </div>
@@ -205,7 +505,7 @@ export default function SettingsPage() {
               <div className="space-y-2">
                 <Label htmlFor="defaultModel">Default Model</Label>
                 <Select
-                  value={settings.defaultModel}
+                  value={appSettings.defaultModel}
                   onValueChange={(value) => value && setSettings({ ...settings, defaultModel: value })}
                 >
                   <SelectTrigger>
@@ -225,7 +525,7 @@ export default function SettingsPage() {
                 <Input
                   id="maxTokens"
                   type="number"
-                  value={settings.maxTokens}
+                  value={appSettings.maxTokens}
                   onChange={(e) => setSettings({ ...settings, maxTokens: parseInt(e.target.value) })}
                 />
               </div>
@@ -238,7 +538,7 @@ export default function SettingsPage() {
                   step="0.1"
                   min="0"
                   max="1"
-                  value={settings.temperature}
+                  value={appSettings.temperature}
                   onChange={(e) => setSettings({ ...settings, temperature: parseFloat(e.target.value) })}
                 />
               </div>
@@ -248,7 +548,7 @@ export default function SettingsPage() {
                 <Input
                   id="maxConcurrency"
                   type="number"
-                  value={settings.maxConcurrency}
+                  value={appSettings.maxConcurrency}
                   onChange={(e) => setSettings({ ...settings, maxConcurrency: parseInt(e.target.value) })}
                 />
               </div>
@@ -277,7 +577,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
                 <Switch
-                  checked={settings.feishuEnabled}
+                  checked={appSettings.feishuEnabled}
                   onCheckedChange={(checked) => setSettings({ ...settings, feishuEnabled: checked })}
                 />
               </div>
@@ -290,7 +590,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
                 <Switch
-                  checked={settings.imessageEnabled}
+                  checked={appSettings.imessageEnabled}
                   onCheckedChange={(checked) => setSettings({ ...settings, imessageEnabled: checked })}
                 />
               </div>
@@ -298,7 +598,7 @@ export default function SettingsPage() {
               <div className="space-y-2">
                 <Label htmlFor="channelPolicy">Default Channel Policy</Label>
                 <Select
-                  value={settings.defaultChannelPolicy}
+                  value={appSettings.defaultChannelPolicy}
                   onValueChange={(value) => value && setSettings({ ...settings, defaultChannelPolicy: value })}
                 >
                   <SelectTrigger>
@@ -336,7 +636,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
                 <Switch
-                  checked={settings.memoryEnabled}
+                  checked={appSettings.memoryEnabled}
                   onCheckedChange={(checked) => setSettings({ ...settings, memoryEnabled: checked })}
                 />
               </div>
@@ -349,7 +649,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
                 <Switch
-                  checked={settings.autoCapture}
+                  checked={appSettings.autoCapture}
                   onCheckedChange={(checked) => setSettings({ ...settings, autoCapture: checked })}
                 />
               </div>
@@ -362,7 +662,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
                 <Switch
-                  checked={settings.autoRecall}
+                  checked={appSettings.autoRecall}
                   onCheckedChange={(checked) => setSettings({ ...settings, autoRecall: checked })}
                 />
               </div>
@@ -370,7 +670,7 @@ export default function SettingsPage() {
               <div className="space-y-2">
                 <Label htmlFor="embeddingModel">Embedding Model</Label>
                 <Select
-                  value={settings.embeddingModel}
+                  value={appSettings.embeddingModel}
                   onValueChange={(value) => value && setSettings({ ...settings, embeddingModel: value })}
                 >
                   <SelectTrigger>
@@ -402,7 +702,7 @@ export default function SettingsPage() {
               <div className="space-y-2">
                 <Label htmlFor="theme">Theme</Label>
                 <Select
-                  value={settings.theme}
+                  value={appSettings.theme}
                   onValueChange={(value) => value && setSettings({ ...settings, theme: value })}
                 >
                   <SelectTrigger>
@@ -424,7 +724,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
                 <Switch
-                  checked={settings.autoRefresh}
+                  checked={appSettings.autoRefresh}
                   onCheckedChange={(checked) => setSettings({ ...settings, autoRefresh: checked })}
                 />
               </div>
@@ -434,7 +734,7 @@ export default function SettingsPage() {
                 <Input
                   id="refreshInterval"
                   type="number"
-                  value={settings.refreshInterval}
+                  value={appSettings.refreshInterval}
                   onChange={(e) => setSettings({ ...settings, refreshInterval: parseInt(e.target.value) })}
                 />
               </div>

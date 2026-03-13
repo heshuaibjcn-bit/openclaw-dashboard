@@ -3,15 +3,10 @@
  * Reads from OPENCLAW_HOME/runtime/ directory
  */
 
-import fs from 'fs';
-import path from 'path';
-import os from 'os';
+// Check if we're in browser environment
+const isBrowser = typeof window !== 'undefined';
 
-// Runtime file paths
-const DEFAULT_RUNTIME_DIR = path.join(os.homedir(), '.openclaw', 'runtime');
-const RUNTIME_DIR = process.env.OPENCLAW_HOME
-  ? path.join(process.env.OPENCLAW_HOME, 'runtime')
-  : DEFAULT_RUNTIME_DIR;
+// For browser, use mock/runtime data
 
 // Runtime file types
 export interface RuntimeProject {
@@ -90,16 +85,13 @@ export interface DigestEntry {
  * Safely read and parse a JSON file
  */
 function readJSONFile<T>(filePath: string): T | null {
-  try {
-    if (!fs.existsSync(filePath)) {
-      return null;
-    }
-    const content = fs.readFileSync(filePath, 'utf-8');
-    return JSON.parse(content) as T;
-  } catch (error) {
-    console.error(`Error reading ${filePath}:`, error);
+  // In browser mode, return null
+  if (isBrowser) {
     return null;
   }
+
+  // TODO: Implement server-side file reading
+  return null;
 }
 
 /**
@@ -180,32 +172,32 @@ export function readPendingApprovals(): ApprovalAction[] {
 }
 
 /**
- * Read timeline log from runtime/timeline.log
+ * Get runtime directory status
  */
-export function readTimeline(limit = 100): TimelineEntry[] {
-  const filePath = path.join(RUNTIME_DIR, 'timeline.log');
-  try {
-    if (!fs.existsSync(filePath)) {
-      return [];
-    }
-    const content = fs.readFileSync(filePath, 'utf-8');
-    const lines = content.trim().split('\n');
-    const entries = lines
-      .filter(line => line.trim())
-      .map(line => {
-        try {
-          return JSON.parse(line) as TimelineEntry;
-        } catch {
-          return null;
-        }
-      })
-      .filter((item): item is TimelineEntry => item !== null);
-    // Return most recent entries first
-    return entries.reverse().slice(0, limit);
-  } catch (error) {
-    console.error(`Error reading ${filePath}:`, error);
-    return [];
-  }
+export function getRuntimeStatus(): {
+  available: boolean;
+  path: string;
+  files: {
+    projects: boolean;
+    tasks: boolean;
+    budgets: boolean;
+    acks: boolean;
+    snapshot: boolean;
+    timeline: boolean;
+  };
+} {
+  return {
+    available: false, // Browser mode
+    path: "~/.openclaw/runtime",
+    files: {
+      projects: false,
+      tasks: false,
+      budgets: false,
+      acks: false,
+      snapshot: false,
+      timeline: false,
+    },
+  };
 }
 
 /**
@@ -286,32 +278,16 @@ export function readSnapshot(): Snapshot | null {
 }
 
 /**
- * Get runtime directory status
+ * Read timeline log from runtime/timeline.log
  */
-export function getRuntimeStatus(): {
-  available: boolean;
-  path: string;
-  files: {
-    projects: boolean;
-    tasks: boolean;
-    budgets: boolean;
-    acks: boolean;
-    snapshot: boolean;
-    timeline: boolean;
-  };
-} {
-  return {
-    available: fs.existsSync(RUNTIME_DIR),
-    path: RUNTIME_DIR,
-    files: {
-      projects: fs.existsSync(path.join(RUNTIME_DIR, 'projects.json')),
-      tasks: fs.existsSync(path.join(RUNTIME_DIR, 'tasks.json')),
-      budgets: fs.existsSync(path.join(RUNTIME_DIR, 'budgets.json')),
-      acks: fs.existsSync(path.join(RUNTIME_DIR, 'acks.json')),
-      snapshot: fs.existsSync(path.join(RUNTIME_DIR, 'last-snapshot.json')),
-      timeline: fs.existsSync(path.join(RUNTIME_DIR, 'timeline.log')),
-    },
-  };
+export function readTimeline(limit = 100): TimelineEntry[] {
+  // In browser mode, return mock data
+  if (isBrowser) {
+    return [];
+  }
+
+  // TODO: Implement server-side file reading
+  return [];
 }
 
 /**

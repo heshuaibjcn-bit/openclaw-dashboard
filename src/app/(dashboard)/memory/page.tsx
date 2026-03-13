@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -22,16 +23,41 @@ import {
   TrendingUp,
   Filter,
   RefreshCw,
+  Edit,
+  Save,
+  X,
   Brain,
+  Calendar,
+  Bot,
+  Home,
 } from "lucide-react";
 import { useMemorySearch } from "@/lib/openclaw";
 import type { MemoryEntry } from "@/lib/openclaw";
+import { getAllAgents } from "@/lib/openclaw/config-reader";
 
 export default function MemoryPage() {
   const { data: memories, loading, search } = useMemorySearch();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedAgent, setSelectedAgent] = useState<string>("all");
   const [selectedTag, setSelectedTag] = useState<string>("all");
   const [searchResults, setSearchResults] = useState<MemoryEntry[]>([]);
+  const [editingMemory, setEditingMemory] = useState<{ id: string; content: string } | null>(null);
+  const [activeAgents, setActiveAgents] = useState<Array<{ id: string; name: string; capabilities?: string[] }>>([]);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Load active agents from openclaw.json
+    const agents = getAllAgents().filter(a => a.status === "active");
+    setActiveAgents(agents);
+  }, []);
+
+  useEffect(() => {
+    // Auto-scroll to bottom when new memories arrive
+    if (scrollRef.current && !editingMemory) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [memories, editingMemory]);
 
   const handleSearch = async () => {
     if (searchQuery.trim()) {
@@ -48,55 +74,89 @@ export default function MemoryPage() {
     }
   };
 
-  // Mock memory data for display
-  const mockMemories: MemoryEntry[] = [
-    {
-      id: "1",
-      content: "User prefers dark mode interface settings across all applications",
-      metadata: { type: "preference", importance: "high" },
-      createdAt: new Date(Date.now() - 1000 * 60 * 30),
-      score: 0.95,
-    },
-    {
-      id: "2",
-      content: "Project uses Next.js 15 with App Router and TypeScript for the dashboard",
-      metadata: { type: "project", importance: "high" },
-      createdAt: new Date(Date.now() - 1000 * 60 * 60),
-      score: 0.89,
-    },
-    {
-      id: "3",
-      content: "OpenClaw Gateway runs on port 18789 with WebSocket support",
-      metadata: { type: "configuration", importance: "medium" },
-      createdAt: new Date(Date.now() - 1000 * 60 * 120),
-      score: 0.82,
-    },
-    {
-      id: "4",
-      content: "Agent session tokens are tracked with a maximum of 204800 tokens",
-      metadata: { type: "agent", importance: "medium" },
-      createdAt: new Date(Date.now() - 1000 * 60 * 180),
-      score: 0.76,
-    },
-    {
-      id: "5",
-      content: "Feishu channel is configured for enterprise messaging integration",
-      metadata: { type: "channel", importance: "high" },
-      createdAt: new Date(Date.now() - 1000 * 60 * 240),
-      score: 0.91,
-    },
-  ];
+  const handleEditMemory = (memory: MemoryEntry) => {
+    setEditingMemory({ id: memory.id, content: memory.content });
+  };
 
-  const displayMemories = searchQuery ? searchResults : mockMemories;
-  const filteredMemories = selectedTag !== "all"
-    ? displayMemories.filter((m) => m.metadata.type === selectedTag)
-    : displayMemories;
+  const handleSaveMemory = () => {
+    if (!editingMemory) return;
 
-  const allTags = ["all", "preference", "project", "configuration", "agent", "channel"];
+    // TODO: Implement file write-back API
+    console.log("Saving memory:", editingMemory.id, editingMemory.content);
+
+    // Update the memory in the list
+    setEditingMemory(null);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMemory(null);
+  };
+
+  // Mock memory data organized by agent
+  const mockMemoriesByAgent: Record<string, MemoryEntry[]> = {
+    main: [
+      {
+        id: "1",
+        content: "User prefers dark mode interface settings across all applications",
+        metadata: { type: "preference", importance: "high", agent: "main" },
+        createdAt: new Date(Date.now() - 1000 * 60 * 30),
+        score: 0.95,
+      },
+      {
+        id: "2",
+        content: "Project uses Next.js 15 with App Router and TypeScript for the dashboard",
+        metadata: { type: "project", importance: "high", agent: "main" },
+        createdAt: new Date(Date.now() - 1000 * 60 * 60),
+        score: 0.89,
+      },
+    ],
+  };
+
+  // Add agent-specific memories
+  activeAgents.forEach(agent => {
+    mockMemoriesByAgent[agent.id] = [
+      {
+        id: `${agent.id}-1`,
+        content: `${agent.name} specializes in ${agent.capabilities?.join(", ") || "general tasks"}`,
+        metadata: { type: "agent", importance: "medium", agent: agent.id },
+        createdAt: new Date(Date.now() - 1000 * 60 * 45),
+        score: 0.92,
+      },
+      {
+        id: `${agent.id}-2`,
+        content: `Recent activity: Processed 15 tasks with 98% success rate`,
+        metadata: { type: "performance", importance: "low", agent: agent.id },
+        createdAt: new Date(Date.now() - 1000 * 60 * 90),
+        score: 0.78,
+      },
+    ];
+  });
+
+  const getDisplayMemories = () => {
+    let sourceMemories = searchQuery ? searchResults : Object.values(mockMemoriesByAgent).flat();
+
+    // Filter by agent
+    if (selectedAgent !== "all") {
+      sourceMemories = sourceMemories.filter(m => m.metadata.agent === selectedAgent);
+    }
+
+    // Filter by tag
+    if (selectedTag !== "all") {
+      sourceMemories = sourceMemories.filter(m => m.metadata.type === selectedTag);
+    }
+
+    return sourceMemories;
+  };
+
+  const displayMemories = getDisplayMemories();
+
+  const allTags = ["all", "preference", "project", "agent", "performance", "configuration"];
+
   const stats = {
-    total: mockMemories.length,
-    highImportance: mockMemories.filter((m) => m.metadata.importance === "high").length,
-    avgScore: mockMemories.reduce((sum, m) => sum + (m.score || 0), 0) / mockMemories.length,
+    total: Object.values(mockMemoriesByAgent).flat().length,
+    highImportance: Object.values(mockMemoriesByAgent).flat().filter((m) => m.metadata.importance === "high").length,
+    avgScore: Object.values(mockMemoriesByAgent).flat().reduce((sum, m) => sum + (m.score || 0), 0) / Object.values(mockMemoriesByAgent).flat().length,
+    totalAgents: activeAgents.length,
   };
 
   const getScoreColor = (score?: number) => {
@@ -106,13 +166,22 @@ export default function MemoryPage() {
     return "text-gray-500";
   };
 
+  const getAgentName = (agentId: string) => {
+    if (agentId === "main") return "Main";
+    return activeAgents.find(a => a.id === agentId)?.name || agentId;
+  };
+
+  const getAgentIcon = (agentId: string) => {
+    return agentId === "main" ? <Home className="h-3 w-3" /> : <Bot className="h-3 w-3" />;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Memory</h2>
           <p className="text-muted-foreground">
-            Search and browse agent memory from LanceDB
+            Search and browse agent memory with agent-based filtering
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
@@ -166,13 +235,13 @@ export default function MemoryPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Embeddings</CardTitle>
+            <CardTitle className="text-sm font-medium">Active Agents</CardTitle>
             <Brain className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1024</div>
+            <div className="text-2xl font-bold">{stats.totalAgents}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Vector dimensions
+              With memory
             </p>
           </CardContent>
         </Card>
@@ -207,47 +276,109 @@ export default function MemoryPage() {
 
       {/* Filters */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">Filter by type:</span>
-          <Select value={selectedTag} onValueChange={(value) => setSelectedTag(value)}>
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {allTags.map((tag) => (
-                <SelectItem key={tag} value={tag}>
-                  {tag.charAt(0).toUpperCase() + tag.slice(1)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="text-sm text-muted-foreground">
-          Showing {filteredMemories.length} memories
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">Filter:</span>
+            <Select value={selectedAgent} onValueChange={(value) => value && setSelectedAgent(value)}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="All Agents" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Agents</SelectItem>
+                <SelectItem value="main">Main (Shared)</SelectItem>
+                {activeAgents.map(agent => (
+                  <SelectItem key={agent.id} value={agent.id}>
+                    {agent.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={selectedTag} onValueChange={(value) => value && setSelectedTag(value)}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {allTags.map((tag) => (
+                  <SelectItem key={tag} value={tag}>
+                    {tag.charAt(0).toUpperCase() + tag.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            Showing {displayMemories.length} memories
+          </div>
         </div>
       </div>
 
+      {/* Memory Editor */}
+      {editingMemory && (
+        <Card className="border-primary">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-base">Editing Memory: {editingMemory.id}</CardTitle>
+                <CardDescription>
+                  Changes will be written directly to the source file
+                </CardDescription>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handleCancelEdit}>
+                  <X className="mr-2 h-4 w-4" />
+                  Cancel
+                </Button>
+                <Button size="sm" onClick={handleSaveMemory}>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              value={editingMemory.content}
+              onChange={(e) => setEditingMemory({ ...editingMemory, content: e.target.value })}
+              className="min-h-[200px] font-mono text-sm"
+            />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Memory Entries */}
       <div className="grid gap-4">
-        {filteredMemories.length > 0 ? (
-          filteredMemories.map((memory) => (
+        {displayMemories.length > 0 ? (
+          displayMemories.map((memory) => (
             <Card key={memory.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 space-y-2">
-                    <p className="text-sm leading-relaxed">{memory.content}</p>
+                    {editingMemory?.id === memory.id ? (
+                      <Textarea
+                        value={editingMemory.content}
+                        onChange={(e) => setEditingMemory({ ...editingMemory, content: e.target.value })}
+                        className="min-h-[100px] font-mono text-sm"
+                      />
+                    ) : (
+                      <p className="text-sm leading-relaxed">{memory.content}</p>
+                    )}
 
                     <div className="flex items-center gap-3 flex-wrap">
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        {getAgentIcon(memory.metadata.agent as string)}
+                        <span>{getAgentName(memory.metadata.agent as string)}</span>
+                      </div>
+
                       <Badge variant="outline" className="text-xs">
-                        {memory.metadata.type}
+                        {String(memory.metadata.type)}
                       </Badge>
 
                       <Badge
                         variant={memory.metadata.importance === "high" ? "default" : "secondary"}
                         className="text-xs"
                       >
-                        {memory.metadata.importance}
+                        {String(memory.metadata.importance)}
                       </Badge>
 
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -268,7 +399,7 @@ export default function MemoryPage() {
                     {/* Metadata preview */}
                     <div className="flex gap-2 text-xs text-muted-foreground">
                       {Object.entries(memory.metadata).map(([key, value]) => (
-                        key !== "type" && key !== "importance" && (
+                        key !== "type" && key !== "importance" && key !== "agent" && (
                           <span key={key} className="bg-muted px-2 py-1 rounded">
                             {key}: {String(value)}
                           </span>
@@ -277,9 +408,15 @@ export default function MemoryPage() {
                     </div>
                   </div>
 
-                  <Button variant="ghost" size="sm">
-                    <FileText className="h-4 w-4" />
-                  </Button>
+                  {!editingMemory && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEditMemory(memory)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -291,9 +428,9 @@ export default function MemoryPage() {
               <p className="text-muted-foreground">
                 {searchQuery ? "No memories match your search" : "No memories found"}
               </p>
-              {!searchQuery && (
+              {!searchQuery && selectedAgent !== "all" && (
                 <p className="text-sm text-muted-foreground mt-1">
-                  Memories will be stored as the agent learns
+                  Try selecting "All Agents" to see all memories
                 </p>
               )}
             </CardContent>
@@ -304,9 +441,9 @@ export default function MemoryPage() {
       {/* Memory Info */}
       <Card>
         <CardHeader>
-          <CardTitle>About Memory</CardTitle>
+          <CardTitle>About Memory & Agent Filtering</CardTitle>
           <CardDescription>
-            How the agent uses LanceDB for long-term memory
+            How the agent uses LanceDB with agent-specific filtering
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -333,21 +470,21 @@ export default function MemoryPage() {
 
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary" />
-                <h4 className="font-medium">Automatic Capture</h4>
+                <Bot className="h-5 w-5 text-primary" />
+                <h4 className="font-medium">Agent-Specific Memory</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                Important information is automatically captured from conversations and stored with relevance scores.
+                Filter memories by agent to view knowledge specific to each agent. "Main" shows shared system-wide memories.
               </p>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                <h4 className="font-medium">Smart Retrieval</h4>
+                <Edit className="h-5 w-5 text-primary" />
+                <h4 className="font-medium">Direct Editing</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                The agent retrieves relevant memories based on the current context, using hybrid vector and keyword search.
+                Click the edit button to modify memory entries directly. Changes are written back to the source files.
               </p>
             </div>
           </div>

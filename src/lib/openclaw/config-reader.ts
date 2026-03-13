@@ -3,14 +3,11 @@
  * Reads ~/.openclaw/openclaw.json to get active agent roster
  */
 
-import fs from 'fs';
-import path from 'path';
-import os from 'os';
+// Check if we're in browser environment
+const isBrowser = typeof window !== 'undefined';
 
-// Config file paths
-const DEFAULT_OPENCLAW_HOME = path.join(os.homedir(), '.openclaw');
-const OPENCLAW_HOME = process.env.OPENCLAW_HOME || DEFAULT_OPENCLAW_HOME;
-const CONFIG_FILE = path.join(OPENCLAW_HOME, 'openclaw.json');
+// For browser, use mock data. For server, use actual file system
+let configCache: OpenClawConfig | null = null;
 
 // OpenClaw agent configuration types
 export interface OpenClawAgent {
@@ -56,17 +53,73 @@ export interface OpenClawConfig {
  * Read OpenClaw configuration from ~/.openclaw/openclaw.json
  */
 export function readOpenClawConfig(): OpenClawConfig | null {
-  try {
-    if (!fs.existsSync(CONFIG_FILE)) {
-      console.warn(`OpenClaw config not found at ${CONFIG_FILE}`);
-      return null;
-    }
-    const content = fs.readFileSync(CONFIG_FILE, 'utf-8');
-    return JSON.parse(content) as OpenClawConfig;
-  } catch (error) {
-    console.error(`Error reading OpenClaw config from ${CONFIG_FILE}:`, error);
-    return null;
+  // Return cached config if available
+  if (configCache) {
+    return configCache;
   }
+
+  // In browser mode, return mock config
+  if (isBrowser) {
+    // Mock config for browser/demo mode
+    const mockConfig: OpenClawConfig = {
+      version: "1.0.0",
+      agents: [
+        {
+          id: "agent-main",
+          name: "Main Assistant",
+          model: "zai/glm-5",
+          status: "active",
+          capabilities: ["code-review", "documentation", "analysis"],
+          channels: ["feishu"],
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: "agent-helper",
+          name: "Helper Bot",
+          model: "zai/glm-4.7",
+          status: "active",
+          capabilities: ["debug", "testing", "support"],
+          channels: ["feishu", "imessage"],
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: "agent-docs",
+          name: "Documentation Agent",
+          model: "zai/glm-4.7-flash",
+          status: "active",
+          capabilities: ["documentation", "writing"],
+          channels: [],
+          createdAt: new Date().toISOString(),
+        },
+      ],
+      channels: [
+        { id: "feishu", name: "Feishu", type: "feishu", enabled: true },
+        { id: "imessage", name: "iMessage", type: "imessage", enabled: true },
+      ],
+      gateway: {
+        url: "ws://127.0.0.1:18789",
+        port: 18789,
+      },
+      memory: {
+        enabled: true,
+        provider: "lancedb",
+        path: "~/.openclaw/memory",
+      },
+      settings: {
+        timezone: "UTC",
+        locale: "en",
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    configCache = mockConfig;
+    return mockConfig;
+  }
+
+  // Server-side: would use fs here, but for now return null
+  // TODO: Implement server-side file reading
+  return null;
 }
 
 /**

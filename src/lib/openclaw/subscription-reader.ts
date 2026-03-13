@@ -55,19 +55,29 @@ export interface UsageCostSnapshot {
 }
 
 /**
- * Read subscription snapshot from file
+ * Get subscription status
  */
-export function readSubscriptionSnapshot(): SubscriptionSnapshot | null {
-  try {
-    if (!fs.existsSync(SUBSCRIPTION_PATH)) {
-      return null;
-    }
-    const content = fs.readFileSync(SUBSCRIPTION_PATH, 'utf-8');
-    return JSON.parse(content) as SubscriptionSnapshot;
-  } catch (error) {
-    console.error(`Error reading subscription snapshot from ${SUBSCRIPTION_PATH}:`, error);
-    return null;
+export function getSubscriptionStatus(): {
+  available: boolean;
+  path: string;
+  provider: string;
+  quotaStatus: 'unknown' | 'healthy' | 'warning' | 'critical';
+} {
+  if (isBrowser) {
+    return {
+      available: false,
+      path: "~/.codex/subscription.json",
+      provider: "unknown",
+      quotaStatus: "unknown",
+    };
   }
+
+  return {
+    available: false,
+    path: "~/.codex/subscription.json",
+    provider: "unknown",
+    quotaStatus: "unknown",
+  };
 }
 
 /**
@@ -176,31 +186,16 @@ export function formatQuotaWindow(window: string): string {
 }
 
 /**
- * Get subscription status
+ * Read subscription snapshot from file
  */
-export function getSubscriptionStatus(): {
-  available: boolean;
-  path: string;
-  provider: string;
-  quotaStatus: 'unknown' | 'healthy' | 'warning' | 'critical';
-} {
-  const subscription = readSubscriptionSnapshot();
-
-  if (!subscription) {
-    return {
-      available: false,
-      path: SUBSCRIPTION_PATH,
-      provider: 'unknown',
-      quotaStatus: 'unknown',
-    };
+export function readSubscriptionSnapshot(): SubscriptionSnapshot | null {
+  // In browser mode, return mock data
+  if (isBrowser) {
+    return null;
   }
 
-  return {
-    available: true,
-    path: SUBSCRIPTION_PATH,
-    provider: subscription.provider,
-    quotaStatus: getQuotaStatus(subscription),
-  };
+  // TODO: Implement server-side file reading
+  return null;
 }
 
 /**

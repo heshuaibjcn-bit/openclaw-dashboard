@@ -27,6 +27,7 @@ import {
   TrendingUp,
   Users,
   CheckSquare,
+  Shield,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -84,6 +85,11 @@ const navItems = [
     icon: Database,
   },
   {
+    title: "Approvals",
+    url: "/approvals",
+    icon: Shield,
+  },
+  {
     title: "Chat",
     url: "/chat",
     icon: MessageSquare,
@@ -134,16 +140,10 @@ export default function DashboardLayout({
               <SidebarMenu>
                 {navItems.slice(0, 4).map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={pathname === item.url}
-                      tooltip={item.title}
-                    >
-                      <Link href={item.url}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
+                    <Link href={item.url} className="flex items-center gap-2 px-2 py-1.5 text-sm">
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
@@ -159,16 +159,10 @@ export default function DashboardLayout({
               <SidebarMenu>
                 {navItems.slice(4, 7).map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={pathname === item.url}
-                      tooltip={item.title}
-                    >
-                      <Link href={item.url}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
+                    <Link href={item.url} className="flex items-center gap-2 px-2 py-1.5 text-sm">
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
@@ -184,16 +178,10 @@ export default function DashboardLayout({
               <SidebarMenu>
                 {navItems.slice(7).map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={pathname === item.url}
-                      tooltip={item.title}
-                    >
-                      <Link href={item.url}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
+                    <Link href={item.url} className="flex items-center gap-2 px-2 py-1.5 text-sm">
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
@@ -209,16 +197,10 @@ export default function DashboardLayout({
               <SidebarMenu>
                 {secondaryItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={pathname === item.url}
-                      tooltip={item.title}
-                    >
-                      <Link href={item.url}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
+                    <Link href={item.url} className="flex items-center gap-2 px-2 py-1.5 text-sm">
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
