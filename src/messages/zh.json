@@ -311,7 +311,7 @@
     "directEditing": "直接编辑",
     "match": "匹配",
     "noMemoriesMatchSearch": "没有符合条件的记忆",
-    "trySelectingAllAgents": "尝试选择"所有代理"以查看所有记忆"
+    "trySelectingAllAgents": "尝试选择\"所有代理\"以查看所有记忆"
   },
   "approvals": {
     "title": "审批",
