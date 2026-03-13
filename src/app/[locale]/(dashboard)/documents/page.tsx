@@ -304,39 +304,39 @@ export default function DocumentsPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Files</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalFiles')}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalFiles}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Across all sections
+              {t('acrossAllSections')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Agents</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('activeAgents')}</CardTitle>
             <Bot className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalAgents}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              With document sections
+              {t('withDocumentSections')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">File System</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('fileSystem')}</CardTitle>
             <Folder className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalFolders}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Folders
+              {t('folders')}
             </p>
           </CardContent>
         </Card>
@@ -460,38 +460,38 @@ export default function DocumentsPage() {
       {/* Info Card */}
       <Card>
         <CardHeader>
-          <CardTitle>About Documents</CardTitle>
-          <CardDescription>How the document workspace works</CardDescription>
+          <CardTitle>{t('aboutDocuments')}</CardTitle>
+          <CardDescription>{t('howDocumentWorkspaceWorks')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Home className="h-5 w-5 text-blue-500" />
-                <h4 className="font-medium">Main Section</h4>
+                <h4 className="font-medium">{t('mainSection')}</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                Root-level OpenClaw configuration files like openclaw.json, channel configs, and system prompts.
+                {t('mainSectionDesc')}
               </p>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Bot className="h-5 w-5 text-purple-500" />
-                <h4 className="font-medium">Agent Sections</h4>
+                <h4 className="font-medium">{t('agentSections')}</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                Agent-specific documents including system prompts, knowledge base, tools, and guidelines.
+                {t('agentSectionsDesc')}
               </p>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Edit className="h-5 w-5 text-green-500" />
-                <h4 className="font-medium">Direct Editing</h4>
+                <h4 className="font-medium">{t('directEditing')}</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                Click any file to edit its contents. Changes are saved directly to the source file.
+                {t('directEditingDesc')}
               </p>
             </div>
           </div>
