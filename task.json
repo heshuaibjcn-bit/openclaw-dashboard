@@ -213,7 +213,7 @@
       "id": "12",
       "title": "Add Document Preview Component",
       "description": "The Documents page lists files but doesn't show previews. Add a document preview modal or panel for quick file viewing without leaving the page.",
-      "status": "pending",
+      "status": "completed",
       "priority": "low",
       "acceptanceCriteria": [
         "Create DocumentPreview modal component",

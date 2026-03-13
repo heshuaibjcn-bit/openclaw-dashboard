@@ -29,9 +29,11 @@ import {
   FileJson,
   FileCode,
   FileType,
+  Eye,
 } from "lucide-react";
 import { getActiveAgents, getAllAgents } from "@/lib/openclaw/config-reader";
 import { useDocuments } from "@/lib/openclaw";
+import { DocumentPreview } from "@/components/document-preview";
 
 interface DocumentNode {
   name: string;
@@ -56,6 +58,7 @@ export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [editingFile, setEditingFile] = useState<{ path: string; content: string } | null>(null);
+  const [previewingFile, setPreviewingFile] = useState<DocumentNode | null>(null);
   const [fileContents, setFileContents] = useState<Record<string, FileContent>>({});
 
   // Load active agents from openclaw.json
@@ -98,14 +101,20 @@ export default function DocumentsPage() {
     return mockContent;
   };
 
-  const handleFileClick = async (node: DocumentNode) => {
+  const handleFileClick = async (node: DocumentNode, event: React.MouseEvent) => {
     if (node.type === "folder") {
       toggleFolder(node.path);
       return;
     }
 
+    // Open preview dialog
+    setPreviewingFile(node);
+  };
+
+  const handleEditFile = async (node: DocumentNode) => {
     const file = await loadFileContent(node.path);
     setEditingFile({ path: node.path, content: file.content });
+    setPreviewingFile(null); // Close preview when editing
   };
 
   const handleSaveFile = () => {
@@ -182,11 +191,35 @@ export default function DocumentsPage() {
               <span className="text-sm">{node.name}</span>
             </div>
           )}
-          {node.modified && (
-            <span className="text-xs text-muted-foreground ml-auto">
-              {new Date(node.modified).toLocaleDateString()}
-            </span>
-          )}
+          <div className="flex items-center gap-1 ml-auto">
+            {node.modified && (
+              <span className="text-xs text-muted-foreground">
+                {new Date(node.modified).toLocaleDateString()}
+              </span>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleFileClick(node, e);
+              }}
+              className="h-7 w-7 p-0"
+            >
+              <Eye className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEditFile(node);
+              }}
+              className="h-7 w-7 p-0"
+            >
+              <Edit className="h-3 w-3" />
+            </Button>
+          </div>
         </div>
         {isFolder && isExpanded && node.children && (
           <div>
@@ -415,6 +448,16 @@ export default function DocumentsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Document Preview Dialog */}
+      <DocumentPreview
+        open={!!previewingFile}
+        onOpenChange={(open) => {
+          if (!open) setPreviewingFile(null);
+        }}
+        document={previewingFile}
+        content={previewingFile ? (fileContents[previewingFile.path]?.content || "") : ""}
+      />
     </div>
   );
 }
