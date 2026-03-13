@@ -27,6 +27,8 @@ import {
   PlayCircle,
   MoreHorizontal,
   Settings,
+  Smartphone,
+  Send,
 } from "lucide-react";
 import { useTranslations, useLocale } from 'next-intl';
 import Link from "next/link";
@@ -477,6 +479,79 @@ export default function DashboardPage() {
                   <p className="text-xs text-muted-foreground">{t('overview.staffStatus.offline')}</p>
                 </div>
               </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Connected Channels */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>{t('overview.channels.title', { defaultValue: 'Connected Channels' })}</CardTitle>
+              <CardDescription>
+                {loading ? t('common.loading') : `${systemHealth.connectedChannels}/${systemHealth.totalChannels} ${t('overview.channels.connected', { defaultValue: 'connected' })}`}
+              </CardDescription>
+            </div>
+            <Link href={`/${locale}/channels`} className="text-sm text-muted-foreground hover:text-primary">
+              {t('common.viewAll')}
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : channels && channels.length > 0 ? (
+            <div className="space-y-3">
+              {channels.map((channel: any) => (
+                <div
+                  key={channel.id}
+                  className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    {channel.type === 'imessage' ? (
+                      <Smartphone className={`h-5 w-5 ${
+                        channel.status === 'connected' ? 'text-green-500' : 'text-red-500'
+                      }`} />
+                    ) : channel.type === 'feishu' ? (
+                      <MessageSquare className={`h-5 w-5 ${
+                        channel.status === 'connected' ? 'text-green-500' : 'text-red-500'
+                      }`} />
+                    ) : channel.type === 'telegram' ? (
+                      <Send className={`h-5 w-5 ${
+                        channel.status === 'connected' ? 'text-green-500' : 'text-red-500'
+                      }`} />
+                    ) : (
+                      <Radio className={`h-5 w-5 ${
+                        channel.status === 'connected' ? 'text-green-500' : 'text-red-500'
+                      }`} />
+                    )}
+                    <div>
+                      <p className="font-medium">{channel.name}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{channel.type}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {channel.status === 'connected' ? (
+                      <Badge variant="default" className="bg-green-500 hover:bg-green-600">
+                        {t('common.connected', { defaultValue: 'Connected' })}
+                      </Badge>
+                    ) : (
+                      <Badge variant="destructive" className="bg-red-500 hover:bg-red-600">
+                        {t('common.disconnected', { defaultValue: 'Disconnected' })}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <Radio className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">{t('overview.channels.noChannels', { defaultValue: 'No channels configured' })}</p>
             </div>
           )}
         </CardContent>
