@@ -1,0 +1,269 @@
+{
+  "tasks": [
+    {
+      "id": "1",
+      "title": "Fix Documents Page Hardcoded Strings",
+      "description": "The Documents page (/documents) has approximately 3 hardcoded English strings that need to be replaced with translation keys for proper internationalization support.",
+      "status": "pending",
+      "priority": "medium",
+      "acceptanceCriteria": [
+        "All hardcoded English strings in documents page are replaced with t() translation keys",
+        "Corresponding translations added to both en.json and zh.json",
+        "Page displays correctly in both English and Chinese",
+        "Build passes with no TypeScript errors"
+      ],
+      "files": [
+        "src/app/[locale]/(dashboard)/documents/page.tsx",
+        "src/messages/en.json",
+        "src/messages/zh.json"
+      ]
+    },
+    {
+      "id": "2",
+      "title": "Fix Settings Page Translation Gaps",
+      "description": "The Settings page (/settings) has 25+ hardcoded English strings that need internationalization. This includes form labels, button text, and descriptions.",
+      "status": "pending",
+      "priority": "medium",
+      "acceptanceCriteria": [
+        "All hardcoded English strings in settings page are replaced with t() translation keys",
+        "Corresponding translations added to both en.json and zh.json",
+        "All form controls, buttons, and descriptions display correctly in both languages",
+        "Settings form submission works correctly in both languages"
+      ],
+      "files": [
+        "src/app/[locale]/(dashboard)/settings/page.tsx",
+        "src/messages/en.json",
+        "src/messages/zh.json"
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Implement Memory File Write-Back API",
+      "description": "The Memory page has an edit functionality (line 109-114) with a TODO comment for implementing file write-back API. Currently, edited memories are only logged to console.",
+      "status": "pending",
+      "priority": "high",
+      "acceptanceCriteria": [
+        "Create API route at /api/memory/[id] for updating memory entries",
+        "Implement PUT endpoint to write changes back to OpenClaw memory files",
+        "Update handleSaveMemory function to call the new API",
+        "Add error handling for write failures",
+        "Test editing and saving a memory entry successfully updates the file"
+      ],
+      "files": [
+        "src/app/[locale]/(dashboard)/memory/page.tsx",
+        "src/app/api/memory/[id]/route.ts"
+      ],
+      "dependencies": ["Local OpenClaw environment required for testing"]
+    },
+    {
+      "id": "4",
+      "title": "Add Real-Time Memory Search with OpenClaw Integration",
+      "description": "The current useMemorySearch hook in the Memory page doesn't connect to the actual OpenClaw Gateway API. Implement real semantic search through OpenClaw's memory system.",
+      "status": "pending",
+      "priority": "high",
+      "acceptanceCriteria": [
+        "Update useMemorySearch hook to call OpenClaw Gateway API at http://127.0.0.1:18789",
+        "Implement semantic search endpoint integration",
+        "Display actual memory entries from ~/.openclaw/memory/ directory",
+        "Handle API errors gracefully with fallback to mock data",
+        "Show relevant scores from OpenClaw's semantic search"
+      ],
+      "files": [
+        "src/lib/openclaw.ts",
+        "src/app/[locale]/(dashboard)/memory/page.tsx"
+      ],
+      "dependencies": ["OpenClaw Gateway running on localhost:18789", "Local OpenClaw environment"]
+    },
+    {
+      "id": "5",
+      "title": "Implement Real Agent Session Management",
+      "description": "The Staff page currently shows mock agent data. Implement real connection to OpenClaw agent system to show actual agents, their sessions, and allow starting/stopping agents.",
+      "status": "pending",
+      "priority": "high",
+      "acceptanceCriteria": [
+        "Connect to OpenClaw Gateway to retrieve real agent list",
+        "Show actual agent sessions from ~/.openclaw/agents/*/sessions/",
+        "Implement start/stop agent functionality",
+        "Display real-time agent status (running/stopped/error)",
+        "Show actual agent output and logs"
+      ],
+      "files": [
+        "src/app/[locale]/(dashboard)/staff/page.tsx",
+        "src/lib/openclaw.ts",
+        "src/app/api/agents/route.ts"
+      ],
+      "dependencies": ["OpenClaw Gateway running", "Local agents configured"]
+    },
+    {
+      "id": "6",
+      "title": "Implement Gateway Connection Status Real-Time Updates",
+      "description": "The Gateway page shows connection status but doesn't auto-update. Implement WebSocket or polling to show real-time status changes of the OpenClaw Gateway connection.",
+      "status": "pending",
+      "priority": "medium",
+      "acceptanceCriteria": [
+        "Add polling or WebSocket connection to Gateway health endpoint",
+        "Update status indicator in real-time when Gateway state changes",
+        "Show last check timestamp",
+        "Add manual refresh button",
+        "Handle connection failures gracefully"
+      ],
+      "files": [
+        "src/app/[locale]/(dashboard)/gateway/page.tsx"
+      ],
+      "dependencies": ["OpenClaw Gateway health endpoint"]
+    },
+    {
+      "id": "7",
+      "title": "Add Dark Mode Persistence",
+      "description": "The theme toggle currently doesn't persist user preference across sessions. Implement localStorage or cookie-based persistence for dark/light mode preference.",
+      "status": "pending",
+      "priority": "low",
+      "acceptanceCriteria": [
+        "Save theme preference to localStorage or cookie",
+        "Load saved theme on page load",
+        "Apply theme before page renders to avoid flash",
+        "Sync theme across all pages",
+        "Test theme persistence after browser restart"
+      ],
+      "files": [
+        "src/components/theme-provider.tsx",
+        "src/app/[locale]/layout.tsx"
+      ]
+    },
+    {
+      "id": "8",
+      "title": "Add Error Boundary Component",
+      "description": "Implement error boundaries to gracefully handle component errors and show user-friendly error messages instead of crashing the entire page.",
+      "status": "pending",
+      "priority": "medium",
+      "acceptanceCriteria": [
+        "Create ErrorBoundary component with fallback UI",
+        "Wrap main dashboard layout in ErrorBoundary",
+        "Log errors to console for debugging",
+        "Provide recovery options (refresh, go back)",
+        "Test error boundary with intentional errors"
+      ],
+      "files": [
+        "src/components/error-boundary.tsx",
+        "src/app/[locale]/(dashboard)/layout.tsx"
+      ]
+    },
+    {
+      "id": "9",
+      "title": "Implement Loading Skeleton States",
+      "description": "Add skeleton loading states for all pages that fetch data from APIs. This improves perceived performance and user experience during data loading.",
+      "status": "pending",
+      "priority": "low",
+      "acceptanceCriteria": [
+        "Create reusable Skeleton component variants",
+        "Add skeleton states to Overview page",
+        "Add skeleton states to Staff page",
+        "Add skeleton states to Tasks page",
+        "Ensure smooth transition from skeleton to content"
+      ],
+      "files": [
+        "src/components/ui/skeleton.tsx",
+        "src/app/[locale]/(dashboard)/page.tsx",
+        "src/app/[locale]/(dashboard)/staff/page.tsx",
+        "src/app/[locale]/(dashboard)/tasks/page.tsx"
+      ]
+    },
+    {
+      "id": "10",
+      "title": "Add Unit Tests for Critical Components",
+      "description": "Set up testing framework and write unit tests for critical components like language-switcher, theme-provider, and key data hooks.",
+      "status": "pending",
+      "priority": "medium",
+      "acceptanceCriteria": [
+        "Install and configure Jest/React Testing Library",
+        "Write tests for language-switcher component",
+        "Write tests for theme-provider",
+        "Write tests for useMemorySearch hook",
+        "Achieve at least 70% code coverage on tested files",
+        "All tests pass: npm run test"
+      ],
+      "files": [
+        "jest.config.js",
+        "src/components/language-switcher.test.tsx",
+        "src/components/theme-provider.test.tsx",
+        "src/lib/__tests__/openclaw.test.ts"
+      ]
+    },
+    {
+      "id": "11",
+      "title": "Implement Task Approval Workflow UI",
+      "description": "The Approvals page currently shows mock data. Implement real task approval workflow connecting to OpenClaw's approval system for human-in-the-loop task verification.",
+      "status": "pending",
+      "priority": "high",
+      "acceptanceCriteria": [
+        "Connect to OpenClaw approval API",
+        "Display pending approvals with full task details",
+        "Implement approve/reject buttons with API calls",
+        "Show approval history and status",
+        "Add filters for approval type, agent, and date range"
+      ],
+      "files": [
+        "src/app/[locale]/(dashboard)/approvals/page.tsx",
+        "src/lib/openclaw.ts",
+        "src/app/api/approvals/route.ts"
+      ],
+      "dependencies": ["OpenClaw approval API", "Active agent tasks"]
+    },
+    {
+      "id": "12",
+      "title": "Add Document Preview Component",
+      "description": "The Documents page lists files but doesn't show previews. Add a document preview modal or panel for quick file viewing without leaving the page.",
+      "status": "pending",
+      "priority": "low",
+      "acceptanceCriteria": [
+        "Create DocumentPreview modal component",
+        "Support preview for text files, markdown, and images",
+        "Add syntax highlighting for code files",
+        "Show file metadata (size, modified date)",
+        "Add open in editor button"
+      ],
+      "files": [
+        "src/components/document-preview.tsx",
+        "src/app/[locale]/(dashboard)/documents/page.tsx"
+      ]
+    },
+    {
+      "id": "13",
+      "title": "Optimize Bundle Size and Performance",
+      "description": "Analyze and optimize the bundle size. Implement code splitting, lazy loading, and other performance optimizations to improve initial load time.",
+      "status": "pending",
+      "priority": "medium",
+      "acceptanceCriteria": [
+        "Run bundle analysis and identify large dependencies",
+        "Implement dynamic imports for heavy components",
+        "Add route-based code splitting",
+        "Optimize image loading with Next.js Image component",
+        "Measure and document performance improvements",
+        "Initial bundle size reduced by at least 20%"
+      ],
+      "files": [
+        "next.config.ts",
+        "src/app/[locale]/(dashboard)/*/page.tsx"
+      ]
+    },
+    {
+      "id": "14",
+      "title": "Add Accessibility Improvements",
+      "description": "Improve accessibility across the dashboard by adding ARIA labels, keyboard navigation, and screen reader support.",
+      "status": "pending",
+      "priority": "medium",
+      "acceptanceCriteria": [
+        "Add ARIA labels to all interactive elements",
+        "Ensure keyboard navigation works for all features",
+        "Add skip to main content link",
+        "Improve color contrast for text and buttons",
+        "Test with screen reader (VOiceOver/NVDA)",
+        "Pass Lighthouse accessibility audit with score > 90"
+      ],
+      "files": [
+        "src/components/**/*.tsx",
+        "src/app/[locale]/(dashboard)/**/page.tsx"
+      ]
+    }
+  ]
+}
