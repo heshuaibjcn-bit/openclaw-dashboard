@@ -292,7 +292,7 @@ export default function SettingsPage() {
                 </div>
                 <Switch
                   checked={appSettings.readonlyMode}
-                  onCheckedChange={(checked) => setSettings({ ...settings, readonlyMode: checked })}
+                  onCheckedChange={(checked) => setSettings({ ...appSettings, readonlyMode: checked })}
                 />
               </div>
 
@@ -308,7 +308,7 @@ export default function SettingsPage() {
                 </div>
                 <Switch
                   checked={appSettings.localTokenAuth}
-                  onCheckedChange={(checked) => setSettings({ ...settings, localTokenAuth: checked })}
+                  onCheckedChange={(checked) => setSettings({ ...appSettings, localTokenAuth: checked })}
                 />
               </div>
             </CardContent>
@@ -336,7 +336,7 @@ export default function SettingsPage() {
                     </div>
                     <Switch
                       checked={appSettings.approvalActionsEnabled}
-                      onCheckedChange={(checked) => setSettings({ ...settings, approvalActionsEnabled: checked })}
+                      onCheckedChange={(checked) => setSettings({ ...appSettings, approvalActionsEnabled: checked })}
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
@@ -358,7 +358,7 @@ export default function SettingsPage() {
                     </div>
                     <Switch
                       checked={appSettings.approvalActionsDryRun}
-                      onCheckedChange={(checked) => setSettings({ ...settings, approvalActionsDryRun: checked })}
+                      onCheckedChange={(checked) => setSettings({ ...appSettings, approvalActionsDryRun: checked })}
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
@@ -393,7 +393,7 @@ export default function SettingsPage() {
                     </div>
                     <Switch
                       checked={appSettings.importMutationEnabled}
-                      onCheckedChange={(checked) => setSettings({ ...settings, importMutationEnabled: checked })}
+                      onCheckedChange={(checked) => setSettings({ ...appSettings, importMutationEnabled: checked })}
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
@@ -415,7 +415,7 @@ export default function SettingsPage() {
                     </div>
                     <Switch
                       checked={appSettings.importMutationDryRun}
-                      onCheckedChange={(checked) => setSettings({ ...settings, importMutationDryRun: checked })}
+                      onCheckedChange={(checked) => setSettings({ ...appSettings, importMutationDryRun: checked })}
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
@@ -447,7 +447,7 @@ export default function SettingsPage() {
                 <Input
                   id="gatewayUrl"
                   value={appSettings.gatewayUrl}
-                  onChange={(e) => setSettings({ ...settings, gatewayUrl: e.target.value })}
+                  onChange={(e) => setSettings({ ...appSettings, gatewayUrl: e.target.value })}
                   placeholder="http://127.0.0.1:18789"
                 />
               </div>
@@ -458,7 +458,7 @@ export default function SettingsPage() {
                   id="gatewayToken"
                   type="password"
                   value={appSettings.gatewayToken}
-                  onChange={(e) => setSettings({ ...settings, gatewayToken: e.target.value })}
+                  onChange={(e) => setSettings({ ...appSettings, gatewayToken: e.target.value })}
                   placeholder="Enter your gateway token"
                 />
               </div>
@@ -472,7 +472,7 @@ export default function SettingsPage() {
                 </div>
                 <Switch
                   checked={appSettings.autoReconnect}
-                  onCheckedChange={(checked) => setSettings({ ...settings, autoReconnect: checked })}
+                  onCheckedChange={(checked) => setSettings({ ...appSettings, autoReconnect: checked })}
                 />
               </div>
 
@@ -482,7 +482,7 @@ export default function SettingsPage() {
                   id="reconnectInterval"
                   type="number"
                   value={appSettings.reconnectInterval}
-                  onChange={(e) => setSettings({ ...settings, reconnectInterval: parseInt(e.target.value) })}
+                  onChange={(e) => setSettings({ ...appSettings, reconnectInterval: parseInt(e.target.value) })}
                 />
               </div>
             </CardContent>
@@ -506,7 +506,7 @@ export default function SettingsPage() {
                 <Label htmlFor="defaultModel">Default Model</Label>
                 <Select
                   value={appSettings.defaultModel}
-                  onValueChange={(value) => value && setSettings({ ...settings, defaultModel: value })}
+                  onValueChange={(value) => value && setSettings({ ...appSettings, defaultModel: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -526,7 +526,7 @@ export default function SettingsPage() {
                   id="maxTokens"
                   type="number"
                   value={appSettings.maxTokens}
-                  onChange={(e) => setSettings({ ...settings, maxTokens: parseInt(e.target.value) })}
+                  onChange={(e) => setSettings({ ...appSettings, maxTokens: parseInt(e.target.value) })}
                 />
               </div>
 
@@ -539,7 +539,7 @@ export default function SettingsPage() {
                   min="0"
                   max="1"
                   value={appSettings.temperature}
-                  onChange={(e) => setSettings({ ...settings, temperature: parseFloat(e.target.value) })}
+                  onChange={(e) => setSettings({ ...appSettings, temperature: parseFloat(e.target.value) })}
                 />
               </div>
 
@@ -549,7 +549,7 @@ export default function SettingsPage() {
                   id="maxConcurrency"
                   type="number"
                   value={appSettings.maxConcurrency}
-                  onChange={(e) => setSettings({ ...settings, maxConcurrency: parseInt(e.target.value) })}
+                  onChange={(e) => setSettings({ ...appSettings, maxConcurrency: parseInt(e.target.value) })}
                 />
               </div>
             </CardContent>
@@ -578,7 +578,7 @@ export default function SettingsPage() {
                 </div>
                 <Switch
                   checked={appSettings.feishuEnabled}
-                  onCheckedChange={(checked) => setSettings({ ...settings, feishuEnabled: checked })}
+                  onCheckedChange={(checked) => setSettings({ ...appSettings, feishuEnabled: checked })}
                 />
               </div>
 
@@ -591,7 +591,7 @@ export default function SettingsPage() {
                 </div>
                 <Switch
                   checked={appSettings.imessageEnabled}
-                  onCheckedChange={(checked) => setSettings({ ...settings, imessageEnabled: checked })}
+                  onCheckedChange={(checked) => setSettings({ ...appSettings, imessageEnabled: checked })}
                 />
               </div>
 
@@ -599,7 +599,7 @@ export default function SettingsPage() {
                 <Label htmlFor="channelPolicy">Default Channel Policy</Label>
                 <Select
                   value={appSettings.defaultChannelPolicy}
-                  onValueChange={(value) => value && setSettings({ ...settings, defaultChannelPolicy: value })}
+                  onValueChange={(value) => value && setSettings({ ...appSettings, defaultChannelPolicy: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -637,7 +637,7 @@ export default function SettingsPage() {
                 </div>
                 <Switch
                   checked={appSettings.memoryEnabled}
-                  onCheckedChange={(checked) => setSettings({ ...settings, memoryEnabled: checked })}
+                  onCheckedChange={(checked) => setSettings({ ...appSettings, memoryEnabled: checked })}
                 />
               </div>
 
@@ -650,7 +650,7 @@ export default function SettingsPage() {
                 </div>
                 <Switch
                   checked={appSettings.autoCapture}
-                  onCheckedChange={(checked) => setSettings({ ...settings, autoCapture: checked })}
+                  onCheckedChange={(checked) => setSettings({ ...appSettings, autoCapture: checked })}
                 />
               </div>
 
@@ -663,7 +663,7 @@ export default function SettingsPage() {
                 </div>
                 <Switch
                   checked={appSettings.autoRecall}
-                  onCheckedChange={(checked) => setSettings({ ...settings, autoRecall: checked })}
+                  onCheckedChange={(checked) => setSettings({ ...appSettings, autoRecall: checked })}
                 />
               </div>
 
@@ -671,7 +671,7 @@ export default function SettingsPage() {
                 <Label htmlFor="embeddingModel">Embedding Model</Label>
                 <Select
                   value={appSettings.embeddingModel}
-                  onValueChange={(value) => value && setSettings({ ...settings, embeddingModel: value })}
+                  onValueChange={(value) => value && setSettings({ ...appSettings, embeddingModel: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -703,7 +703,7 @@ export default function SettingsPage() {
                 <Label htmlFor="theme">Theme</Label>
                 <Select
                   value={appSettings.theme}
-                  onValueChange={(value) => value && setSettings({ ...settings, theme: value })}
+                  onValueChange={(value) => value && setSettings({ ...appSettings, theme: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -725,7 +725,7 @@ export default function SettingsPage() {
                 </div>
                 <Switch
                   checked={appSettings.autoRefresh}
-                  onCheckedChange={(checked) => setSettings({ ...settings, autoRefresh: checked })}
+                  onCheckedChange={(checked) => setSettings({ ...appSettings, autoRefresh: checked })}
                 />
               </div>
 
@@ -735,7 +735,7 @@ export default function SettingsPage() {
                   id="refreshInterval"
                   type="number"
                   value={appSettings.refreshInterval}
-                  onChange={(e) => setSettings({ ...settings, refreshInterval: parseInt(e.target.value) })}
+                  onChange={(e) => setSettings({ ...appSettings, refreshInterval: parseInt(e.target.value) })}
                 />
               </div>
             </CardContent>

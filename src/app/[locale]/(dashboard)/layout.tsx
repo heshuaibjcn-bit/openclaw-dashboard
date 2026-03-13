@@ -32,79 +32,68 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 
-const navItems = [
+const navConfig = [
   {
-    title: "Overview",
-    url: "/",
+    key: "overview",
     icon: LayoutDashboard,
   },
   {
-    title: "Usage",
-    url: "/usage",
+    key: "usage",
     icon: TrendingUp,
   },
   {
-    title: "Staff",
-    url: "/staff",
+    key: "staff",
     icon: Users,
   },
   {
-    title: "Tasks",
-    url: "/tasks",
+    key: "tasks",
     icon: CheckSquare,
   },
   {
-    title: "Gateway",
-    url: "/gateway",
+    key: "gateway",
     icon: Activity,
   },
   {
-    title: "Sessions",
-    url: "/sessions",
+    key: "sessions",
     icon: MessageSquare,
   },
   {
-    title: "Agents",
-    url: "/agents",
+    key: "agents",
     icon: Bot,
   },
   {
-    title: "Channels",
-    url: "/channels",
+    key: "channels",
     icon: Radio,
   },
   {
-    title: "Logs",
-    url: "/logs",
+    key: "logs",
     icon: FileText,
   },
   {
-    title: "Memory",
-    url: "/memory",
+    key: "memory",
     icon: Database,
   },
   {
-    title: "Approvals",
-    url: "/approvals",
+    key: "approvals",
     icon: Shield,
   },
   {
-    title: "Chat",
-    url: "/chat",
+    key: "chat",
     icon: MessageSquare,
   },
 ];
 
-const secondaryItems = [
+const secondaryConfig = [
   {
-    title: "Settings",
-    url: "/settings",
+    key: "settings",
     icon: Settings,
   },
   {
-    title: "Help",
-    url: "/help",
+    key: "help",
     icon: HelpCircle,
   },
 ];
@@ -115,6 +104,8 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const t = useTranslations();
+  const locale = useLocale();
 
   return (
     <SidebarProvider>
@@ -126,8 +117,8 @@ export default function DashboardLayout({
               🦞
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-semibold">OpenClaw</span>
-              <span className="text-xs text-muted-foreground">Dashboard</span>
+              <span className="text-sm font-semibold">{t('sidebar.brand.name')}</span>
+              <span className="text-xs text-muted-foreground">{t('sidebar.brand.tagline')}</span>
             </div>
           </div>
         </SidebarHeader>
@@ -135,14 +126,14 @@ export default function DashboardLayout({
         <SidebarContent>
           {/* Main Navigation */}
           <SidebarGroup>
-            <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
+            <SidebarGroupLabel>{t('sidebar.groups.dashboard')}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {navItems.slice(0, 4).map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <Link href={item.url} className="flex items-center gap-2 px-2 py-1.5 text-sm">
+                {navConfig.slice(0, 4).map((item) => (
+                  <SidebarMenuItem key={item.key}>
+                    <Link href={`/${locale}${item.key === 'overview' ? '' : '/' + item.key}`} className="flex items-center gap-2 px-2 py-1.5 text-sm">
                       <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <span>{t(`nav.${item.key}`)}</span>
                     </Link>
                   </SidebarMenuItem>
                 ))}
@@ -154,14 +145,14 @@ export default function DashboardLayout({
 
           {/* System Status */}
           <SidebarGroup>
-            <SidebarGroupLabel>System</SidebarGroupLabel>
+            <SidebarGroupLabel>{t('sidebar.groups.system')}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {navItems.slice(4, 7).map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <Link href={item.url} className="flex items-center gap-2 px-2 py-1.5 text-sm">
+                {navConfig.slice(4, 7).map((item) => (
+                  <SidebarMenuItem key={item.key}>
+                    <Link href={`/${locale}/${item.key}`} className="flex items-center gap-2 px-2 py-1.5 text-sm">
                       <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <span>{t(`nav.${item.key}`)}</span>
                     </Link>
                   </SidebarMenuItem>
                 ))}
@@ -173,14 +164,14 @@ export default function DashboardLayout({
 
           {/* AI & Memory */}
           <SidebarGroup>
-            <SidebarGroupLabel>AI & Memory</SidebarGroupLabel>
+            <SidebarGroupLabel>{t('sidebar.groups.ai_memory')}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {navItems.slice(7).map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <Link href={item.url} className="flex items-center gap-2 px-2 py-1.5 text-sm">
+                {navConfig.slice(7).map((item) => (
+                  <SidebarMenuItem key={item.key}>
+                    <Link href={`/${locale}/${item.key}`} className="flex items-center gap-2 px-2 py-1.5 text-sm">
                       <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <span>{t(`nav.${item.key}`)}</span>
                     </Link>
                   </SidebarMenuItem>
                 ))}
@@ -192,14 +183,14 @@ export default function DashboardLayout({
 
           {/* Settings */}
           <SidebarGroup>
-            <SidebarGroupLabel>Settings</SidebarGroupLabel>
+            <SidebarGroupLabel>{t('sidebar.groups.settings')}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {secondaryItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <Link href={item.url} className="flex items-center gap-2 px-2 py-1.5 text-sm">
+                {secondaryConfig.map((item) => (
+                  <SidebarMenuItem key={item.key}>
+                    <Link href={`/${locale}/${item.key}`} className="flex items-center gap-2 px-2 py-1.5 text-sm">
                       <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <span>{t(`nav.${item.key}`)}</span>
                     </Link>
                   </SidebarMenuItem>
                 ))}
@@ -212,7 +203,7 @@ export default function DashboardLayout({
           <div className="flex items-center gap-2 rounded-lg bg-muted p-2">
             <div className="h-2 w-2 rounded-full bg-green-500"></div>
             <span className="text-xs text-muted-foreground">
-              Gateway: Connected
+              {t('sidebar.gateway.connected')}
             </span>
           </div>
         </SidebarFooter>
@@ -221,8 +212,9 @@ export default function DashboardLayout({
       <main className="flex-1 overflow-auto">
         <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex h-14 items-center justify-between px-6">
-            <h1 className="text-lg font-semibold">Dashboard</h1>
+            <h1 className="text-lg font-semibold">{t('sidebar.header.title')}</h1>
             <div className="flex items-center gap-2">
+              <LanguageSwitcher />
               <ThemeToggle />
             </div>
           </div>

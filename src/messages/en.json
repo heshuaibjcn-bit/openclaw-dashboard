@@ -1,0 +1,210 @@
+{
+  "locale": "English",
+  "nav": {
+    "overview": "Overview",
+    "usage": "Usage",
+    "staff": "Staff",
+    "tasks": "Tasks",
+    "gateway": "Gateway",
+    "sessions": "Sessions",
+    "agents": "Agents",
+    "channels": "Channels",
+    "logs": "Logs",
+    "memory": "Memory",
+    "approvals": "Approvals",
+    "chat": "Chat",
+    "documents": "Documents",
+    "settings": "Settings",
+    "help": "Help"
+  },
+  "sidebar": {
+    "groups": {
+      "dashboard": "Dashboard",
+      "system": "System",
+      "ai_memory": "AI & Memory",
+      "settings": "Settings"
+    },
+    "gateway": {
+      "connected": "Gateway: Connected",
+      "disconnected": "Gateway: Disconnected",
+      "connecting": "Gateway: Connecting..."
+    },
+    "brand": {
+      "name": "OpenClaw",
+      "tagline": "Dashboard"
+    },
+    "header": {
+      "title": "Dashboard"
+    }
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "update": "Update",
+    "loading": "Loading...",
+    "refresh": "Refresh",
+    "search": "Search",
+    "searchPlaceholder": "Search...",
+    "viewAll": "View All",
+    "viewDetails": "View Details",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "confirm": "Confirm",
+    "actions": "Actions",
+    "status": "Status",
+    "name": "Name",
+    "description": "Description",
+    "type": "Type",
+    "date": "Date",
+    "time": "Time",
+    "active": "Active",
+    "inactive": "Inactive",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "online": "Online",
+    "offline": "Offline",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "pending": "Pending",
+    "completed": "Completed",
+    "failed": "Failed",
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info",
+    "none": "None",
+    "all": "All",
+    "filter": "Filter"
+  },
+  "severity": {
+    "critical": "Critical",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "overview": {
+    "title": "Overview",
+    "subtitle": "System status, pending items, and operational summary",
+    "searchPlaceholder": "Search...",
+    "refresh": "Refresh",
+    "metrics": {
+      "gateway": "Gateway",
+      "uptime": "Uptime",
+      "sessions": "Sessions",
+      "activeNow": "Active now",
+      "agents": "Agents",
+      "working": "Working",
+      "standby": "Standby",
+      "channels": "Channels",
+      "connected": "Connected",
+      "tokenUsage": "Token Usage",
+      "issues": "Issues",
+      "errors": "errors",
+      "warnings": "warnings"
+    },
+    "pendingItems": {
+      "title": "Pending Items",
+      "description": "{count} items require attention",
+      "noItems": "All caught up! No pending items."
+    },
+    "risks": {
+      "title": "Risks",
+      "description": "{count} identified risks",
+      "noRisks": "No risks detected",
+      "affected": "{count} affected"
+    },
+    "staffStatus": {
+      "title": "Staff Status",
+      "description": "{working} working, {standby} on standby",
+      "working": "Working",
+      "standby": "Standby",
+      "offline": "Offline"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "description": "Common tasks and navigation",
+      "viewSessions": "View Sessions",
+      "manageAgents": "Manage Agents",
+      "checkChannels": "Check Channels",
+      "openSettings": "Open Settings"
+    },
+    "types": {
+      "approval": "Approval",
+      "exception": "Exception",
+      "alert": "Alert",
+      "budget": "Budget",
+      "stalled": "Stalled",
+      "system": "System"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Configure your OpenClaw Dashboard preferences",
+    "sections": {
+      "general": "General",
+      "appearance": "Appearance",
+      "notifications": "Notifications",
+      "security": "Security",
+      "api": "API Configuration",
+      "advanced": "Advanced"
+    }
+  },
+  "tasks": {
+    "title": "Tasks",
+    "subtitle": "Manage and monitor your tasks"
+  },
+  "usage": {
+    "title": "Usage",
+    "subtitle": "Monitor your resource usage and statistics"
+  },
+  "staff": {
+    "title": "Staff",
+    "subtitle": "Manage your AI staff members"
+  },
+  "sessions": {
+    "title": "Sessions",
+    "subtitle": "Active and historical session information"
+  },
+  "agents": {
+    "title": "Agents",
+    "subtitle": "Configure and monitor AI agents"
+  },
+  "channels": {
+    "title": "Channels",
+    "subtitle": "Manage communication channels"
+  },
+  "logs": {
+    "title": "Logs",
+    "subtitle": "System logs and event history"
+  },
+  "memory": {
+    "title": "Memory",
+    "subtitle": "Vector database and memory management"
+  },
+  "approvals": {
+    "title": "Approvals",
+    "subtitle": "Review and approve pending requests"
+  },
+  "chat": {
+    "title": "Chat",
+    "subtitle": "Interact with your AI agents"
+  },
+  "documents": {
+    "title": "Documents",
+    "subtitle": "Manage and organize documents"
+  },
+  "gateway": {
+    "title": "Gateway",
+    "subtitle": "Gateway status and configuration"
+  },
+  "languageSwitcher": {
+    "switchTo": "Switch to {language}",
+    "english": "English",
+    "chinese": "中文"
+  }
+}

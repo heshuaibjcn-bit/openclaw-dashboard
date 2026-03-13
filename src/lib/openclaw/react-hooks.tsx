@@ -3,17 +3,15 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import {
-  getAPIClient,
-  type OpenClawAPIClient,
-  type GatewayHealth,
-  type Agent,
-  type Session,
-  type Channel,
-  type LogEntry,
-  type MemoryEntry,
-  OpenClawAPIError,
-} from "./api-client";
+import { getAPIClient, type OpenClawAPIClient, OpenClawAPIError } from "./api-client";
+import type {
+  GatewayHealth,
+  Agent,
+  Session,
+  Channel,
+  LogEntry,
+  MemoryEntry,
+} from "./types";
 
 export function useGatewayHealth() {
   const [data, setData] = useState<GatewayHealth | null>(null);

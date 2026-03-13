@@ -4,8 +4,11 @@
  */
 
 import fs from 'fs';
-import path from 'os';
+import path from 'path';
 import { homedir } from 'os';
+
+// Check if we're in browser environment
+const isBrowser = typeof window !== 'undefined';
 
 // Subscription file paths
 const DEFAULT_CODEX_HOME = path.join(homedir(), '.codex');

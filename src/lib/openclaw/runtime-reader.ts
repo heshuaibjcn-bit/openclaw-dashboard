@@ -3,8 +3,14 @@
  * Reads from OPENCLAW_HOME/runtime/ directory
  */
 
+import * as path from 'path';
+import * as fs from 'fs';
+
 // Check if we're in browser environment
 const isBrowser = typeof window !== 'undefined';
+
+// Runtime directory location
+const RUNTIME_DIR = '~/.openclaw/runtime';
 
 // For browser, use mock/runtime data
 

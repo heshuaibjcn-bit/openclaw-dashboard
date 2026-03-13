@@ -49,13 +49,16 @@ export class OpenClawAPIClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    const headers: HeadersInit = {
+    const headersInit: HeadersInit = {
       "Content-Type": "application/json",
       ...options.headers,
     };
 
+    // Create a new Headers object to properly handle different header types
+    const headers = new Headers(headersInit);
+
     if (this.authToken) {
-      headers["Authorization"] = `Bearer ${this.authToken}`;
+      headers.set("Authorization", `Bearer ${this.authToken}`);
     }
 
     try {
@@ -102,106 +105,47 @@ export class OpenClawAPIClient {
   }
 
   async getAgents(): Promise<Agent[]> {
-    // This would call the actual OpenClaw agents endpoint
-    return [
-      {
-        id: "main",
-        name: "Main Agent",
-        model: "zai/glm-5",
-        status: "active",
-        capabilities: ["chat", "code", "tools"],
-        createdAt: new Date("2026-03-11T14:26:00Z"),
-      },
-    ];
+    return this.request<Agent[]>("/api/agents");
   }
 
   async getSessions(): Promise<Session[]> {
-    // This would call the actual OpenClaw sessions endpoint
-    return [
-      {
-        id: "agent:main:main",
-        agentId: "main",
-        model: "zai/glm-5",
-        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
-        lastActivity: new Date(),
-        tokens: {
-          input: 15000,
-          output: 16000,
-          total: 31000,
-          max: 204800,
-        },
-        messages: [],
-      },
-    ];
+    return this.request<Session[]>("/api/sessions");
   }
 
   async getChannels(): Promise<Channel[]> {
-    // This would call the actual OpenClaw channels endpoint
-    return [
-      {
-        id: "imessage",
-        type: "imessage",
-        name: "iMessage",
-        status: "connected",
-        enabled: true,
-      },
-      {
-        id: "feishu",
-        type: "feishu",
-        name: "Feishu",
-        status: "connected",
-        enabled: true,
-      },
-    ];
+    return this.request<Channel[]>("/api/channels");
   }
 
-  async getLogs(options: {
-    level?: string;
-    limit?: number;
-    offset?: number;
-  } = {}): Promise<LogEntry[]> {
-    // This would call the actual OpenClaw logs endpoint
-    return [
-      {
-        id: "1",
-        level: "info",
-        message: "Gateway started",
-        timestamp: new Date(),
-        source: "gateway",
-      },
-    ];
+  async getLogs(params?: { limit?: number; offset?: number }): Promise<LogEntry[]> {
+    const queryParams = new URLSearchParams();
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.offset) queryParams.append("offset", params.offset.toString());
+    const queryString = queryParams.toString();
+    return this.request<LogEntry[]>(`/api/logs${queryString ? `?${queryString}` : ""}`);
   }
 
-  async searchMemory(query: string, limit = 10): Promise<MemoryEntry[]> {
-    // This would call the actual OpenClaw memory search endpoint
-    return [];
+  async getMemory(params?: { limit?: number; offset?: number }): Promise<MemoryEntry[]> {
+    const queryParams = new URLSearchParams();
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.offset) queryParams.append("offset", params.offset.toString());
+    const queryString = queryParams.toString();
+    return this.request<MemoryEntry[]>(`/api/memory${queryString ? `?${queryString}` : ""}`);
   }
 
-  setAuthToken(token: string): void {
-    this.authToken = token;
-    if (typeof window !== "undefined") {
-      localStorage.setItem("openclaw_token", token);
-    }
-  }
-
-  clearAuthToken(): void {
-    this.authToken = "";
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("openclaw_token");
-    }
+  async searchMemory(query: string, limit?: number): Promise<MemoryEntry[]> {
+    const queryParams = new URLSearchParams({ query });
+    if (limit) queryParams.append("limit", limit.toString());
+    const queryString = queryParams.toString();
+    return this.request<MemoryEntry[]>(`/api/memory/search?${queryString}`);
   }
 }
 
-// Singleton instance
-let apiClient: OpenClawAPIClient | null = null;
+// Singleton instance getter
+let apiClientInstance: OpenClawAPIClient | null = null;
 
 export function getAPIClient(): OpenClawAPIClient {
-  if (!apiClient) {
-    apiClient = new OpenClawAPIClient();
+  if (!apiClientInstance) {
+    apiClientInstance = new OpenClawAPIClient();
   }
-  return apiClient;
-}
-
-export function setAPIClient(client: OpenClawAPIClient): void {
-  apiClient = client;
+  return apiClientInstance;
 }

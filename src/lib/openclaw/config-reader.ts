@@ -6,6 +6,9 @@
 // Check if we're in browser environment
 const isBrowser = typeof window !== 'undefined';
 
+// OpenClaw config file location
+const CONFIG_FILE = '~/.openclaw/openclaw.json';
+
 // For browser, use mock data. For server, use actual file system
 let configCache: OpenClawConfig | null = null;
 

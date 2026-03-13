@@ -28,6 +28,8 @@ import {
   MoreHorizontal,
   Settings,
 } from "lucide-react";
+import { useTranslations, useLocale } from 'next-intl';
+import Link from "next/link";
 
 // Types for overview data
 interface PendingItem {
@@ -57,6 +59,8 @@ interface StaffStatus {
 }
 
 export default function DashboardPage() {
+  const t = useTranslations();
+  const locale = useLocale();
   const [pendingItems, setPendingItems] = useState<PendingItem[]>([]);
   const [risks, setRisks] = useState<RiskItem[]>([]);
   const [staffStatus, setStaffStatus] = useState<StaffStatus>({
@@ -150,13 +154,13 @@ export default function DashboardPage() {
   const getSeverityBadge = (severity: string) => {
     switch (severity) {
       case "critical":
-        return <Badge variant="destructive">Critical</Badge>;
+        return <Badge variant="destructive">{t('severity.critical')}</Badge>;
       case "high":
-        return <Badge variant="destructive" className="bg-orange-500">High</Badge>;
+        return <Badge variant="destructive" className="bg-orange-500">{t('severity.high')}</Badge>;
       case "medium":
-        return <Badge variant="outline" className="border-yellow-500 text-yellow-500">Medium</Badge>;
+        return <Badge variant="outline" className="border-yellow-500 text-yellow-500">{t('severity.medium')}</Badge>;
       case "low":
-        return <Badge variant="secondary">Low</Badge>;
+        return <Badge variant="secondary">{t('severity.low')}</Badge>;
     }
   };
 
@@ -202,16 +206,16 @@ export default function DashboardPage() {
       {/* Header with search */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Overview</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t('overview.title')}</h2>
           <p className="text-muted-foreground">
-            System status, pending items, and operational summary
+            {t('overview.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search..."
+              placeholder={t('overview.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 w-64"
@@ -219,7 +223,7 @@ export default function DashboardPage() {
           </div>
           <Button variant="outline" size="sm">
             <RefreshCw className="mr-2 h-4 w-4" />
-            Refresh
+            {t('overview.refresh')}
           </Button>
         </div>
       </div>
@@ -228,7 +232,7 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Gateway</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('overview.metrics.gateway')}</CardTitle>
             <Activity className={`h-4 w-4 ${
               systemHealth.gatewayStatus === "healthy" ? "text-green-500" :
               systemHealth.gatewayStatus === "degraded" ? "text-yellow-500" :
@@ -238,53 +242,53 @@ export default function DashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold capitalize">{systemHealth.gatewayStatus}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Uptime: {systemHealth.uptime}
+              {t('overview.metrics.uptime')}: {systemHealth.uptime}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sessions</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('overview.metrics.sessions')}</CardTitle>
             <MessageSquare className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{systemHealth.activeSessions}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Active now
+              {t('overview.metrics.activeNow')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Agents</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('overview.metrics.agents')}</CardTitle>
             <Bot className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{systemHealth.totalAgents}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              {staffStatus.working} working, {staffStatus.standby} standby
+              {staffStatus.working} {t('overview.metrics.working')}, {staffStatus.standby} {t('overview.metrics.standby')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Channels</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('overview.metrics.channels')}</CardTitle>
             <Radio className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{systemHealth.connectedChannels}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Connected
+              {t('overview.metrics.connected')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Token Usage</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('overview.metrics.tokenUsage')}</CardTitle>
             <Zap className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
@@ -297,7 +301,7 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Issues</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('overview.metrics.issues')}</CardTitle>
             <AlertTriangle className={`h-4 w-4 ${
               systemHealth.warnings > 0 || systemHealth.recentErrors > 0 ? "text-orange-500" : "text-gray-500"
             }`} />
@@ -307,7 +311,7 @@ export default function DashboardPage() {
               {systemHealth.recentErrors + systemHealth.warnings}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {systemHealth.recentErrors} errors, {systemHealth.warnings} warnings
+              {systemHealth.recentErrors} {t('overview.metrics.errors')}, {systemHealth.warnings} {t('overview.metrics.warnings')}
             </p>
           </CardContent>
         </Card>
@@ -320,15 +324,15 @@ export default function DashboardPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Pending Items</CardTitle>
+                <CardTitle>{t('overview.pendingItems.title')}</CardTitle>
                 <CardDescription>
-                  {loading ? "Loading..." : `${pendingItems.length} items require attention`}
+                  {loading ? t('common.loading') : t('overview.pendingItems.description', { count: pendingItems.length })}
                 </CardDescription>
               </div>
-              <Button variant="outline" size="sm">
-                View All
+              <Link href={`/${locale}/approvals`} className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3">
+                {t('common.viewAll')}
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              </Link>
             </div>
           </CardHeader>
           <CardContent>
@@ -339,7 +343,7 @@ export default function DashboardPage() {
             ) : pendingItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <CheckCircle2 className="h-12 w-12 text-green-500 mb-4" />
-                <p className="text-muted-foreground">All caught up! No pending items.</p>
+                <p className="text-muted-foreground">{t('overview.pendingItems.noItems')}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -381,9 +385,9 @@ export default function DashboardPage() {
         {/* Risks */}
         <Card>
           <CardHeader>
-            <CardTitle>Risks</CardTitle>
+            <CardTitle>{t('overview.risks.title')}</CardTitle>
             <CardDescription>
-              {loading ? "Loading..." : `${risks.length} identified risks`}
+              {loading ? t('common.loading') : t('overview.risks.description', { count: risks.length })}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -394,7 +398,7 @@ export default function DashboardPage() {
             ) : risks.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <ShieldAlert className="h-12 w-12 text-green-500 mb-4" />
-                <p className="text-muted-foreground">No risks detected</p>
+                <p className="text-muted-foreground">{t('overview.risks.noRisks')}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -412,7 +416,7 @@ export default function DashboardPage() {
                       {getSeverityBadge(risk.severity)}
                       {risk.affected && risk.affected.length > 0 && (
                         <span className="text-xs text-muted-foreground">
-                          {risk.affected.length} affected
+                          {t('overview.risks.affected', { count: risk.affected.length })}
                         </span>
                       )}
                     </div>
@@ -429,15 +433,15 @@ export default function DashboardPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Staff Status</CardTitle>
+              <CardTitle>{t('overview.staffStatus.title')}</CardTitle>
               <CardDescription>
-                {loading ? "Loading..." : `${staffStatus.working} working, ${staffStatus.standby} on standby`}
+                {loading ? t('common.loading') : t('overview.staffStatus.description', { working: staffStatus.working, standby: staffStatus.standby })}
               </CardDescription>
             </div>
-            <Button variant="outline" size="sm">
-              View Details
+            <Link href={`/${locale}/staff`} className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3">
+              {t('common.viewDetails')}
               <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            </Link>
           </div>
         </CardHeader>
         <CardContent>
@@ -454,7 +458,7 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <div className="text-2xl font-bold">{staffStatus.working}</div>
-                  <p className="text-xs text-muted-foreground">Working</p>
+                  <p className="text-xs text-muted-foreground">{t('overview.staffStatus.working')}</p>
                 </div>
               </div>
 
@@ -465,7 +469,7 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <div className="text-2xl font-bold">{staffStatus.standby}</div>
-                  <p className="text-xs text-muted-foreground">Standby</p>
+                  <p className="text-xs text-muted-foreground">{t('overview.staffStatus.standby')}</p>
                 </div>
               </div>
 
@@ -476,7 +480,7 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <div className="text-2xl font-bold">{staffStatus.offline}</div>
-                  <p className="text-xs text-muted-foreground">Offline</p>
+                  <p className="text-xs text-muted-foreground">{t('overview.staffStatus.offline')}</p>
                 </div>
               </div>
             </div>
@@ -487,27 +491,27 @@ export default function DashboardPage() {
       {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Common tasks and navigation</CardDescription>
+          <CardTitle>{t('overview.quickActions.title')}</CardTitle>
+          <CardDescription>{t('overview.quickActions.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 md:grid-cols-4">
-            <Button variant="outline" className="justify-start">
+            <Link href={`/${locale}/sessions`} className="inline-flex items-center justify-start rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
               <MessageSquare className="mr-2 h-4 w-4" />
-              View Sessions
-            </Button>
-            <Button variant="outline" className="justify-start">
+              {t('overview.quickActions.viewSessions')}
+            </Link>
+            <Link href={`/${locale}/agents`} className="inline-flex items-center justify-start rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
               <Bot className="mr-2 h-4 w-4" />
-              Manage Agents
-            </Button>
-            <Button variant="outline" className="justify-start">
+              {t('overview.quickActions.manageAgents')}
+            </Link>
+            <Link href={`/${locale}/channels`} className="inline-flex items-center justify-start rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
               <Radio className="mr-2 h-4 w-4" />
-              Check Channels
-            </Button>
-            <Button variant="outline" className="justify-start">
+              {t('overview.quickActions.checkChannels')}
+            </Link>
+            <Link href={`/${locale}/settings`} className="inline-flex items-center justify-start rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
               <Settings className="mr-2 h-4 w-4" />
-              Open Settings
-            </Button>
+              {t('overview.quickActions.openSettings')}
+            </Link>
           </div>
         </CardContent>
       </Card>
