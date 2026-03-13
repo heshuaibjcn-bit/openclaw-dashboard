@@ -60,6 +60,20 @@ export default function TasksPage() {
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"updated" | "created" | "priority" | "due">("updated");
 
+  // Translate tag codes to display names
+  const getTagName = (tag: string): string => {
+    const tagMap: Record<string, { en: string; zh: string }> = {
+      "code-review": { en: "Code Review", zh: "代码审查" },
+      "security": { en: "Security", zh: "安全" },
+      "documentation": { en: "Documentation", zh: "文档" },
+      "bug": { en: "Bug", zh: "Bug" },
+      "urgent": { en: "Urgent", zh: "紧急" },
+      "feature": { en: "Feature", zh: "功能" },
+      "enhancement": { en: "Enhancement", zh: "增强" },
+    };
+    return tagMap[tag]?.[locale] || tag;
+  };
+
   useEffect(() => {
     // Simulate data loading
     const loadData = async () => {
@@ -444,7 +458,7 @@ export default function TasksPage() {
                       <div className="flex flex-wrap gap-1">
                         {task.tags.map((tag) => (
                           <Badge key={tag} variant="outline" className="text-xs">
-                            {tag}
+                            {getTagName(tag)}
                           </Badge>
                         ))}
                       </div>
