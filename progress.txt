@@ -27,8 +27,91 @@ For each completed task, add a new section with:
 
 ## Task Completion History
 
-### 2026-03-14 - Task 3: Implement Memory File Write-Back API
+### 2026-03-14 - Task 6: Implement Gateway Connection Status Real-Time Updates
 **Commit**: [pending]
+
+#### Completed Work:
+- Enhanced `useGatewayHealth` hook with advanced polling features
+- Added configurable polling interval and enable/disable options
+- Implemented last check timestamp tracking
+- Added pause/resume auto-refresh functionality
+- Updated Gateway page UI with real-time status indicators
+
+#### Features Implemented:
+
+**1. Enhanced useGatewayHealth Hook**
+- Added `enabled` option to enable/disable polling
+- Added `interval` option (default 30 seconds)
+- Returns `lastChecked` timestamp
+- Returns `isAutoRefreshing` state
+- Returns `toggleAutoRefresh` function
+
+**2. Gateway Page UI Updates**
+- Added pause/resume button for auto-refresh control
+- Visual indicator when auto-refresh is active
+- Shows "Last checked: Xs ago" timestamp
+- Animated refresh icon when loading
+- Highlighted pause button when auto-refresh is disabled
+
+**3. Translation Keys Added**
+- `lastChecked`: "Last checked" / "最后检查"
+- `autoRefresh`: "Auto-refresh" / "自动刷新"
+- `autoRefreshEnabled`: "Auto-refresh enabled" / "自动刷新已启用"
+- `autoRefreshDisabled`: "Auto-refresh paused" / "自动刷新已暂停"
+- `pause`: "Pause" / "暂停"
+- `resume`: "Resume" / "恢复"
+- `refreshing`: "Refreshing..." / "刷新中..."
+
+#### Technical Implementation:
+
+**Hook Features:**
+- Configurable polling interval (default 30s)
+- Toggle auto-refresh on/off without losing current state
+- Timestamp tracking for every health check
+- Graceful error handling with timestamps
+- Memory-efficient cleanup on unmount
+
+**UI Features:**
+- Smart timestamp display (shows "Xs ago" format)
+- Visual feedback for loading state
+- Yellow highlight on pause button when auto-refresh disabled
+- Pause/Play icons for clear affordance
+- Badge indicator for auto-refresh status
+
+#### Acceptance Criteria:
+✅ Add polling to Gateway health endpoint (30s interval, configurable)
+✅ Update status indicator in real-time when Gateway state changes
+✅ Show last check timestamp in relative format ("Xs ago")
+✅ Add manual refresh button (already existed, enhanced with loading state)
+✅ Handle connection failures gracefully (timestamps updated even on failure)
+
+#### Testing Method:
+- Build successful with no new errors
+- Gateway page loads correctly
+- Pause/resume buttons functional
+- Last checked timestamp displays correctly
+- Auto-refresh badge shows current state
+- Manual refresh triggers immediate update
+
+#### Files Modified:
+- `src/lib/openclaw/react-hooks.tsx` - Enhanced useGatewayHealth with new options and return values
+- `src/app/[locale]/(dashboard)/gateway/page.tsx` - Added pause/resume controls and timestamp display
+- `src/messages/en.json` - Added 7 new translation keys
+- `src/messages/zh.json` - Added 7 new translation keys
+
+#### Issues Encountered:
+- None - all features implemented successfully
+
+#### Notes:
+- Auto-refresh is enabled by default (30s interval)
+- Users can pause auto-refresh for manual control
+- Last check timestamp updates even when auto-refresh is paused (via manual refresh)
+- Relative time format provides user-friendly display ("5s ago", "2m 30s ago")
+
+---
+
+### 2026-03-14 - Task 3: Implement Memory File Write-Back API
+**Commit**: 774f687
 
 #### Completed Work:
 - Created hybrid memory storage API at `/api/memory/[id]/route.ts`

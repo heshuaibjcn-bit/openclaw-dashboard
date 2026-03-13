@@ -98,7 +98,7 @@
       "id": "6",
       "title": "Implement Gateway Connection Status Real-Time Updates",
       "description": "The Gateway page shows connection status but doesn't auto-update. Implement WebSocket or polling to show real-time status changes of the OpenClaw Gateway connection.",
-      "status": "pending",
+      "status": "completed",
       "priority": "medium",
       "acceptanceCriteria": [
         "Add polling or WebSocket connection to Gateway health endpoint",

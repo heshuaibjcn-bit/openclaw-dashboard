@@ -730,7 +730,14 @@
     "used": "已使用",
     "agentInformation": "代理信息",
     "configuredAIAgents": "已配置的 AI 代理",
-    "noAgentsConfigured": "未配置代理"
+    "noAgentsConfigured": "未配置代理",
+    "lastChecked": "最后检查",
+    "autoRefresh": "自动刷新",
+    "autoRefreshEnabled": "自动刷新已启用",
+    "autoRefreshDisabled": "自动刷新已暂停",
+    "pause": "暂停",
+    "resume": "恢复",
+    "refreshing": "刷新中..."
   },
   "languageSwitcher": {
     "switchTo": "切换到{language}",

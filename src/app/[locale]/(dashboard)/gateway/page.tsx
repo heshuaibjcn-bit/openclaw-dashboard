@@ -11,18 +11,38 @@ import {
   Zap,
   TrendingUp,
   RefreshCw,
+  Pause,
+  Play,
 } from "lucide-react";
 import { useGatewayHealth, useSessions, useAgents } from "@/lib/openclaw";
 
 export default function GatewayPage() {
   const t = useTranslations('gateway');
   const tCommon = useTranslations('common');
-  const { data: health, loading: healthLoading, refetch: refetchHealth } = useGatewayHealth();
+  const {
+    data: health,
+    loading: healthLoading,
+    refetch: refetchHealth,
+    lastChecked,
+    isAutoRefreshing,
+    toggleAutoRefresh,
+  } = useGatewayHealth({ interval: 30000 });
   const { data: sessions, loading: sessionsLoading } = useSessions();
   const { data: agents, loading: agentsLoading } = useAgents();
 
   const handleRefresh = () => {
     refetchHealth();
+  };
+
+  const formatLastChecked = (date: Date | null) => {
+    if (!date) return '-';
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffSecs = Math.floor(diffMs / 1000);
+
+    if (diffSecs < 60) return `${diffSecs}s ago`;
+    if (diffSecs < 3600) return `${Math.floor(diffSecs / 60)}m ${diffSecs % 60}s ago`;
+    return date.toLocaleTimeString();
   };
 
   return (
@@ -34,10 +54,21 @@ export default function GatewayPage() {
             {t('subtitle')}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={handleRefresh}>
-          <RefreshCw className="mr-2 h-4 w-4" />
-          {tCommon('refresh')}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleAutoRefresh}
+            className={isAutoRefreshing ? "" : "bg-yellow-50 dark:bg-yellow-900/20"}
+          >
+            {isAutoRefreshing ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
+            {isAutoRefreshing ? t('pause') : t('resume')}
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={healthLoading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${healthLoading ? 'animate-spin' : ''}`} />
+            {healthLoading ? t('refreshing') : tCommon('refresh')}
+          </Button>
+        </div>
       </div>
 
       {/* Connection Status */}
@@ -47,10 +78,21 @@ export default function GatewayPage() {
             <div className="flex items-center gap-2">
               <Activity className="h-5 w-5" />
               <CardTitle>{t('connectionStatus')}</CardTitle>
+              {isAutoRefreshing && (
+                <Badge variant="outline" className="text-xs">
+                  {t('autoRefreshEnabled')}
+                </Badge>
+              )}
             </div>
-            <Badge variant={health?.status === "healthy" ? "default" : "destructive"} className={health?.status === "healthy" ? "bg-green-500 hover:bg-green-600" : ""}>
-              {health?.status === "healthy" ? t('connected') : t('disconnected')}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Clock className="h-3 w-3" />
+                <span>{t('lastChecked')}: {formatLastChecked(lastChecked)}</span>
+              </div>
+              <Badge variant={health?.status === "healthy" ? "default" : "destructive"} className={health?.status === "healthy" ? "bg-green-500 hover:bg-green-600" : ""}>
+                {health?.status === "healthy" ? t('connected') : t('disconnected')}
+              </Badge>
+            </div>
           </div>
           <CardDescription>
             {health?.status === "healthy"

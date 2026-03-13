@@ -13,33 +13,53 @@ import type {
   MemoryEntry,
 } from "./types";
 
-export function useGatewayHealth() {
+export function useGatewayHealth(options?: { enabled?: boolean; interval?: number }) {
+  const { enabled = true, interval = 30000 } = options || {};
   const [data, setData] = useState<GatewayHealth | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [lastChecked, setLastChecked] = useState<Date | null>(null);
+  const [isAutoRefreshing, setIsAutoRefreshing] = useState(true);
 
   const fetchHealth = useCallback(async () => {
+    if (!enabled) return;
+
     try {
       setLoading(true);
       setError(null);
       const client = getAPIClient();
       const health = await client.getHealth();
       setData(health);
+      setLastChecked(new Date());
     } catch (e) {
       setError(e instanceof Error ? e : new Error("Failed to fetch health"));
+      setLastChecked(new Date());
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
-    fetchHealth();
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchHealth, 30000);
-    return () => clearInterval(interval);
-  }, [fetchHealth]);
+    if (!enabled) return;
 
-  return { data, loading, error, refetch: fetchHealth };
+    fetchHealth();
+
+    // Only set up interval if auto-refresh is enabled
+    if (isAutoRefreshing) {
+      const intervalId = setInterval(fetchHealth, interval);
+      return () => clearInterval(intervalId);
+    }
+  }, [fetchHealth, interval, isAutoRefreshing, enabled]);
+
+  return {
+    data,
+    loading,
+    error,
+    refetch: fetchHealth,
+    lastChecked,
+    isAutoRefreshing,
+    toggleAutoRefresh: () => setIsAutoRefreshing(prev => !prev),
+  };
 }
 
 export function useAgents() {

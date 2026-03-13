@@ -730,7 +730,14 @@
     "used": "used",
     "agentInformation": "Agent Information",
     "configuredAIAgents": "Configured AI agents",
-    "noAgentsConfigured": "No agents configured"
+    "noAgentsConfigured": "No agents configured",
+    "lastChecked": "Last checked",
+    "autoRefresh": "Auto-refresh",
+    "autoRefreshEnabled": "Auto-refresh enabled",
+    "autoRefreshDisabled": "Auto-refresh paused",
+    "pause": "Pause",
+    "resume": "Resume",
+    "refreshing": "Refreshing..."
   },
   "languageSwitcher": {
     "switchTo": "Switch to {language}",
