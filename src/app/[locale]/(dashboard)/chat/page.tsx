@@ -380,7 +380,7 @@ export default function ChatPage() {
             <div className="border-t p-4">
               <div className="flex gap-2">
                 <Textarea
-                  placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)"
+                  placeholder={t('inputPlaceholder')}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={handleKeyPress}

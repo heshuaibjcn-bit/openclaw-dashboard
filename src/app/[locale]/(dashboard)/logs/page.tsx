@@ -144,7 +144,7 @@ export default function LogsPage() {
           </Button>
           <Button variant="outline" size="sm" onClick={handleRefresh}>
             <RefreshCw className="mr-2 h-4 w-4" />
-            Refresh
+            {tCommon('refresh')}
           </Button>
         </div>
       </div>
@@ -233,7 +233,7 @@ export default function LogsPage() {
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search logs..."
+                  placeholder={t('searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-8 w-64"

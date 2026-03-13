@@ -263,7 +263,7 @@ export default function MemoryPage() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search memories... (e.g., 'user preferences', 'project config')"
+                placeholder={t('searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -271,7 +271,7 @@ export default function MemoryPage() {
               />
             </div>
             <Button onClick={handleSearch} disabled={!searchQuery.trim() || loading}>
-              {loading ? "Searching..." : "Search"}
+              {loading ? tCommon('loading') : tCommon('search')}
             </Button>
           </div>
         </CardContent>

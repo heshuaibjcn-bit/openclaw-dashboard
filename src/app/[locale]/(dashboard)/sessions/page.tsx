@@ -72,7 +72,7 @@ export default function SessionsPage() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Sessions</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.active')}</CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -85,7 +85,7 @@ export default function SessionsPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Tokens</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.totalTokens')}</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -120,7 +120,7 @@ export default function SessionsPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Oldest Session</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.avgDuration')}</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -147,7 +147,7 @@ export default function SessionsPage() {
               <CardTitle>All Sessions</CardTitle>
               <CardDescription>
                 {loading
-                  ? "Loading sessions..."
+                  ? t('loading')
                   : `Showing ${filteredSessions.length} of ${sessions?.length || 0} sessions`}
               </CardDescription>
             </div>
@@ -155,7 +155,7 @@ export default function SessionsPage() {
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search sessions..."
+                  placeholder={t('searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-8 w-64"
@@ -238,7 +238,7 @@ export default function SessionsPage() {
               <p className="text-muted-foreground">
                 {searchQuery
                   ? "No sessions match your search"
-                  : "No active sessions found"}
+                  : t('noSessions')}
               </p>
             </div>
           )}

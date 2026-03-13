@@ -349,7 +349,7 @@ export default function DocumentsPage() {
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search documents..."
+                placeholder={t('searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
@@ -357,7 +357,7 @@ export default function DocumentsPage() {
             </div>
             <Select value={selectedAgent} onValueChange={(value) => value && setSelectedAgent(value)}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by agent" />
+                <SelectValue placeholder={t('allAgents')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Sections</SelectItem>

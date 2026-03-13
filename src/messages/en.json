@@ -85,7 +85,10 @@
     "sortBy": "Sort by",
     "today": "Today",
     "tomorrow": "Tomorrow",
-    "yesterday": "Yesterday"
+    "yesterday": "Yesterday",
+    "configure": "Configure",
+    "manage": "Manage",
+    "monitor": "Monitor"
   },
   "severity": {
     "critical": "Critical",
@@ -176,28 +179,30 @@
     },
     "searchPlaceholder": "Search tasks...",
     "noTasks": "No tasks found",
-    "noTasksFiltered": "No tasks match your filters",
-    "table": {
-      "task": "Task",
-      "status": "Status",
-      "priority": "Priority",
-      "project": "Project",
-      "assigned": "Assigned",
-      "due": "Due",
-      "actions": "Actions"
-    }
+    "noTasksFiltered": "No tasks match your filters"
   },
   "usage": {
     "title": "Usage",
-    "subtitle": "Monitor your resource usage and statistics"
+    "subtitle": "Monitor your resource usage and statistics",
+    "loading": "Loading usage data..."
   },
   "staff": {
     "title": "Staff",
-    "subtitle": "Manage your AI staff members"
+    "subtitle": "Manage your AI staff members",
+    "loading": "Loading staff data..."
   },
   "sessions": {
     "title": "Sessions",
-    "subtitle": "Active and historical session information"
+    "subtitle": "Active and historical session information",
+    "stats": {
+      "active": "Active Sessions",
+      "totalTokens": "Total Tokens",
+      "avgDuration": "Avg Duration",
+      "agents": "Agents"
+    },
+    "searchPlaceholder": "Search sessions...",
+    "loading": "Loading sessions...",
+    "noSessions": "No sessions found"
   },
   "agents": {
     "title": "Agents",
@@ -213,35 +218,73 @@
     "searchPlaceholder": "Search agents...",
     "loading": "Loading agents...",
     "allAgents": "All Agents",
-    "showing": "Showing {count} of {total} agents"
+    "showing": "Showing {count} of {total} agents",
+    "noAgents": "No agents found"
   },
   "channels": {
     "title": "Channels",
-    "subtitle": "Manage communication channels"
+    "subtitle": "Manage communication channels",
+    "stats": {
+      "total": "Total Channels",
+      "connected": "Connected",
+      "disconnected": "Disconnected",
+      "errors": "Errors"
+    },
+    "searchPlaceholder": "Search channels...",
+    "loading": "Loading channels...",
+    "allChannels": "All Channels",
+    "configure": "Configure",
+    "noChannels": "No channels found"
   },
   "logs": {
     "title": "Logs",
-    "subtitle": "System logs and event history"
+    "subtitle": "System logs and event history",
+    "searchPlaceholder": "Search logs...",
+    "loading": "Loading logs...",
+    "noLogs": "No logs found",
+    "filter": "Filter logs",
+    "clear": "Clear Logs"
   },
   "memory": {
     "title": "Memory",
-    "subtitle": "Vector database and memory management"
+    "subtitle": "Vector database and memory management",
+    "searchPlaceholder": "Search memory...",
+    "loading": "Loading memories...",
+    "noResults": "No memories found",
+    "allAgents": "All Agents"
   },
   "approvals": {
     "title": "Approvals",
-    "subtitle": "Review and approve pending requests"
+    "subtitle": "Review and approve pending requests",
+    "searchPlaceholder": "Search approvals...",
+    "loading": "Loading approvals...",
+    "noActions": "No approval actions found",
+    "dryRun": "Dry-Run Mode"
   },
   "chat": {
     "title": "Chat",
-    "subtitle": "Interact with your AI agents"
+    "subtitle": "Interact with your AI agents",
+    "inputPlaceholder": "Type your message...",
+    "send": "Send",
+    "clear": "Clear Chat",
+    "regenerate": "Regenerate"
   },
   "documents": {
     "title": "Documents",
-    "subtitle": "Manage and organize documents"
+    "subtitle": "Manage and organize documents",
+    "searchPlaceholder": "Search documents...",
+    "loading": "Loading documents...",
+    "noDocuments": "No documents found",
+    "allAgents": "All Agents",
+    "openClaw": "OpenClaw"
   },
   "gateway": {
     "title": "Gateway",
-    "subtitle": "Gateway status and configuration"
+    "subtitle": "Gateway status and configuration",
+    "loading": "Loading gateway status...",
+    "connectionStatus": "Connection Status",
+    "latency": "Latency",
+    "uptime": "Uptime"
   },
   "languageSwitcher": {
     "switchTo": "Switch to {language}",

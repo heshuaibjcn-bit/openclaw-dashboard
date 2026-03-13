@@ -337,7 +337,7 @@ export default function ApprovalsPage() {
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search actions..."
+                placeholder={t('searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
@@ -345,19 +345,19 @@ export default function ApprovalsPage() {
             </div>
             <Select value={statusFilter} onValueChange={(value) => value && setStatusFilter(value)}>
               <SelectTrigger className="w-40">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={tCommon('status')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="all">{tCommon('all')} {tCommon('status')}</SelectItem>
+                <SelectItem value="pending">{tCommon('pending')}</SelectItem>
+                <SelectItem value="approved">{tCommon('completed')}</SelectItem>
                 <SelectItem value="rejected">Rejected</SelectItem>
                 <SelectItem value="expired">Expired</SelectItem>
               </SelectContent>
             </Select>
             <Select value={categoryFilter} onValueChange={(value) => value && setCategoryFilter(value)}>
               <SelectTrigger className="w-40">
-                <SelectValue placeholder="Category" />
+                <SelectValue placeholder={tCommon('type')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
