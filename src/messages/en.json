@@ -234,7 +234,22 @@
     "loading": "Loading channels...",
     "allChannels": "All Channels",
     "configure": "Configure",
-    "noChannels": "No channels found"
+    "noChannels": "No channels found",
+    "channelSettings": "channel settings and preferences",
+    "channelId": "Channel ID",
+    "type": "Type",
+    "status": "Status",
+    "enableChannel": "Enable Channel",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "additionalConfig": "Additional configuration options will be available in the settings panel.",
+    "configured": "Configured",
+    "activeConnections": "Active connections",
+    "activeChannels": "Active channels",
+    "connectionRate": "Connection rate",
+    "managingChannels": "Managing {count} communication channels",
+    "noChannelsConfigured": "No channels configured",
+    "addChannels": "Add channels to enable agent communication"
   },
   "logs": {
     "title": "Logs",
@@ -259,7 +274,48 @@
     "searchPlaceholder": "Search approvals...",
     "loading": "Loading approvals...",
     "noActions": "No approval actions found",
-    "dryRun": "Dry-Run Mode"
+    "dryRun": "Dry-Run Mode",
+    "categories": "Categories",
+    "config": "Config",
+    "import": "Import",
+    "export": "Export",
+    "channel": "Channel",
+    "agent": "Agent",
+    "rejected": "Rejected",
+    "expired": "Expired",
+    "close": "Close",
+    "actionDetails": "Action Details",
+    "riskLevel": "Risk Level",
+    "requestedBy": "Requested By",
+    "expires": "Expires",
+    "details": "Details",
+    "reject": "Reject",
+    "approve": "Approve",
+    "aboutApprovalActions": "About Approval Actions",
+    "aboutDescription": "How the approval workflow protects your system",
+    "pendingActions": {
+      "title": "Pending Actions",
+      "description": "Actions awaiting your review. Approve or reject within the expiration time."
+    },
+    "riskLevels": {
+      "title": "Risk Levels",
+      "description": "Each action is tagged with a risk level. High and critical risks require extra attention."
+    },
+    "actionHistory": {
+      "title": "Action History",
+      "description": "All approval decisions are recorded. View approved and rejected actions at any time."
+    },
+    "awaitingApproval": "Awaiting approval",
+    "approvedActions": "Approved actions",
+    "rejectedActions": "Rejected actions",
+    "requiresAttention": "Requires attention",
+    "noActionsMatchFilters": "No actions match your filters",
+    "noApprovalActionsFound": "No approval actions found",
+    "channelSettings": "channel settings and preferences",
+    "configFile": "Configuration file",
+    "changes": "Changes",
+    "source": "Source",
+    "size": "Size"
   },
   "chat": {
     "title": "Chat",
@@ -272,7 +328,22 @@
       "totalMessages": "Total Messages",
       "totalTokens": "Total tokens",
       "avgTokens": "Avg tokens"
-    }
+    },
+    "agentSelection": "Agent Selection",
+    "chooseAgent": "Choose which agent to chat with",
+    "selectAgent": "Select agent",
+    "model": "Model",
+    "status": "Status",
+    "active": "Active",
+    "capabilities": "Capabilities",
+    "conversation": "Conversation",
+    "chattingWith": "Chatting with {agent}",
+    "inThisSession": "In this session",
+    "sentByYou": "Sent by you",
+    "fromAgents": "From agents",
+    "totalTokens": "Total tokens",
+    "pressEnter": "Press Enter to send, Shift+Enter for new line",
+    "sending": "Sending..."
   },
   "documents": {
     "title": "Documents",

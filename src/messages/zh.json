@@ -234,7 +234,22 @@
     "loading": "加载频道中...",
     "allChannels": "所有频道",
     "configure": "配置",
-    "noChannels": "未找到频道"
+    "noChannels": "未找到频道",
+    "channelSettings": "频道设置和偏好",
+    "channelId": "频道 ID",
+    "type": "类型",
+    "status": "状态",
+    "enableChannel": "启用频道",
+    "enabled": "已启用",
+    "disabled": "已禁用",
+    "additionalConfig": "更多配置选项将在设置面板中可用。",
+    "configured": "已配置",
+    "activeConnections": "活跃连接",
+    "activeChannels": "活跃频道",
+    "connectionRate": "连接率",
+    "managingChannels": "管理 {count} 个通信频道",
+    "noChannelsConfigured": "未配置频道",
+    "addChannels": "添加频道以启用代理通信"
   },
   "logs": {
     "title": "日志",
@@ -259,7 +274,48 @@
     "searchPlaceholder": "搜索审批...",
     "loading": "加载审批中...",
     "noActions": "未找到审批操作",
-    "dryRun": "试运行模式"
+    "dryRun": "试运行模式",
+    "categories": "类别",
+    "config": "配置",
+    "import": "导入",
+    "export": "导出",
+    "channel": "频道",
+    "agent": "代理",
+    "rejected": "已拒绝",
+    "expired": "已过期",
+    "close": "关闭",
+    "actionDetails": "操作详情",
+    "riskLevel": "风险级别",
+    "requestedBy": "请求者",
+    "expires": "过期时间",
+    "details": "详情",
+    "reject": "拒绝",
+    "approve": "批准",
+    "aboutApprovalActions": "关于审批操作",
+    "aboutDescription": "审批工作流程如何保护您的系统",
+    "pendingActions": {
+      "title": "待处理操作",
+      "description": "等待您审查的操作。请在过期时间内批准或拒绝。"
+    },
+    "riskLevels": {
+      "title": "风险级别",
+      "description": "每个操作都标有风险级别。高和严重风险需要额外关注。"
+    },
+    "actionHistory": {
+      "title": "操作历史",
+      "description": "所有审批决策都会被记录。随时查看已批准和已拒绝的操作。"
+    },
+    "awaitingApproval": "等待审批",
+    "approvedActions": "已批准操作",
+    "rejectedActions": "已拒绝操作",
+    "requiresAttention": "需要关注",
+    "noActionsMatchFilters": "没有符合条件的操作",
+    "noApprovalActionsFound": "未找到审批操作",
+    "channelSettings": "频道设置和偏好",
+    "configFile": "配置文件",
+    "changes": "更改",
+    "source": "来源",
+    "size": "大小"
   },
   "chat": {
     "title": "聊天",
@@ -272,7 +328,22 @@
       "totalMessages": "总消息",
       "totalTokens": "总令牌",
       "avgTokens": "平均令牌"
-    }
+    },
+    "agentSelection": "代理选择",
+    "chooseAgent": "选择要聊天的代理",
+    "selectAgent": "选择代理",
+    "model": "模型",
+    "status": "状态",
+    "active": "活跃",
+    "capabilities": "能力",
+    "conversation": "对话",
+    "chattingWith": "正在与 {agent} 聊天",
+    "inThisSession": "本次会话中",
+    "sentByYou": "您发送的",
+    "fromAgents": "来自代理",
+    "totalTokens": "总令牌",
+    "pressEnter": "按 Enter 发送，Shift+Enter 换行",
+    "sending": "发送中..."
   },
   "documents": {
     "title": "文档",

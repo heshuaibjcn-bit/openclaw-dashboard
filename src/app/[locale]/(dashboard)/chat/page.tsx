@@ -189,7 +189,7 @@ export default function ChatPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              In this session
+              {t('inThisSession')}
             </p>
           </CardContent>
         </Card>
@@ -202,7 +202,7 @@ export default function ChatPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.user}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Sent by you
+              {t('sentByYou')}
             </p>
           </CardContent>
         </Card>
@@ -215,7 +215,7 @@ export default function ChatPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.assistant}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              From agents
+              {t('fromAgents')}
             </p>
           </CardContent>
         </Card>
@@ -228,7 +228,7 @@ export default function ChatPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.tokens.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Total tokens
+              {t('totalTokens')}
             </p>
           </CardContent>
         </Card>
@@ -239,13 +239,13 @@ export default function ChatPage() {
         {/* Agent Selection Panel */}
         <Card className="lg:col-span-1">
           <CardHeader>
-            <CardTitle className="text-base">Agent Selection</CardTitle>
-            <CardDescription>Choose which agent to chat with</CardDescription>
+            <CardTitle className="text-base">{t('agentSelection')}</CardTitle>
+            <CardDescription>{t('chooseAgent')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Select value={selectedAgent} onValueChange={(value) => value && setSelectedAgent(value)}>
               <SelectTrigger>
-                <SelectValue placeholder="Select agent" />
+                <SelectValue placeholder={t('selectAgent')} />
               </SelectTrigger>
               <SelectContent>
                 {agents?.map((agent) => (
@@ -262,20 +262,20 @@ export default function ChatPage() {
             {agents?.find((a) => a.id === selectedAgent) && (
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Model</span>
+                  <span className="text-muted-foreground">{t('model')}</span>
                   <span className="font-medium">
                     {agents.find((a) => a.id === selectedAgent)?.model}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Status</span>
-                  <Badge variant="default">Active</Badge>
+                  <span className="text-muted-foreground">{t('status')}</span>
+                  <Badge variant="default">{t('active')}</Badge>
                 </div>
               </div>
             )}
 
             <div className="pt-4 border-t space-y-2">
-              <p className="text-xs text-muted-foreground">Capabilities</p>
+              <p className="text-xs text-muted-foreground">{t('capabilities')}</p>
               <div className="flex flex-wrap gap-1">
                 {agents?.find((a) => a.id === selectedAgent)?.capabilities.map((cap: string) => (
                   <Badge key={cap} variant="outline" className="text-xs">
@@ -292,9 +292,9 @@ export default function ChatPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Conversation</CardTitle>
+                <CardTitle>{t('conversation')}</CardTitle>
                 <CardDescription>
-                  Chatting with {agents?.find((a) => a.id === selectedAgent)?.name || "Agent"}
+                  {t('chattingWith', { agent: agents?.find((a) => a.id === selectedAgent)?.name || "Agent" })}
                 </CardDescription>
               </div>
               <Button variant="ghost" size="sm">
@@ -339,7 +339,7 @@ export default function ChatPage() {
 
                         {message.status === "sending" && (
                           <Badge variant="outline" className="text-xs">
-                            Sending...
+                            {t('sending')}
                           </Badge>
                         )}
 
@@ -396,7 +396,7 @@ export default function ChatPage() {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                Press Enter to send, Shift+Enter for new line
+                {t('pressEnter')}
               </p>
             </div>
           </CardContent>

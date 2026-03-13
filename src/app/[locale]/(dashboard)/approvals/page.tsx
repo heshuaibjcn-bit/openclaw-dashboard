@@ -266,7 +266,7 @@ export default function ApprovalsPage() {
               onChange={(e) => setDryRun(e.target.checked)}
               className="h-4 w-4"
             />
-            <label htmlFor="dryRun">Dry-Run Mode</label>
+            <label htmlFor="dryRun">{t('dryRun')}</label>
           </div>
           <Button variant="outline" size="sm" onClick={loadActions}>
             <RefreshCw className="mr-2 h-4 w-4" />
@@ -285,7 +285,7 @@ export default function ApprovalsPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.pending}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Awaiting approval
+              {t('awaitingApproval')}
             </p>
           </CardContent>
         </Card>
@@ -298,7 +298,7 @@ export default function ApprovalsPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.approved}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Approved actions
+              {t('approvedActions')}
             </p>
           </CardContent>
         </Card>
@@ -311,7 +311,7 @@ export default function ApprovalsPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.rejected}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Rejected actions
+              {t('rejectedActions')}
             </p>
           </CardContent>
         </Card>
@@ -324,7 +324,7 @@ export default function ApprovalsPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.highRisk}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Requires attention
+              {t('requiresAttention')}
             </p>
           </CardContent>
         </Card>
@@ -351,8 +351,8 @@ export default function ApprovalsPage() {
                 <SelectItem value="all">{tCommon('all')} {tCommon('status')}</SelectItem>
                 <SelectItem value="pending">{tCommon('pending')}</SelectItem>
                 <SelectItem value="approved">{tCommon('completed')}</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-                <SelectItem value="expired">Expired</SelectItem>
+                <SelectItem value="rejected">{t('rejected')}</SelectItem>
+                <SelectItem value="expired">{t('expired')}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={categoryFilter} onValueChange={(value) => value && setCategoryFilter(value)}>
@@ -360,12 +360,12 @@ export default function ApprovalsPage() {
                 <SelectValue placeholder={tCommon('type')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{tCommon('all')} Categories</SelectItem>
-                <SelectItem value="config">Config</SelectItem>
-                <SelectItem value="import">Import</SelectItem>
-                <SelectItem value="export">Export</SelectItem>
-                <SelectItem value="channel">Channel</SelectItem>
-                <SelectItem value="agent">Agent</SelectItem>
+                <SelectItem value="all">{tCommon('all')} {t('categories')}</SelectItem>
+                <SelectItem value="config">{t('config')}</SelectItem>
+                <SelectItem value="import">{t('import')}</SelectItem>
+                <SelectItem value="export">{t('export')}</SelectItem>
+                <SelectItem value="channel">{t('channel')}</SelectItem>
+                <SelectItem value="agent">{t('agent')}</SelectItem>
               </SelectContent>
             </Select>
             {statusFilter === "pending" && (
@@ -390,40 +390,40 @@ export default function ApprovalsPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-base">Action Details: {selectedAction.id}</CardTitle>
+                <CardTitle className="text-base">{t('actionDetails')}: {selectedAction.id}</CardTitle>
                 <CardDescription>
                   {selectedAction.type}
                 </CardDescription>
               </div>
               <Button variant="outline" size="sm" onClick={() => setSelectedAction(null)}>
-                Close
+                {t('close')}
               </Button>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <p className="text-sm text-muted-foreground">Status</p>
+                <p className="text-sm text-muted-foreground">{tCommon('status')}</p>
                 <p className="font-medium">{getStatusBadge(selectedAction.status)}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Risk Level</p>
+                <p className="text-sm text-muted-foreground">{t('riskLevel')}</p>
                 <p className={`font-medium ${riskColors[selectedAction.riskLevel]}`}>
                   {selectedAction.riskLevel.toUpperCase()}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Requested By</p>
+                <p className="text-sm text-muted-foreground">{t('requestedBy')}</p>
                 <p className="font-medium">{selectedAction.requestedBy}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Expires</p>
+                <p className="text-sm text-muted-foreground">{t('expires')}</p>
                 <p className="font-medium">{selectedAction.expiresAt.toLocaleString()}</p>
               </div>
             </div>
             {selectedAction.details && (
               <div>
-                <p className="text-sm text-muted-foreground mb-2">Details</p>
+                <p className="text-sm text-muted-foreground mb-2">{t('details')}</p>
                 <pre className="bg-muted p-4 rounded-lg text-sm overflow-x-auto">
                   {JSON.stringify(selectedAction.details, null, 2)}
                 </pre>
@@ -440,7 +440,7 @@ export default function ApprovalsPage() {
                   }}
                 >
                   <X className="mr-2 h-4 w-4" />
-                  Reject
+                  {t('reject')}
                 </Button>
                 <Button
                   className="flex-1"
@@ -450,7 +450,7 @@ export default function ApprovalsPage() {
                   }}
                 >
                   <Check className="mr-2 h-4 w-4" />
-                  Approve
+                  {t('approve')}
                 </Button>
               </div>
             )}
@@ -545,8 +545,8 @@ export default function ApprovalsPage() {
               <Shield className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-muted-foreground">
                 {searchQuery || statusFilter !== "all" || categoryFilter !== "all"
-                  ? "No actions match your filters"
-                  : "No approval actions found"}
+                  ? t('noActionsMatchFilters')
+                  : t('noApprovalActionsFound')}
               </p>
             </CardContent>
           </Card>

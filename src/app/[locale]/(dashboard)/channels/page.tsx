@@ -119,7 +119,7 @@ export default function ChannelsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground mt-1">Configured</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('configured')}</p>
           </CardContent>
         </Card>
 
@@ -131,7 +131,7 @@ export default function ChannelsPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.connected}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Active connections
+              {t('activeConnections')}
             </p>
           </CardContent>
         </Card>
@@ -144,7 +144,7 @@ export default function ChannelsPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.enabled}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Active channels
+              {t('activeChannels')}
             </p>
           </CardContent>
         </Card>
@@ -159,7 +159,7 @@ export default function ChannelsPage() {
               {stats.total > 0 ? Math.round((stats.connected / stats.total) * 100) : 0}%
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Connection rate
+              {t('connectionRate')}
             </p>
           </CardContent>
         </Card>
@@ -172,7 +172,7 @@ export default function ChannelsPage() {
           <CardDescription>
             {loading
               ? t('loading')
-              : `Managing ${channels?.length || 0} communication channels`}
+              : t('managingChannels', { count: channels?.length || 0 })}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -248,9 +248,9 @@ export default function ChannelsPage() {
           ) : (
             <div className="flex flex-col items-center justify-center py-8">
               <Radio className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No channels configured</p>
+              <p className="text-muted-foreground">{t('noChannelsConfigured')}</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Add channels to enable agent communication
+                {t('addChannels')}
               </p>
             </div>
           )}
@@ -345,24 +345,24 @@ export default function ChannelsPage() {
               {selectedChannel && channelNames[selectedChannel.type as keyof typeof channelNames]} Settings
             </DialogTitle>
             <DialogDescription>
-              {t('configure')} channel settings and preferences
+              {t('configure')} {t('channelSettings')}
             </DialogDescription>
           </DialogHeader>
           {selectedChannel && (
             <div className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <p className="text-sm font-medium">Channel ID</p>
+                  <p className="text-sm font-medium">{t('channelId')}</p>
                   <p className="text-sm text-muted-foreground">{selectedChannel.id}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Type</p>
+                  <p className="text-sm font-medium">{t('type')}</p>
                   <p className="text-sm text-muted-foreground">{selectedChannel.type}</p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm font-medium">Status</p>
+                <p className="text-sm font-medium">{t('status')}</p>
                 <div className="flex items-center gap-2">
                   {getStatusIcon(selectedChannel.status)}
                   <span>{selectedChannel.status}</span>
@@ -370,18 +370,18 @@ export default function ChannelsPage() {
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm font-medium">Enable Channel</p>
+                <p className="text-sm font-medium">{t('enableChannel')}</p>
                 <div className="flex items-center gap-2">
                   <Switch checked={selectedChannel.enabled} disabled />
                   <span className="text-sm text-muted-foreground">
-                    {selectedChannel.enabled ? "Enabled" : "Disabled"}
+                    {selectedChannel.enabled ? t('enabled') : t('disabled')}
                   </span>
                 </div>
               </div>
 
               <div className="pt-4 border-t">
                 <p className="text-sm text-muted-foreground">
-                  Additional configuration options will be available in the settings panel.
+                  {t('additionalConfig')}
                 </p>
               </div>
             </div>
