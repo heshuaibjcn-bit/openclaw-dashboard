@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -47,6 +47,7 @@ interface StaffMember {
 export default function StaffPage() {
   const t = useTranslations('staff');
   const tCommon = useTranslations('common');
+  const locale = useLocale();
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,22 +57,23 @@ export default function StaffPage() {
       setLoading(true);
       // TODO: Replace with actual API call
       // const data = await fetchStaffStatus();
+      const isZh = locale === 'zh';
       setTimeout(() => {
         setStaff([
           {
             id: "agent-main",
-            name: "Main Assistant",
+            name: isZh ? "主助手" : "Main Assistant",
             model: "zai/glm-5",
             status: "working",
             currentTask: {
               id: "task-1",
-              title: "Processing code review requests",
+              title: isZh ? "正在处理代码审查请求" : "Processing code review requests",
               progress: 65,
               startedAt: new Date(Date.now() - 1000 * 60 * 15),
             },
             nextTask: {
               id: "task-2",
-              title: "Generate documentation",
+              title: isZh ? "生成文档" : "Generate documentation",
               scheduledAt: new Date(Date.now() + 1000 * 60 * 30),
             },
             recentOutput: {
@@ -83,12 +85,12 @@ export default function StaffPage() {
           },
           {
             id: "agent-helper",
-            name: "Helper Bot",
+            name: isZh ? "助手机器人" : "Helper Bot",
             model: "zai/glm-4.7",
             status: "standby",
             nextTask: {
               id: "task-3",
-              title: "Bug investigation",
+              title: isZh ? "Bug 调查" : "Bug investigation",
               scheduledAt: new Date(Date.now() + 1000 * 60 * 10),
             },
             recentOutput: {
@@ -100,7 +102,7 @@ export default function StaffPage() {
           },
           {
             id: "agent-docs",
-            name: "Documentation Agent",
+            name: isZh ? "文档代理" : "Documentation Agent",
             model: "zai/glm-4.7-flash",
             status: "offline",
             recentOutput: {
