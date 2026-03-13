@@ -61,6 +61,7 @@ interface StaffStatus {
 export default function DashboardPage() {
   const t = useTranslations();
   const locale = useLocale();
+  const isZh = locale === 'zh';
   const [pendingItems, setPendingItems] = useState<PendingItem[]>([]);
   const [risks, setRisks] = useState<RiskItem[]>([]);
   const [staffStatus, setStaffStatus] = useState<StaffStatus>({
@@ -94,8 +95,8 @@ export default function DashboardPage() {
           {
             id: "pending-1",
             type: "approval",
-            title: "API key change request",
-            description: "Request to update API key for production environment",
+            title: isZh ? "API 密钥更改请求" : "API key change request",
+            description: isZh ? "请求更新生产环境的 API 密钥" : "Request to update API key for production environment",
             severity: "high",
             timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
             source: "agent-main",
@@ -103,8 +104,8 @@ export default function DashboardPage() {
           {
             id: "pending-2",
             type: "exception",
-            title: "Session timeout error",
-            description: "Agent session exceeded maximum duration",
+            title: isZh ? "会话超时错误" : "Session timeout error",
+            description: isZh ? "代理会话超过最大持续时间" : "Agent session exceeded maximum duration",
             severity: "medium",
             timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
             source: "agent-helper",
@@ -112,8 +113,8 @@ export default function DashboardPage() {
           {
             id: "pending-3",
             type: "alert",
-            title: "Memory usage warning",
-            description: "LanceDB memory index approaching size limit",
+            title: isZh ? "内存使用警告" : "Memory usage warning",
+            description: isZh ? "LanceDB 内存索引接近大小限制" : "LanceDB memory index approaching size limit",
             severity: "low",
             timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
           },
@@ -123,16 +124,16 @@ export default function DashboardPage() {
           {
             id: "risk-1",
             type: "budget",
-            title: "Token budget running low",
-            description: "Current window at 72% capacity with 3 days remaining",
+            title: isZh ? "令牌预算不足" : "Token budget running low",
+            description: isZh ? "当前窗口已使用 72%，还剩 3 天" : "Current window at 72% capacity with 3 days remaining",
             severity: "medium",
             affected: ["agent-main", "agent-helper"],
           },
           {
             id: "risk-2",
             type: "stalled",
-            title: "Documentation task stalled",
-            description: "Task 'Generate API docs' has been in progress for 4 hours",
+            title: isZh ? "文档任务停滞" : "Documentation task stalled",
+            description: isZh ? "任务'生成 API 文档'已进行 4 小时" : "Task 'Generate API docs' has been in progress for 4 hours",
             severity: "low",
             affected: ["agent-docs"],
           },
