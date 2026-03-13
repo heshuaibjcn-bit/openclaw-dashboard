@@ -103,8 +103,8 @@
         "Show token usage statistics",
         "Verify session data loads correctly"
       ],
-      "passes": false,
-      "notes": "Session management"
+      "passes": true,
+      "notes": "Session management complete - table with search/filter, detail dialog with token usage visualization, stats overview cards, refresh functionality"
     },
     {
       "id": "agents-management",
@@ -118,8 +118,8 @@
         "Implement create/edit/delete agents",
         "Verify agent operations work"
       ],
-      "passes": false,
-      "notes": "Agent management"
+      "passes": true,
+      "notes": "Agent management complete - agent cards with status, capabilities display, edit dialog with model selection and capability toggles, stats overview cards"
     },
     {
       "id": "channels-monitoring",
