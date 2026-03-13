@@ -51,13 +51,51 @@ async function getGatewayProcess() {
             resolve(null);
             return;
           }
-          // Parse uptime from etime format
-          resolve({ pid, uptime: etime.trim() });
+          // Parse uptime from etime format and convert to seconds
+          const uptimeStr = etime.trim();
+          const uptimeSeconds = parseEtimeToSeconds(uptimeStr);
+          resolve({ pid, uptime: uptimeSeconds });
         });
       });
     });
   } catch {
     return null;
+  }
+}
+
+// Parse etime format to seconds
+// etime format can be: "DD-HH:MM:SS" or "HH:MM:SS" or "MM:SS"
+function parseEtimeToSeconds(etime: string): number {
+  try {
+    // Check if format includes days (DD-HH:MM:SS)
+    if (etime.includes('-')) {
+      const [days, timePart] = etime.split('-');
+      const timeParts = timePart.split(':');
+      const hours = parseInt(timeParts[0]) || 0;
+      const minutes = parseInt(timeParts[1]) || 0;
+      const seconds = parseInt(timeParts[2]) || 0;
+      return (
+        (parseInt(days) || 0) * 86400 +
+        hours * 3600 +
+        minutes * 60 +
+        seconds
+      );
+    }
+
+    // Format is HH:MM:SS or MM:SS
+    const parts = etime.split(':').map(p => parseInt(p) || 0);
+
+    if (parts.length === 3) {
+      // HH:MM:SS
+      return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    } else if (parts.length === 2) {
+      // MM:SS
+      return parts[0] * 60 + parts[1];
+    }
+
+    return 0;
+  } catch {
+    return 0;
   }
 }
 
