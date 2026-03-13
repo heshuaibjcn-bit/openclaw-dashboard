@@ -278,8 +278,8 @@ export default function DocumentsPage() {
                 <SelectValue placeholder={t('allAgents')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Sections</SelectItem>
-                <SelectItem value="main">Main (Root)</SelectItem>
+                <SelectItem value="all">{t('allSections')}</SelectItem>
+                <SelectItem value="main">{t('mainRoot')}</SelectItem>
                 {getAllAgents().map(agent => (
                   <SelectItem key={agent.id} value={agent.id}>
                     {agent.name}
@@ -344,18 +344,18 @@ export default function DocumentsPage() {
                       <Bot className="h-5 w-5 text-purple-500" />
                     )}
                     <CardTitle className="text-base">
-                      {section === "main" ? "Main" : getAllAgents().find(a => a.id === section)?.name || section}
+                      {section === "main" ? t('main') : getAllAgents().find(a => a.id === section)?.name || section}
                     </CardTitle>
                     {section !== "main" && (
                       <Badge variant="outline" className="text-xs">
-                        Agent
+                        {t('agentBadge')}
                       </Badge>
                     )}
                   </div>
                   <CardDescription>
                     {section === "main"
-                      ? "Root-level OpenClaw configuration files"
-                      : `Agent-specific documents and knowledge base`}
+                      ? t('rootLevelConfig')
+                      : t('agentSpecificDocs')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

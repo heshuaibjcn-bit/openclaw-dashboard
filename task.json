@@ -4,7 +4,7 @@
       "id": "1",
       "title": "Fix Documents Page Hardcoded Strings",
       "description": "The Documents page (/documents) has approximately 3 hardcoded English strings that need to be replaced with translation keys for proper internationalization support.",
-      "status": "pending",
+      "status": "completed",
       "priority": "medium",
       "acceptanceCriteria": [
         "All hardcoded English strings in documents page are replaced with t() translation keys",

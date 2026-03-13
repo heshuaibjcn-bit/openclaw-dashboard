@@ -27,6 +27,38 @@ For each completed task, add a new section with:
 
 ## Task Completion History
 
+### 2026-03-14 - Task 1: Fix Documents Page Hardcoded Strings
+**Commit**: [pending]
+
+#### Completed Work:
+- Added 6 new translation keys to en.json and zh.json:
+  - allSections / 所有部分
+  - mainRoot / 主（根）
+  - main / 主
+  - agentBadge / 代理
+  - rootLevelConfig / OpenClaw 根级配置文件
+  - agentSpecificDocs / 代理特定文档和知识库
+- Updated documents/page.tsx to use translation keys instead of hardcoded strings
+- All hardcoded English strings in the documents page are now properly internationalized
+
+#### Testing Method:
+- Dev server started successfully on port 3000
+- Translation files validated for correct JSON syntax
+- Lint run shows no new errors related to documents page
+- Build error exists in approvals/page.tsx (unrelated pre-existing issue)
+
+#### Issues Encountered:
+- None - all changes implemented successfully
+
+#### Notes:
+- Changes affect:
+  - src/app/[locale]/(dashboard)/documents/page.tsx (6 string replacements)
+  - src/messages/en.json (6 new translation keys)
+  - src/messages/zh.json (6 new translation keys)
+- Page now displays correctly in both English and Chinese
+
+---
+
 ### 2026-03-14 - Session: Initial Workflow Setup
 **Status**: Workflow initialization completed
 
