@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const navItems = [
   {
@@ -63,6 +64,11 @@ const navItems = [
     title: "Memory",
     url: "/memory",
     icon: Database,
+  },
+  {
+    title: "Chat",
+    url: "/chat",
+    icon: MessageSquare,
   },
 ];
 
@@ -162,8 +168,11 @@ export default function DashboardLayout({
 
       <main className="flex-1 overflow-auto">
         <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="flex h-14 items-center px-6">
+          <div className="flex h-14 items-center justify-between px-6">
             <h1 className="text-lg font-semibold">Dashboard</h1>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+            </div>
           </div>
         </header>
         <div className="p-6">{children}</div>
