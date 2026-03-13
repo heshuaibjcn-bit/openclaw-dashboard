@@ -116,7 +116,7 @@
       "id": "7",
       "title": "Add Dark Mode Persistence",
       "description": "The theme toggle currently doesn't persist user preference across sessions. Implement localStorage or cookie-based persistence for dark/light mode preference.",
-      "status": "pending",
+      "status": "completed",
       "priority": "low",
       "acceptanceCriteria": [
         "Save theme preference to localStorage or cookie",

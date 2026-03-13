@@ -4,10 +4,12 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { locales } from '@/lib/i18n';
+import Script from "next/script";
 import "../globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { ThemeScript } from "@/components/theme-script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,6 +49,27 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        <Script id="theme-script" strategy="beforeInteractive">
+          {`
+            (function() {
+              try {
+                const theme = localStorage.getItem('openclaw-dashboard-theme');
+                const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                const resolvedTheme = theme === 'system' ? systemTheme : (theme || systemTheme);
+
+                if (resolvedTheme === 'dark') {
+                  document.documentElement.classList.add('dark');
+                } else {
+                  document.documentElement.classList.remove('dark');
+                }
+              } catch (e) {
+                console.error('Failed to apply theme:', e);
+              }
+            })();
+          `}
+        </Script>
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -56,6 +79,7 @@ export default async function LocaleLayout({
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange
+            storageKey="openclaw-dashboard-theme"
           >
             <ErrorBoundary>
               <TooltipProvider>{children}</TooltipProvider>

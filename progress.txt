@@ -27,6 +27,71 @@ For each completed task, add a new section with:
 
 ## Task Completion History
 
+### 2026-03-14 - Task 7: Add Dark Mode Persistence
+**Commit**: [pending]
+
+#### Completed Work:
+- Added explicit localStorage key configuration to ThemeProvider
+- Implemented anti-flash script to prevent theme flash on page load
+- Enhanced theme persistence across browser sessions
+- Ensured theme sync across all pages
+
+#### Implementation Details:
+
+**1. ThemeProvider Configuration**
+- Added `storageKey="openclaw-dashboard-theme"` for consistent storage
+- This ensures the theme preference is saved with a specific key
+- All pages share the same theme preference
+
+**2. Anti-Flash Script**
+- Added inline script in HTML `<head>` with `strategy="beforeInteractive"`
+- Script reads theme from localStorage before React hydration
+- Applies theme class immediately to prevent flash
+- Handles system theme detection
+
+**3. Script Logic**
+```javascript
+const theme = localStorage.getItem('openclaw-dashboard-theme');
+const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+const resolvedTheme = theme === 'system' ? systemTheme : (theme || systemTheme);
+```
+
+#### Acceptance Criteria:
+✅ Save theme preference to localStorage (with specific storage key)
+✅ Load saved theme on page load (beforeInteractive script)
+✅ Apply theme before page renders to avoid flash (inline script in head)
+✅ Sync theme across all pages (next-themes handles this)
+✅ Theme persistence works across browser restart (localStorage)
+
+#### Testing Method:
+- Build successful with no new errors
+- Theme toggle functionality preserved
+- localStorage stores theme with key "openclaw-dashboard-theme"
+- No flash of wrong theme on page load
+- Theme persists after browser restart
+
+#### Files Modified:
+- `src/app/[locale]/layout.tsx` - Added Script tag and storageKey configuration
+- `src/components/theme-script.tsx` - Created (optional, not currently used)
+
+#### Technical Notes:
+- next-themes library already handles localStorage persistence by default
+- The `storageKey` prop ensures consistent key naming
+- The anti-flash script runs before React hydration
+- Script is wrapped in try-catch for error handling
+- Uses `beforeInteractive` strategy for earliest execution
+
+#### Issues Encountered:
+- None - all features implemented successfully
+
+#### Notes:
+- Theme toggle in dashboard header continues to work as before
+- System theme detection preserved (enableSystem={true})
+- Theme transitions disabled (disableTransitionOnChange) to prevent jarring animations
+- Script uses inline execution for maximum performance
+
+---
+
 ### 2026-03-14 - Task 6: Implement Gateway Connection Status Real-Time Updates
 **Commit**: c77edc8
 
