@@ -138,15 +138,15 @@ export default function SettingsPage() {
   const getConnectorBadge = (status: string) => {
     switch (status) {
       case "connected":
-        return <Badge variant="default" className="bg-green-500"><CheckCircle className="mr-1 h-3 w-3" />Connected</Badge>;
+        return <Badge variant="default" className="bg-green-500"><CheckCircle className="mr-1 h-3 w-3" />{t('connected')}</Badge>;
       case "disconnected":
-        return <Badge variant="secondary"><XCircle className="mr-1 h-3 w-3" />Not Connected</Badge>;
+        return <Badge variant="secondary"><XCircle className="mr-1 h-3 w-3" />{t('notConnected')}</Badge>;
       case "degraded":
-        return <Badge variant="outline" className="border-yellow-500 text-yellow-500"><AlertTriangle className="mr-1 h-3 w-3" />Degraded</Badge>;
+        return <Badge variant="outline" className="border-yellow-500 text-yellow-500"><AlertTriangle className="mr-1 h-3 w-3" />{t('degraded')}</Badge>;
       case "partial":
-        return <Badge variant="outline" className="border-blue-500 text-blue-500"><Plug className="mr-1 h-3 w-3" />Partial</Badge>;
+        return <Badge variant="outline" className="border-blue-500 text-blue-500"><Plug className="mr-1 h-3 w-3" />{t('partial')}</Badge>;
       default:
-        return <Badge variant="secondary">Unknown</Badge>;
+        return <Badge variant="secondary">{t('unknown')}</Badge>;
     }
   };
 
@@ -183,10 +183,10 @@ export default function SettingsPage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Plug className="h-5 w-5" />
-            <CardTitle>Connector Status</CardTitle>
+            <CardTitle>{t('connectorStatus')}</CardTitle>
           </div>
           <CardDescription>
-            Real-time status of data sources and external connections
+            {t('connectorStatusDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -195,7 +195,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm">
                   <Server className="h-4 w-4" />
-                  <span className="font-medium">Gateway</span>
+                  <span className="font-medium">{t('gateway')}</span>
                 </div>
                 {getConnectorBadge(connectorStatus.gateway.status)}
               </div>
@@ -210,7 +210,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm">
                   <Database className="h-4 w-4" />
-                  <span className="font-medium">Runtime Data</span>
+                  <span className="font-medium">{t('runtimeData')}</span>
                 </div>
                 {getConnectorBadge(connectorStatus.runtime.status)}
               </div>
@@ -225,7 +225,7 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm">
                     <TrendingUp className="h-4 w-4" />
-                    <span className="font-medium">Subscription</span>
+                    <span className="font-medium">{t('subscription')}</span>
                   </div>
                   {getConnectorBadge(connectorStatus.subscription.status)}
                 </div>
@@ -240,7 +240,7 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm">
                     <Brain className="h-4 w-4" />
-                    <span className="font-medium">Memory ({connectorStatus.memory.type})</span>
+                    <span className="font-medium">{t('memory')} ({connectorStatus.memory.type})</span>
                   </div>
                   {getConnectorBadge(connectorStatus.memory.status)}
                 </div>
@@ -256,12 +256,12 @@ export default function SettingsPage() {
 
       <Tabs defaultValue="security" className="space-y-4">
         <TabsList className="grid w-full grid-cols-6 lg:w-auto">
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="gateway">Gateway</TabsTrigger>
-          <TabsTrigger value="agents">Agents</TabsTrigger>
-          <TabsTrigger value="channels">Channels</TabsTrigger>
-          <TabsTrigger value="memory">Memory</TabsTrigger>
-          <TabsTrigger value="ui">Interface</TabsTrigger>
+          <TabsTrigger value="security">{t('security')}</TabsTrigger>
+          <TabsTrigger value="gateway">{t('gatewayTab')}</TabsTrigger>
+          <TabsTrigger value="agents">{t('agents')}</TabsTrigger>
+          <TabsTrigger value="channels">{t('channelsTab')}</TabsTrigger>
+          <TabsTrigger value="memory">{t('memoryTab')}</TabsTrigger>
+          <TabsTrigger value="ui">{t('interface')}</TabsTrigger>
         </TabsList>
 
         {/* Security Settings */}
