@@ -267,7 +267,12 @@
     "inputPlaceholder": "输入您的消息...",
     "send": "发送",
     "clear": "清空聊天",
-    "regenerate": "重新生成"
+    "regenerate": "重新生成",
+    "stats": {
+      "totalMessages": "总消息",
+      "totalTokens": "总令牌",
+      "avgTokens": "平均令牌"
+    }
   },
   "documents": {
     "title": "文档",

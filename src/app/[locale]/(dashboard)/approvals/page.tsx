@@ -360,7 +360,7 @@ export default function ApprovalsPage() {
                 <SelectValue placeholder={tCommon('type')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="all">{tCommon('all')} Categories</SelectItem>
                 <SelectItem value="config">Config</SelectItem>
                 <SelectItem value="import">Import</SelectItem>
                 <SelectItem value="export">Export</SelectItem>
@@ -372,11 +372,11 @@ export default function ApprovalsPage() {
               <>
                 <Button variant="outline" size="sm" onClick={handleBatchReject}>
                   <X className="mr-2 h-4 w-4" />
-                  Reject All
+                  {tCommon('all')} {tCommon('delete')}
                 </Button>
                 <Button size="sm" onClick={handleBatchApprove}>
                   <Check className="mr-2 h-4 w-4" />
-                  Approve All
+                  {tCommon('all')} {tCommon('confirm')}
                 </Button>
               </>
             )}

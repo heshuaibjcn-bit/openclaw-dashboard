@@ -167,7 +167,7 @@ export default function SessionsPage() {
         <CardContent>
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <p className="text-muted-foreground">Loading sessions...</p>
+              <p className="text-muted-foreground">{t('loading')}</p>
             </div>
           ) : filteredSessions.length > 0 ? (
             <Table>

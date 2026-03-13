@@ -267,7 +267,12 @@
     "inputPlaceholder": "Type your message...",
     "send": "Send",
     "clear": "Clear Chat",
-    "regenerate": "Regenerate"
+    "regenerate": "Regenerate",
+    "stats": {
+      "totalMessages": "Total Messages",
+      "totalTokens": "Total tokens",
+      "avgTokens": "Avg tokens"
+    }
   },
   "documents": {
     "title": "Documents",

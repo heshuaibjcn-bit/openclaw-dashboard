@@ -115,7 +115,7 @@ export default function GatewayPage() {
             <div className="flex items-center justify-center py-8">
               <div className="text-center">
                 <p className="text-muted-foreground">
-                  {healthLoading ? "Loading gateway status..." : "Unable to connect to gateway"}
+                  {healthLoading ? t('loading') : "Unable to connect to gateway"}
                 </p>
               </div>
             </div>
@@ -155,7 +155,7 @@ export default function GatewayPage() {
             </div>
           ) : (
             <div className="flex items-center justify-center py-8">
-              <p className="text-muted-foreground">Loading channels...</p>
+              <p className="text-muted-foreground">{t('loading')}</p>
             </div>
           )}
         </CardContent>
@@ -170,7 +170,7 @@ export default function GatewayPage() {
         <CardContent>
           {sessionsLoading ? (
             <div className="flex items-center justify-center py-8">
-              <p className="text-muted-foreground">Loading sessions...</p>
+              <p className="text-muted-foreground">{t('loading')}</p>
             </div>
           ) : sessions && sessions.length > 0 ? (
             <div className="space-y-3">
@@ -213,7 +213,7 @@ export default function GatewayPage() {
         <CardContent>
           {agentsLoading ? (
             <div className="flex items-center justify-center py-8">
-              <p className="text-muted-foreground">Loading agents...</p>
+              <p className="text-muted-foreground">{t('loading')}</p>
             </div>
           ) : agents && agents.length > 0 ? (
             <div className="space-y-3">

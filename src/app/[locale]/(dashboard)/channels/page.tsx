@@ -345,7 +345,7 @@ export default function ChannelsPage() {
               {selectedChannel && channelNames[selectedChannel.type as keyof typeof channelNames]} Settings
             </DialogTitle>
             <DialogDescription>
-              Configure channel settings and preferences
+              {t('configure')} channel settings and preferences
             </DialogDescription>
           </DialogHeader>
           {selectedChannel && (

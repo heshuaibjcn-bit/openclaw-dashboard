@@ -197,7 +197,7 @@ export default function AgentsPage() {
         <CardContent>
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <p className="text-muted-foreground">Loading agents...</p>
+              <p className="text-muted-foreground">{t('loading')}</p>
             </div>
           ) : filteredAgents.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

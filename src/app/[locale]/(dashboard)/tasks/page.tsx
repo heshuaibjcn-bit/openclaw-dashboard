@@ -382,7 +382,7 @@ export default function TasksPage() {
             <CardContent className="flex items-center justify-center py-16">
               <div className="text-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
-                <p className="text-muted-foreground">Loading tasks...</p>
+                <p className="text-muted-foreground">{tCommon('loading')}</p>
               </div>
             </CardContent>
           </Card>

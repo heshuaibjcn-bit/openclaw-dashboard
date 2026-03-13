@@ -151,7 +151,7 @@ export default function UsagePage() {
           <CardContent className="flex items-center justify-center py-16">
             <div className="text-center">
               <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
-              <p className="text-muted-foreground">Loading usage data...</p>
+              <p className="text-muted-foreground">{t('loading')}</p>
             </div>
           </CardContent>
         </Card>
