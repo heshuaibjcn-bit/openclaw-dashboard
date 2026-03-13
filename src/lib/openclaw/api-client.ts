@@ -138,6 +138,70 @@ export class OpenClawAPIClient {
     const queryString = queryParams.toString();
     return this.request<MemoryEntry[]>(`/api/memory/search?${queryString}`);
   }
+
+  async getTasks(params?: { limit?: number; offset?: number }): Promise<any[]> {
+    const queryParams = new URLSearchParams();
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.offset) queryParams.append("offset", params.offset.toString());
+    const queryString = queryParams.toString();
+    return this.request<any[]>(`/api/tasks${queryString ? `?${queryString}` : ""}`);
+  }
+
+  async getUsage(params?: { timeRange?: "today" | "7days" | "30days" }): Promise<any> {
+    const queryParams = new URLSearchParams();
+    if (params?.timeRange) queryParams.append("timeRange", params.timeRange);
+    const queryString = queryParams.toString();
+    return this.request<any>(`/api/usage${queryString ? `?${queryString}` : ""}`);
+  }
+
+  async getSubscription(): Promise<any> {
+    return this.request<any>("/api/subscription");
+  }
+
+  async getDocuments(agentId?: string): Promise<any> {
+    const queryParams = new URLSearchParams();
+    if (agentId) queryParams.append("agent", agentId);
+    const queryString = queryParams.toString();
+    return this.request<any>(`/api/documents${queryString ? `?${queryString}` : ""}`);
+  }
+
+  async getFileContent(path: string): Promise<any> {
+    const queryParams = new URLSearchParams({ path });
+    return this.request<any>(`/api/files/content?${queryParams.toString()}`);
+  }
+
+  async writeFileContent(path: string, content: string): Promise<any> {
+    return this.request<any>("/api/files/write", {
+      method: "POST",
+      body: JSON.stringify({ path, content }),
+    });
+  }
+
+  async getApprovals(params?: { status?: string; limit?: number }): Promise<any[]> {
+    const queryParams = new URLSearchParams();
+    if (params?.status) queryParams.append("status", params.status);
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    const queryString = queryParams.toString();
+    return this.request<any[]>(`/api/approvals${queryString ? `?${queryString}` : ""}`);
+  }
+
+  async approveAction(actionId: string, reason?: string): Promise<any> {
+    return this.request<any>(`/api/approvals/${actionId}/approve`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    });
+  }
+
+  async rejectAction(actionId: string, reason?: string): Promise<any> {
+    return this.request<any>(`/api/approvals/${actionId}/reject`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    });
+  }
+
+  async getRuntimeData(): Promise<any> {
+    return this.request<any>("/api/runtime");
+  }
 }
 
 // Singleton instance getter

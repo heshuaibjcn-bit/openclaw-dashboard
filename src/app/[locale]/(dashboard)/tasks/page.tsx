@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +28,9 @@ import {
   User,
   Tag,
   ArrowUpDown,
+  RefreshCw,
 } from "lucide-react";
+import { useTasks } from "@/lib/openclaw";
 
 interface Task {
   id: string;
@@ -53,8 +55,15 @@ export default function TasksPage() {
   const tCommon = useTranslations('common');
   const locale = useLocale();
   const isZh = locale === 'zh';
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  // Use real API for tasks data
+  const { data: apiTasks, loading, error, refetch } = useTasks();
+
+  // Fallback to mock data if API returns empty or error
+  const [mockTasks, setMockTasks] = useState<Task[]>([]);
+  const [useMock, setUseMock] = useState(false);
+
+  const tasks = useMock ? mockTasks : (apiTasks || []);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
@@ -75,80 +84,76 @@ export default function TasksPage() {
   };
 
   useEffect(() => {
-    // Simulate data loading
-    const loadData = async () => {
-      setLoading(true);
-      // TODO: Replace with actual API call
-      // const data = await fetchTasks();
-      setTimeout(() => {
-        setTasks([
-          {
-            id: "task-1",
-            title: isZh ? "审查认证模块的 PR #234" : "Review PR #234 for authentication module",
-            description: isZh ? "审查认证更改并测试流程" : "Review the authentication changes and test the flow",
-            status: "in-progress",
-            priority: "high",
-            projectId: "proj-auth",
-            projectTitle: isZh ? "认证系统" : "Authentication System",
-            assignedTo: "agent-main",
-            assigneeName: isZh ? "主助手" : "Main Assistant",
-            dueDate: new Date(Date.now() + 1000 * 60 * 60 * 4).toISOString(),
-            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-            updatedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-            tags: ["code-review", "security"],
-            subtaskCount: 5,
-            completedSubtasks: 3,
-          },
-          {
-            id: "task-2",
-            title: isZh ? "生成 API 文档" : "Generate API documentation",
-            description: isZh ? "为新端点创建全面的 API 文档" : "Create comprehensive API docs for the new endpoints",
-            status: "pending",
-            priority: "medium",
-            projectId: "proj-docs",
-            projectTitle: isZh ? "文档" : "Documentation",
-            assignedTo: "agent-docs",
-            assigneeName: isZh ? "文档代理" : "Documentation Agent",
-            dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
-            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
-            updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
-            tags: ["documentation"],
-          },
-          {
-            id: "task-3",
-            title: isZh ? "调查会话管理器中的内存泄漏" : "Investigate memory leak in session manager",
-            description: isZh ? "调试并修复内存泄漏问题" : "Debug and fix the memory leak issue",
-            status: "blocked",
-            priority: "critical",
-            projectId: "proj-bugfix",
-            projectTitle: isZh ? "Bug 修复" : "Bug Fixes",
-            assignedTo: "agent-helper",
-            assigneeName: isZh ? "助手机器人" : "Helper Bot",
-            dueDate: new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString(),
-            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
-            updatedAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
-            tags: ["bug", "urgent"],
-          },
-          {
-            id: "task-4",
-            title: isZh ? "更新新功能的用户指南" : "Update user guide for new features",
-            description: isZh ? "为最近发布的功能添加文档" : "Add documentation for recently released features",
-            status: "completed",
-            priority: "low",
-            projectId: "proj-docs",
-            projectTitle: isZh ? "文档" : "Documentation",
-            assignedTo: "agent-docs",
-            assigneeName: isZh ? "文档代理" : "Documentation Agent",
-            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-            updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-            tags: ["documentation"],
-          },
-        ]);
-        setLoading(false);
-      }, 500);
-    };
-    loadData();
-  }, []);
+    // Load mock data as fallback when API returns no data
+    if (!apiTasks || apiTasks.length === 0) {
+      setMockTasks([
+        {
+          id: "task-1",
+          title: isZh ? "审查认证模块的 PR #234" : "Review PR #234 for authentication module",
+          description: isZh ? "审查认证更改并测试流程" : "Review the authentication changes and test the flow",
+          status: "in-progress",
+          priority: "high",
+          projectId: "proj-auth",
+          projectTitle: isZh ? "认证系统" : "Authentication System",
+          assignedTo: "agent-main",
+          assigneeName: isZh ? "主助手" : "Main Assistant",
+          dueDate: new Date(Date.now() + 1000 * 60 * 60 * 4).toISOString(),
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+          updatedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+          tags: ["code-review", "security"],
+          subtaskCount: 5,
+          completedSubtasks: 3,
+        },
+        {
+          id: "task-2",
+          title: isZh ? "生成 API 文档" : "Generate API documentation",
+          description: isZh ? "为新端点创建全面的 API 文档" : "Create comprehensive API docs for the new endpoints",
+          status: "pending",
+          priority: "medium",
+          projectId: "proj-docs",
+          projectTitle: isZh ? "文档" : "Documentation",
+          assignedTo: "agent-docs",
+          assigneeName: isZh ? "文档代理" : "Documentation Agent",
+          dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
+          updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
+          tags: ["documentation"],
+        },
+        {
+          id: "task-3",
+          title: isZh ? "调查会话管理器中的内存泄漏" : "Investigate memory leak in session manager",
+          description: isZh ? "调试并修复内存泄漏问题" : "Debug and fix the memory leak issue",
+          status: "blocked",
+          priority: "critical",
+          projectId: "proj-bugfix",
+          projectTitle: isZh ? "Bug 修复" : "Bug Fixes",
+          assignedTo: "agent-helper",
+          assigneeName: isZh ? "助手机器人" : "Helper Bot",
+          dueDate: new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString(),
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
+          updatedAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+          tags: ["bug", "urgent"],
+        },
+        {
+          id: "task-4",
+          title: isZh ? "更新新功能的用户指南" : "Update user guide for new features",
+          description: isZh ? "为最近发布的功能添加文档" : "Add documentation for recently released features",
+          status: "completed",
+          priority: "low",
+          projectId: "proj-docs",
+          projectTitle: isZh ? "文档" : "Documentation",
+          assignedTo: "agent-docs",
+          assigneeName: isZh ? "文档代理" : "Documentation Agent",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
+          updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+          tags: ["documentation"],
+        },
+      ]);
+      setUseMock(true);
+    } else {
+      setUseMock(false);
+    }
+  }, [apiTasks, isZh]);
 
   const getStatusIcon = (status: Task["status"]) => {
     switch (status) {
@@ -263,10 +268,16 @@ export default function TasksPage() {
             {t('subtitle')}
           </p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          {tCommon('create')} {t('title')}
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={loading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            {tCommon('refresh')}
+          </Button>
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            {tCommon('create')} {t('title')}
+          </Button>
+        </div>
       </div>
 
       {/* Stats Overview */}

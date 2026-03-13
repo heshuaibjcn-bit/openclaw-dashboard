@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +31,7 @@ import {
   FileType,
 } from "lucide-react";
 import { getActiveAgents, getAllAgents } from "@/lib/openclaw/config-reader";
+import { useDocuments } from "@/lib/openclaw";
 
 interface DocumentNode {
   name: string;
@@ -51,28 +52,24 @@ interface FileContent {
 export default function DocumentsPage() {
   const t = useTranslations('documents');
   const tCommon = useTranslations('common');
-  const [documents, setDocuments] = useState<Record<string, DocumentNode[]>>({});
   const [selectedAgent, setSelectedAgent] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(true);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [editingFile, setEditingFile] = useState<{ path: string; content: string } | null>(null);
   const [fileContents, setFileContents] = useState<Record<string, FileContent>>({});
-  const [activeAgents, setActiveAgents] = useState<string[]>([]);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  // Load active agents from openclaw.json
+  const activeAgents = useMemo(() => getActiveAgents().map(a => a.id), []);
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      // Load active agents from openclaw.json
-      const agents = getActiveAgents();
-      setActiveAgents(agents.map(a => a.id));
+  // Use real API hook for documents
+  const { data: apiDocuments, loading, refetch } = useDocuments(
+    selectedAgent === "all" ? undefined : selectedAgent
+  );
 
-      // TODO: Replace with actual file system API calls
-      // For now, use mock data structure
+  // Process documents data or fallback to mock
+  const documents = useMemo(() => {
+    if (!apiDocuments || Object.keys(apiDocuments).length === 0) {
+      // Fallback to mock data structure
       const mockDocs: Record<string, DocumentNode[]> = {
         main: [
           {
@@ -108,7 +105,7 @@ export default function DocumentsPage() {
       };
 
       // Add agent-specific documents
-      agents.forEach(agent => {
+      getActiveAgents().forEach(agent => {
         mockDocs[agent.id] = [
           {
             name: "system-prompt.md",
@@ -147,13 +144,11 @@ export default function DocumentsPage() {
         ];
       });
 
-      setDocuments(mockDocs);
-    } catch (error) {
-      console.error("Failed to load documents:", error);
-    } finally {
-      setLoading(false);
+      return mockDocs;
     }
-  };
+
+    return apiDocuments;
+  }, [apiDocuments]);
 
   const toggleFolder = (path: string) => {
     setExpandedFolders(prev => {
@@ -215,6 +210,10 @@ export default function DocumentsPage() {
 
   const handleCancelEdit = () => {
     setEditingFile(null);
+  };
+
+  const handleRefresh = () => {
+    refetch();
   };
 
   const getFileIcon = (name: string) => {
@@ -294,8 +293,8 @@ export default function DocumentsPage() {
             {t('subtitle')}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={loadData}>
-          <RefreshCw className="mr-2 h-4 w-4" />
+        <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
+          <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           {tCommon('refresh')}
         </Button>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ import {
   Zap,
   Calendar,
 } from "lucide-react";
+import { useUsage, useSubscription } from "@/lib/openclaw";
 
 // Mock data (will be replaced with real API calls)
 interface UsageData {
@@ -44,45 +45,56 @@ interface UsageData {
 export default function UsagePage() {
   const t = useTranslations('usage');
   const tCommon = useTranslations('common');
-  const [data, setData] = useState<UsageData | null>(null);
-  const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<"today" | "7days" | "30days">("7days");
   const [view, setView] = useState<"tasks" | "agents" | "projects">("tasks");
 
-  useEffect(() => {
-    // Simulate data loading
-    const loadData = async () => {
-      setLoading(true);
-      // TODO: Replace with actual API call
-      // const data = await fetchUsageCost();
-      setTimeout(() => {
-        setData({
-          today: { tokens: 45000, cost: 0.45 },
-          last7days: { tokens: 280000, cost: 2.80 },
-          last30days: { tokens: 950000, cost: 9.50 },
-          quota: {
-            limit: 1000000,
-            used: 280000,
-            remaining: 720000,
-            window: "Week",
-            resetAt: "2025-03-20T00:00:00Z",
-          },
-          attribution: [
-            { id: "task1", name: "Code Review", type: "task", tokens: 85000, cost: 0.85, percentage: 30.4 },
-            { id: "task2", name: "Documentation", type: "task", tokens: 62000, cost: 0.62, percentage: 22.1 },
-            { id: "task3", name: "Bug Fix", type: "task", tokens: 48000, cost: 0.48, percentage: 17.1 },
-            { id: "agent1", name: "Main Agent", type: "agent", tokens: 155000, cost: 1.55, percentage: 55.4 },
-            { id: "agent2", name: "Helper Agent", type: "agent", tokens: 125000, cost: 1.25, percentage: 44.6 },
-          ],
-        });
-        setLoading(false);
-      }, 500);
+  // Use real API hooks
+  const { data: usageData, loading: usageLoading, refetch: refetchUsage } = useUsage(timeRange);
+  const { data: subscriptionData, loading: subscriptionLoading, refetch: refetchSubscription } = useSubscription();
+
+  const loading = usageLoading || subscriptionLoading;
+
+  // Process data from API or fallback to mock
+  const data = useMemo(() => {
+    if (!usageData || !subscriptionData) {
+      // Fallback to mock data
+      return {
+        today: { tokens: 45000, cost: 0.45 },
+        last7days: { tokens: 280000, cost: 2.80 },
+        last30days: { tokens: 950000, cost: 9.50 },
+        quota: {
+          limit: subscriptionData?.quota?.limit || 1000000,
+          used: subscriptionData?.quota?.used || 280000,
+          remaining: subscriptionData?.quota?.remaining || 720000,
+          window: subscriptionData?.quota?.window || "Week",
+          resetAt: subscriptionData?.quota?.resetAt || "2025-03-20T00:00:00Z",
+        },
+        attribution: usageData?.attribution || [
+          { id: "task1", name: "Code Review", type: "task", tokens: 85000, cost: 0.85, percentage: 30.4 },
+          { id: "task2", name: "Documentation", type: "task", tokens: 62000, cost: 0.62, percentage: 22.1 },
+          { id: "task3", name: "Bug Fix", type: "task", tokens: 48000, cost: 0.48, percentage: 17.1 },
+          { id: "agent1", name: "Main Agent", type: "agent", tokens: 155000, cost: 1.55, percentage: 55.4 },
+          { id: "agent2", name: "Helper Agent", type: "agent", tokens: 125000, cost: 1.25, percentage: 44.6 },
+        ],
+      };
+    }
+
+    return {
+      today: usageData.today || { tokens: 0, cost: 0 },
+      last7days: usageData.last7days || { tokens: 0, cost: 0 },
+      last30days: usageData.last30days || { tokens: 0, cost: 0 },
+      quota: {
+        limit: subscriptionData.quota?.limit || 1000000,
+        used: subscriptionData.quota?.used || 0,
+        remaining: subscriptionData.quota?.remaining || 0,
+        window: subscriptionData.quota?.window || "Week",
+        resetAt: subscriptionData.quota?.resetAt || "",
+      },
+      attribution: usageData.attribution || [],
     };
-    loadData();
-  }, []);
+  }, [usageData, subscriptionData]);
 
   const getCurrentData = () => {
-    if (!data) return null;
     switch (timeRange) {
       case "today": return data.today;
       case "7days": return data.last7days;
@@ -91,7 +103,6 @@ export default function UsagePage() {
   };
 
   const getQuotaPercentage = () => {
-    if (!data) return 0;
     return (data.quota.used / data.quota.limit) * 100;
   };
 
@@ -104,6 +115,11 @@ export default function UsagePage() {
 
   const currentData = getCurrentData();
   const quotaStatus = getQuotaStatus();
+
+  const handleRefresh = () => {
+    refetchUsage();
+    refetchSubscription();
+  };
 
   const filteredAttribution = data?.attribution.filter(item => {
     if (view === "tasks") return item.type === "task";
@@ -142,6 +158,10 @@ export default function UsagePage() {
             onClick={() => setTimeRange("30days")}
           >
             {t('days30')}
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            {tCommon('refresh')}
           </Button>
         </div>
       </div>

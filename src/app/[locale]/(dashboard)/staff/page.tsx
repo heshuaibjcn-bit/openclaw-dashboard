@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +18,9 @@ import {
   Zap,
   Calendar,
   TrendingUp,
+  RefreshCw,
 } from "lucide-react";
+import { useAgents, useRuntimeData } from "@/lib/openclaw";
 
 interface StaffMember {
   id: string;
@@ -48,8 +50,100 @@ export default function StaffPage() {
   const t = useTranslations('staff');
   const tCommon = useTranslations('common');
   const locale = useLocale();
-  const [staff, setStaff] = useState<StaffMember[]>([]);
-  const [loading, setLoading] = useState(true);
+  const isZh = locale === 'zh';
+
+  // Use real API hooks
+  const { data: agents, loading: agentsLoading, refetch: refetchAgents } = useAgents();
+  const { data: runtimeData, loading: runtimeLoading, refetch: refetchRuntime } = useRuntimeData();
+
+  const loading = agentsLoading || runtimeLoading;
+
+  // Transform agents data to staff members format
+  const staff = useMemo(() => {
+    if (!agents || agents.length === 0) {
+      // Fallback to mock data
+      return [
+        {
+          id: "agent-main",
+          name: isZh ? "主助手" : "Main Assistant",
+          model: "zai/glm-5",
+          status: "working" as const,
+          currentTask: {
+            id: "task-1",
+            title: isZh ? "正在处理代码审查请求" : "Processing code review requests",
+            progress: 65,
+            startedAt: new Date(Date.now() - 1000 * 60 * 15),
+          },
+          nextTask: {
+            id: "task-2",
+            title: isZh ? "生成文档" : "Generate documentation",
+            scheduledAt: new Date(Date.now() + 1000 * 60 * 30),
+          },
+          recentOutput: {
+            count: 23,
+            lastActivity: new Date(Date.now() - 1000 * 30),
+          },
+          capabilities: ["code-review", "documentation", "analysis"],
+          uptime: 1000 * 60 * 60 * 4.5,
+        },
+        {
+          id: "agent-helper",
+          name: isZh ? "助手机器人" : "Helper Bot",
+          model: "zai/glm-4.7",
+          status: "standby" as const,
+          nextTask: {
+            id: "task-3",
+            title: isZh ? "Bug 调查" : "Bug investigation",
+            scheduledAt: new Date(Date.now() + 1000 * 60 * 10),
+          },
+          recentOutput: {
+            count: 15,
+            lastActivity: new Date(Date.now() - 1000 * 60 * 45),
+          },
+          capabilities: ["debug", "testing", "support"],
+          uptime: 1000 * 60 * 60 * 2,
+        },
+        {
+          id: "agent-docs",
+          name: isZh ? "文档代理" : "Documentation Agent",
+          model: "zai/glm-4.7-flash",
+          status: "offline" as const,
+          recentOutput: {
+            count: 8,
+            lastActivity: new Date(Date.now() - 1000 * 60 * 60 * 2),
+          },
+          capabilities: ["documentation", "writing"],
+          uptime: 0,
+        },
+      ];
+    }
+
+    // Get runtime status for each agent
+    const agentStatuses = runtimeData?.agentStatuses || {};
+
+    return agents.map((agent: any) => {
+      const runtimeStatus = agentStatuses[agent.id] || {};
+      return {
+        id: agent.id,
+        name: agent.name,
+        model: agent.model,
+        status: runtimeStatus.status || (agent.status === "active" ? "standby" : "offline"),
+        currentTask: runtimeStatus.currentTask,
+        nextTask: runtimeStatus.nextTask,
+        recentOutput: runtimeStatus.recentOutput || {
+          count: 0,
+          lastActivity: new Date(agent.createdAt || Date.now()),
+        },
+        capabilities: agent.capabilities || [],
+        uptime: runtimeStatus.uptime || 0,
+      };
+    });
+  }, [agents, runtimeData, isZh]);
+
+  const handleRefresh = () => {
+    refetchAgents();
+    refetchRuntime();
+  };
 
   // Translate capability codes to display names
   const getCapabilityName = (cap: string): string => {
@@ -64,74 +158,6 @@ export default function StaffPage() {
     };
     return capabilityMap[cap]?.[locale] || cap;
   };
-
-  useEffect(() => {
-    // Simulate data loading
-    const loadData = async () => {
-      setLoading(true);
-      // TODO: Replace with actual API call
-      // const data = await fetchStaffStatus();
-      const isZh = locale === 'zh';
-      setTimeout(() => {
-        setStaff([
-          {
-            id: "agent-main",
-            name: isZh ? "主助手" : "Main Assistant",
-            model: "zai/glm-5",
-            status: "working",
-            currentTask: {
-              id: "task-1",
-              title: isZh ? "正在处理代码审查请求" : "Processing code review requests",
-              progress: 65,
-              startedAt: new Date(Date.now() - 1000 * 60 * 15),
-            },
-            nextTask: {
-              id: "task-2",
-              title: isZh ? "生成文档" : "Generate documentation",
-              scheduledAt: new Date(Date.now() + 1000 * 60 * 30),
-            },
-            recentOutput: {
-              count: 23,
-              lastActivity: new Date(Date.now() - 1000 * 30),
-            },
-            capabilities: ["code-review", "documentation", "analysis"],
-            uptime: 1000 * 60 * 60 * 4.5,
-          },
-          {
-            id: "agent-helper",
-            name: isZh ? "助手机器人" : "Helper Bot",
-            model: "zai/glm-4.7",
-            status: "standby",
-            nextTask: {
-              id: "task-3",
-              title: isZh ? "Bug 调查" : "Bug investigation",
-              scheduledAt: new Date(Date.now() + 1000 * 60 * 10),
-            },
-            recentOutput: {
-              count: 15,
-              lastActivity: new Date(Date.now() - 1000 * 60 * 45),
-            },
-            capabilities: ["debug", "testing", "support"],
-            uptime: 1000 * 60 * 60 * 2,
-          },
-          {
-            id: "agent-docs",
-            name: isZh ? "文档代理" : "Documentation Agent",
-            model: "zai/glm-4.7-flash",
-            status: "offline",
-            recentOutput: {
-              count: 8,
-              lastActivity: new Date(Date.now() - 1000 * 60 * 60 * 2),
-            },
-            capabilities: ["documentation", "writing"],
-            uptime: 0,
-          },
-        ]);
-        setLoading(false);
-      }, 500);
-    };
-    loadData();
-  }, []);
 
   const getStatusBadge = (status: StaffMember["status"]) => {
     switch (status) {
@@ -196,7 +222,8 @@ export default function StaffPage() {
             {t('subtitle')}
           </p>
         </div>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
+          <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           {tCommon('refresh')}
         </Button>
       </div>

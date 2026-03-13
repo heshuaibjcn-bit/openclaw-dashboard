@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,7 @@ import {
   TrendingUp,
   AlertCircle,
 } from "lucide-react";
+import { useApprovals } from "@/lib/openclaw";
 
 type ApprovalStatus = "pending" | "approved" | "rejected" | "expired";
 type ActionCategory = "mutation" | "import" | "export" | "config" | "channel" | "agent";
@@ -65,99 +66,20 @@ const riskColors = {
 export default function ApprovalsPage() {
   const t = useTranslations('approvals');
   const tCommon = useTranslations('common');
-  const [actions, setActions] = useState<ApprovalAction[]>([]);
-  const [filteredActions, setFilteredActions] = useState<ApprovalAction[]>([]);
   const [selectedAction, setSelectedAction] = useState<ApprovalAction | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(false);
   const [dryRun, setDryRun] = useState(true);
 
-  useEffect(() => {
-    loadActions();
-  }, []);
+  // Use real API hook - will fetch filtered data based on statusFilter
+  const { data: apiActions, loading, refetch, approveAction, rejectAction } = useApprovals(
+    statusFilter === "all" ? undefined : statusFilter
+  );
 
-  useEffect(() => {
-    filterActions();
-  }, [actions, statusFilter, categoryFilter, searchQuery]);
-
-  const loadActions = () => {
-    setLoading(true);
-
-    // Mock approval actions data
-    const mockActions: ApprovalAction[] = [
-      {
-        id: "1",
-        type: "write_config",
-        category: "config",
-        description: "Update openclaw.json configuration",
-        status: "pending",
-        createdAt: new Date(Date.now() - 1000 * 60 * 5),
-        expiresAt: new Date(Date.now() + 1000 * 60 * 55),
-        requestedBy: "system",
-        riskLevel: "high",
-        details: { file: "openclaw.json", changes: ["Add new agent", "Update model settings"] },
-      },
-      {
-        id: "2",
-        type: "import_data",
-        category: "import",
-        description: "Import runtime data snapshot",
-        status: "pending",
-        createdAt: new Date(Date.now() - 1000 * 60 * 10),
-        expiresAt: new Date(Date.now() + 1000 * 60 * 50),
-        requestedBy: "admin",
-        riskLevel: "medium",
-        details: { source: "/tmp/snapshot.json", size: "2.3MB" },
-      },
-      {
-        id: "3",
-        type: "enable_channel",
-        category: "channel",
-        description: "Enable Feishu channel integration",
-        status: "approved",
-        createdAt: new Date(Date.now() - 1000 * 60 * 60),
-        expiresAt: new Date(Date.now() - 1000 * 60 * 30),
-        requestedBy: "user",
-        channel: "feishu",
-        riskLevel: "low",
-      },
-      {
-        id: "4",
-        type: "update_agent",
-        category: "agent",
-        description: "Update agent system prompt",
-        status: "rejected",
-        createdAt: new Date(Date.now() - 1000 * 60 * 120),
-        expiresAt: new Date(Date.now() - 1000 * 60 * 90),
-        requestedBy: "user",
-        agent: "research",
-        riskLevel: "medium",
-      },
-      {
-        id: "5",
-        type: "export_memory",
-        category: "export",
-        description: "Export all memory entries",
-        status: "expired",
-        createdAt: new Date(Date.now() - 1000 * 60 * 180),
-        expiresAt: new Date(Date.now() - 1000 * 60 * 60),
-        requestedBy: "system",
-        riskLevel: "critical",
-      },
-    ];
-
-    setActions(mockActions);
-    setLoading(false);
-  };
-
-  const filterActions = () => {
-    let filtered = actions;
-
-    if (statusFilter !== "all") {
-      filtered = filtered.filter(a => a.status === statusFilter);
-    }
+  // Apply client-side filtering for category and search
+  const filteredActions = useMemo(() => {
+    let filtered = apiActions || [];
 
     if (categoryFilter !== "all") {
       filtered = filtered.filter(a => a.category === categoryFilter);
@@ -170,43 +92,45 @@ export default function ApprovalsPage() {
       );
     }
 
-    setFilteredActions(filtered);
-  };
+    return filtered;
+  }, [apiActions, categoryFilter, searchQuery]);
 
   const handleApprove = async (id: string) => {
-    const action = actions.find(a => a.id === id);
-    if (!action) return;
-
     if (dryRun) {
       console.log(`[DRY-RUN] Would approve action: ${id}`);
     } else {
-      console.log(`Approving action: ${id}`);
-      // TODO: Call approval API
+      try {
+        await approveAction(id);
+      } catch (error) {
+        console.error("Failed to approve action:", error);
+      }
     }
-
-    setActions(prev =>
-      prev.map(a =>
-        a.id === id ? { ...a, status: dryRun ? a.status : "approved" } : a
-      )
-    );
+    if (dryRun) {
+      // For dry run, manually update the status locally
+      // This is just for UI feedback
+    }
+    if (selectedAction?.id === id) {
+      setSelectedAction(null);
+    }
   };
 
   const handleReject = async (id: string) => {
-    const action = actions.find(a => a.id === id);
-    if (!action) return;
-
     if (dryRun) {
       console.log(`[DRY-RUN] Would reject action: ${id}`);
     } else {
-      console.log(`Rejecting action: ${id}`);
-      // TODO: Call rejection API
+      try {
+        await rejectAction(id);
+      } catch (error) {
+        console.error("Failed to reject action:", error);
+      }
     }
-
-    setActions(prev =>
-      prev.map(a =>
-        a.id === id ? { ...a, status: dryRun ? a.status : "rejected" } : a
-      )
-    );
+    if (dryRun) {
+      // For dry run, manually update the status locally
+      // This is just for UI feedback
+    }
+    if (selectedAction?.id === id) {
+      setSelectedAction(null);
+    }
   };
 
   const handleBatchApprove = () => {
@@ -217,6 +141,10 @@ export default function ApprovalsPage() {
   const handleBatchReject = () => {
     const pendingIds = filteredActions.filter(a => a.status === "pending").map(a => a.id);
     pendingIds.forEach(id => handleReject(id));
+  };
+
+  const handleRefresh = () => {
+    refetch();
   };
 
   const getStatusBadge = (status: ApprovalStatus) => {
@@ -242,10 +170,10 @@ export default function ApprovalsPage() {
   };
 
   const stats = {
-    pending: actions.filter(a => a.status === "pending").length,
-    approved: actions.filter(a => a.status === "approved").length,
-    rejected: actions.filter(a => a.status === "rejected").length,
-    highRisk: actions.filter(a => a.riskLevel === "high" || a.riskLevel === "critical" && a.status === "pending").length,
+    pending: (apiActions || []).filter(a => a.status === "pending").length,
+    approved: (apiActions || []).filter(a => a.status === "approved").length,
+    rejected: (apiActions || []).filter(a => a.status === "rejected").length,
+    highRisk: (apiActions || []).filter(a => (a.riskLevel === "high" || a.riskLevel === "critical") && a.status === "pending").length,
   };
 
   return (
@@ -268,8 +196,8 @@ export default function ApprovalsPage() {
             />
             <label htmlFor="dryRun">{t('dryRun')}</label>
           </div>
-          <Button variant="outline" size="sm" onClick={loadActions}>
-            <RefreshCw className="mr-2 h-4 w-4" />
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             {tCommon('refresh')}
           </Button>
         </div>

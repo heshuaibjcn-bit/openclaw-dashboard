@@ -178,3 +178,193 @@ export function useMemorySearch() {
 
   return { data, loading, error, search };
 }
+
+export function useTasks(params?: { limit?: number; offset?: number }) {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchTasks = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const client = getAPIClient();
+      const tasks = await client.getTasks(params);
+      setData(tasks);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error("Failed to fetch tasks"));
+    } finally {
+      setLoading(false);
+    }
+  }, [JSON.stringify(params)]);
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
+
+  return { data, loading, error, refetch: fetchTasks };
+}
+
+export function useUsage(timeRange: "today" | "7days" | "30days" = "7days") {
+  const [data, setData] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchUsage = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const client = getAPIClient();
+      const usage = await client.getUsage({ timeRange });
+      setData(usage);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error("Failed to fetch usage"));
+    } finally {
+      setLoading(false);
+    }
+  }, [timeRange]);
+
+  useEffect(() => {
+    fetchUsage();
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchUsage, 30000);
+    return () => clearInterval(interval);
+  }, [fetchUsage]);
+
+  return { data, loading, error, refetch: fetchUsage };
+}
+
+export function useSubscription() {
+  const [data, setData] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchSubscription = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const client = getAPIClient();
+      const subscription = await client.getSubscription();
+      setData(subscription);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error("Failed to fetch subscription"));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSubscription();
+    // Refresh every 60 seconds
+    const interval = setInterval(fetchSubscription, 60000);
+    return () => clearInterval(interval);
+  }, [fetchSubscription]);
+
+  return { data, loading, error, refetch: fetchSubscription };
+}
+
+export function useDocuments(agentId?: string) {
+  const [data, setData] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchDocuments = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const client = getAPIClient();
+      const documents = await client.getDocuments(agentId);
+      setData(documents);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error("Failed to fetch documents"));
+    } finally {
+      setLoading(false);
+    }
+  }, [agentId]);
+
+  useEffect(() => {
+    fetchDocuments();
+  }, [fetchDocuments]);
+
+  return { data, loading, error, refetch: fetchDocuments };
+}
+
+export function useApprovals(statusFilter?: string) {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchApprovals = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const client = getAPIClient();
+      const approvals = await client.getApprovals({ status: statusFilter });
+      setData(approvals);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error("Failed to fetch approvals"));
+    } finally {
+      setLoading(false);
+    }
+  }, [statusFilter]);
+
+  useEffect(() => {
+    fetchApprovals();
+    // Refresh every 10 seconds for pending approvals
+    const interval = setInterval(fetchApprovals, 10000);
+    return () => clearInterval(interval);
+  }, [fetchApprovals]);
+
+  const approveAction = useCallback(async (actionId: string, reason?: string) => {
+    try {
+      const client = getAPIClient();
+      await client.approveAction(actionId, reason);
+      await fetchApprovals();
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error("Failed to approve action"));
+      throw e;
+    }
+  }, [fetchApprovals]);
+
+  const rejectAction = useCallback(async (actionId: string, reason?: string) => {
+    try {
+      const client = getAPIClient();
+      await client.rejectAction(actionId, reason);
+      await fetchApprovals();
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error("Failed to reject action"));
+      throw e;
+    }
+  }, [fetchApprovals]);
+
+  return { data, loading, error, refetch: fetchApprovals, approveAction, rejectAction };
+}
+
+export function useRuntimeData() {
+  const [data, setData] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchRuntimeData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const client = getAPIClient();
+      const runtime = await client.getRuntimeData();
+      setData(runtime);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error("Failed to fetch runtime data"));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchRuntimeData();
+    // Refresh every 15 seconds
+    const interval = setInterval(fetchRuntimeData, 15000);
+    return () => clearInterval(interval);
+  }, [fetchRuntimeData]);
+
+  return { data, loading, error, refetch: fetchRuntimeData };
+}

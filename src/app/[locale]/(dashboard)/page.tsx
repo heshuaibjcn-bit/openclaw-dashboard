@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { useTranslations, useLocale } from 'next-intl';
 import Link from "next/link";
+import { useGatewayHealth, useAgents, useSessions, useChannels, useRuntimeData } from "@/lib/openclaw";
 
 // Types for overview data
 interface PendingItem {
@@ -62,95 +63,126 @@ export default function DashboardPage() {
   const t = useTranslations();
   const locale = useLocale();
   const isZh = locale === 'zh';
-  const [pendingItems, setPendingItems] = useState<PendingItem[]>([]);
-  const [risks, setRisks] = useState<RiskItem[]>([]);
-  const [staffStatus, setStaffStatus] = useState<StaffStatus>({
-    working: 0,
-    standby: 0,
-    offline: 0,
-    total: 0,
-  });
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // System health metrics
-  const [systemHealth, setSystemHealth] = useState({
-    gatewayStatus: "healthy" as "healthy" | "degraded" | "unhealthy",
-    uptime: "4h 32m",
-    activeSessions: 3,
-    totalAgents: 4,
-    connectedChannels: 2,
-    tokenUsage: { used: 45000, limit: 1000000, percentage: 4.5 },
-    recentErrors: 2,
-    warnings: 5,
-  });
+  // Use real API hooks
+  const { data: healthData, loading: healthLoading, refetch: refetchHealth } = useGatewayHealth();
+  const { data: agents, loading: agentsLoading, refetch: refetchAgents } = useAgents();
+  const { data: sessions, loading: sessionsLoading, refetch: refetchSessions } = useSessions();
+  const { data: channels, loading: channelsLoading, refetch: refetchChannels } = useChannels();
+  const { data: runtimeData, loading: runtimeLoading, refetch: refetchRuntime } = useRuntimeData();
 
-  useEffect(() => {
-    // Simulate data loading
-    const loadData = async () => {
-      setLoading(true);
-      // TODO: Replace with actual API calls
-      setTimeout(() => {
-        setPendingItems([
-          {
-            id: "pending-1",
-            type: "approval",
-            title: isZh ? "API 密钥更改请求" : "API key change request",
-            description: isZh ? "请求更新生产环境的 API 密钥" : "Request to update API key for production environment",
-            severity: "high",
-            timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-            source: "agent-main",
-          },
-          {
-            id: "pending-2",
-            type: "exception",
-            title: isZh ? "会话超时错误" : "Session timeout error",
-            description: isZh ? "代理会话超过最大持续时间" : "Agent session exceeded maximum duration",
-            severity: "medium",
-            timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-            source: "agent-helper",
-          },
-          {
-            id: "pending-3",
-            type: "alert",
-            title: isZh ? "内存使用警告" : "Memory usage warning",
-            description: isZh ? "LanceDB 内存索引接近大小限制" : "LanceDB memory index approaching size limit",
-            severity: "low",
-            timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
-          },
-        ]);
+  // Computed values from API data
+  const loading = healthLoading || agentsLoading || sessionsLoading || channelsLoading || runtimeLoading;
 
-        setRisks([
-          {
-            id: "risk-1",
-            type: "budget",
-            title: isZh ? "令牌预算不足" : "Token budget running low",
-            description: isZh ? "当前窗口已使用 72%，还剩 3 天" : "Current window at 72% capacity with 3 days remaining",
-            severity: "medium",
-            affected: ["agent-main", "agent-helper"],
-          },
-          {
-            id: "risk-2",
-            type: "stalled",
-            title: isZh ? "文档任务停滞" : "Documentation task stalled",
-            description: isZh ? "任务'生成 API 文档'已进行 4 小时" : "Task 'Generate API docs' has been in progress for 4 hours",
-            severity: "low",
-            affected: ["agent-docs"],
-          },
-        ]);
+  const systemHealth = useMemo(() => {
+    if (!healthData) {
+      return {
+        gatewayStatus: "healthy" as "healthy" | "degraded" | "unhealthy",
+        uptime: "0m",
+        activeSessions: 0,
+        totalAgents: 0,
+        connectedChannels: 0,
+        tokenUsage: { used: 0, limit: 1000000, percentage: 0 },
+        recentErrors: 0,
+        warnings: 0,
+      };
+    }
+    const uptimeSeconds = healthData.uptime || 0;
+    const hours = Math.floor(uptimeSeconds / 3600);
+    const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+    const uptime = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 
-        setStaffStatus({
-          working: 2,
-          standby: 1,
-          offline: 1,
-          total: 4,
-        });
-
-        setLoading(false);
-      }, 500);
+    return {
+      gatewayStatus: healthData.status || "healthy",
+      uptime,
+      activeSessions: healthData.sessions || sessions?.length || 0,
+      totalAgents: healthData.agents || agents?.length || 0,
+      connectedChannels: channels?.filter((c: any) => c.status === "connected").length || 0,
+      tokenUsage: { used: 0, limit: 1000000, percentage: 0 }, // Will be updated from runtime data
+      recentErrors: 0,
+      warnings: 0,
     };
-    loadData();
-  }, []);
+  }, [healthData, agents, sessions, channels]);
+
+  const pendingItems = useMemo(() => {
+    if (!runtimeData?.pendingItems) {
+      // Fallback to mock data
+      return [
+        {
+          id: "pending-1",
+          type: "approval" as const,
+          title: isZh ? "API 密钥更改请求" : "API key change request",
+          description: isZh ? "请求更新生产环境的 API 密钥" : "Request to update API key for production environment",
+          severity: "high" as const,
+          timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+          source: "agent-main",
+        },
+        {
+          id: "pending-2",
+          type: "exception" as const,
+          title: isZh ? "会话超时错误" : "Session timeout error",
+          description: isZh ? "代理会话超过最大持续时间" : "Agent session exceeded maximum duration",
+          severity: "medium" as const,
+          timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+          source: "agent-helper",
+        },
+        {
+          id: "pending-3",
+          type: "alert" as const,
+          title: isZh ? "内存使用警告" : "Memory usage warning",
+          description: isZh ? "LanceDB 内存索引接近大小限制" : "LanceDB memory index approaching size limit",
+          severity: "low" as const,
+          timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+        },
+      ];
+    }
+    return runtimeData.pendingItems;
+  }, [runtimeData, isZh]);
+
+  const risks = useMemo(() => {
+    if (!runtimeData?.risks) {
+      // Fallback to mock data
+      return [
+        {
+          id: "risk-1",
+          type: "budget" as const,
+          title: isZh ? "令牌预算不足" : "Token budget running low",
+          description: isZh ? "当前窗口已使用 72%，还剩 3 天" : "Current window at 72% capacity with 3 days remaining",
+          severity: "medium" as const,
+          affected: ["agent-main", "agent-helper"],
+        },
+        {
+          id: "risk-2",
+          type: "stalled" as const,
+          title: isZh ? "文档任务停滞" : "Documentation task stalled",
+          description: isZh ? "任务'生成 API 文档'已进行 4 小时" : "Task 'Generate API docs' has been in progress for 4 hours",
+          severity: "low" as const,
+          affected: ["agent-docs"],
+        },
+      ];
+    }
+    return runtimeData.risks;
+  }, [runtimeData, isZh]);
+
+  const staffStatus = useMemo(() => {
+    const activeAgents = agents?.filter((a: any) => a.status === "active") || [];
+    return {
+      working: activeAgents.filter((a: any) => (a as any).currentTask !== undefined).length,
+      standby: activeAgents.length - (activeAgents.filter((a: any) => (a as any).currentTask !== undefined).length),
+      offline: (agents?.length || 0) - activeAgents.length,
+      total: agents?.length || 0,
+    };
+  }, [agents]);
+
+  // Refetch all data
+  const handleRefresh = () => {
+    refetchHealth();
+    refetchAgents();
+    refetchSessions();
+    refetchChannels();
+    refetchRuntime();
+  };
 
   const getSeverityBadge = (severity: string) => {
     switch (severity) {
@@ -222,8 +254,8 @@ export default function DashboardPage() {
               className="pl-9 w-64"
             />
           </div>
-          <Button variant="outline" size="sm">
-            <RefreshCw className="mr-2 h-4 w-4" />
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             {t('overview.refresh')}
           </Button>
         </div>
