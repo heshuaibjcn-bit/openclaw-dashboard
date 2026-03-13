@@ -231,7 +231,12 @@
     },
     "searchPlaceholder": "搜索会话...",
     "loading": "加载会话中...",
-    "noSessions": "未找到会话"
+    "noSessions": "未找到会话",
+    "currentlyRunning": "当前运行中",
+    "acrossAllSessions": "所有会话总计",
+    "avgUsage": "平均使用",
+    "runningDuration": "运行时长",
+    "tokenUtilization": "令牌利用率"
   },
   "agents": {
     "title": "代理",

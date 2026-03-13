@@ -78,7 +78,7 @@ export default function SessionsPage() {
           <CardContent>
             <div className="text-2xl font-bold">{sessions?.length || 0}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Currently running
+              {t('currentlyRunning')}
             </p>
           </CardContent>
         </Card>
@@ -93,14 +93,14 @@ export default function SessionsPage() {
               {sessions?.reduce((sum, s) => sum + s.tokens.total, 0).toLocaleString() || 0}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Across all sessions
+              {t('acrossAllSessions')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Usage</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('avgUsage')}</CardTitle>
             <Bot className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -113,7 +113,7 @@ export default function SessionsPage() {
                 : 0}%
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Token utilization
+              {t('tokenUtilization')}
             </p>
           </CardContent>
         </Card>

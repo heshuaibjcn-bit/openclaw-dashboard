@@ -231,7 +231,12 @@
     },
     "searchPlaceholder": "Search sessions...",
     "loading": "Loading sessions...",
-    "noSessions": "No sessions found"
+    "noSessions": "No sessions found",
+    "currentlyRunning": "Currently running",
+    "acrossAllSessions": "Across all sessions",
+    "avgUsage": "Avg Usage",
+    "runningDuration": "Running duration",
+    "tokenUtilization": "Token utilization"
   },
   "agents": {
     "title": "Agents",
