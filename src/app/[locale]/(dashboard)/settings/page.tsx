@@ -270,10 +270,10 @@ export default function SettingsPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
-                <CardTitle>Security Mode</CardTitle>
+                <CardTitle>{t('securityMode')}</CardTitle>
               </div>
               <CardDescription>
-                Control write access and authentication for the dashboard
+                {t('securityModeDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -321,7 +321,7 @@ export default function SettingsPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <ShieldAlert className="h-5 w-5" />
-                <CardTitle>Approval Actions</CardTitle>
+                <CardTitle>{t('approvalActions')}</CardTitle>
               </div>
               <CardDescription>
                 Control approval/rejection workflow for sensitive operations
@@ -378,7 +378,7 @@ export default function SettingsPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Settings className="h-5 w-5" />
-                <CardTitle>Import/Export Mutations</CardTitle>
+                <CardTitle>{t('importExportMutations')}</CardTitle>
               </div>
               <CardDescription>
                 Control data import/export and modification operations
@@ -438,7 +438,7 @@ export default function SettingsPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Server className="h-5 w-5" />
-                <CardTitle>Gateway Configuration</CardTitle>
+                <CardTitle>{t('gatewayConfiguration')}</CardTitle>
               </div>
               <CardDescription>
                 Configure your OpenClaw Gateway connection
@@ -498,7 +498,7 @@ export default function SettingsPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Bot className="h-5 w-5" />
-                <CardTitle>Agent Defaults</CardTitle>
+                <CardTitle>{t('agentDefaults')}</CardTitle>
               </div>
               <CardDescription>
                 Configure default agent behavior
@@ -565,7 +565,7 @@ export default function SettingsPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <MessageSquare className="h-5 w-5" />
-                <CardTitle>Channel Configuration</CardTitle>
+                <CardTitle>{t('channelConfiguration')}</CardTitle>
               </div>
               <CardDescription>
                 Manage communication channels
@@ -624,7 +624,7 @@ export default function SettingsPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Database className="h-5 w-5" />
-                <CardTitle>Memory Configuration</CardTitle>
+                <CardTitle>{t('memoryConfiguration')}</CardTitle>
               </div>
               <CardDescription>
                 Configure LanceDB memory storage
@@ -695,7 +695,7 @@ export default function SettingsPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Palette className="h-5 w-5" />
-                <CardTitle>Interface Settings</CardTitle>
+                <CardTitle>{t('interfaceSettings')}</CardTitle>
               </div>
               <CardDescription>
                 Customize your dashboard appearance

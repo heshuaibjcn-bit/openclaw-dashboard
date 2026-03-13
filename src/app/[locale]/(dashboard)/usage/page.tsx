@@ -161,46 +161,46 @@ export default function UsagePage() {
           <div className="grid gap-4 md:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Tokens Used</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('tokensUsed')}</CardTitle>
                 <Zap className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{currentData.tokens.toLocaleString()}</div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  In selected period
+                  {t('inSelectedPeriod')}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Cost</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('cost')}</CardTitle>
                 <DollarSign className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">${currentData.cost.toFixed(2)}</div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  In selected period
+                  {t('inSelectedPeriod')}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Quota Used</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('quotaUsed')}</CardTitle>
                 <PieChart className="h-4 w-4 text-purple-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{getQuotaPercentage().toFixed(1)}%</div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {data.quota.remaining.toLocaleString()} remaining
+                  {data.quota.remaining.toLocaleString()} {t('remaining')}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Quota Status</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('quotaStatus')}</CardTitle>
                 {quotaStatus.status === "healthy" ? (
                   <CheckCircle2 className="h-4 w-4 text-green-500" />
                 ) : quotaStatus.status === "warning" ? (
@@ -223,9 +223,9 @@ export default function UsagePage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Quota Usage</CardTitle>
+                  <CardTitle>{t('quotaUsage')}</CardTitle>
                   <CardDescription>
-                    Current subscription window: {data.quota.window}
+                    {t('currentSubscriptionWindow')}: {data.quota.window}
                   </CardDescription>
                 </div>
                 <Badge variant={quotaStatus.status === "healthy" ? "default" : quotaStatus.status === "warning" ? "outline" : "destructive"}>
@@ -249,10 +249,10 @@ export default function UsagePage() {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">
-                    {data.quota.used.toLocaleString()} / {data.quota.limit.toLocaleString()} tokens
+                    {data.quota.used.toLocaleString()} / {data.quota.limit.toLocaleString()} {t('tokens')}
                   </span>
                   <span className="text-muted-foreground">
-                    Resets: {new Date(data.quota.resetAt).toLocaleDateString()}
+                    {t('resets')}: {new Date(data.quota.resetAt).toLocaleDateString()}
                   </span>
                 </div>
               </div>
@@ -264,9 +264,9 @@ export default function UsagePage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Token Attribution</CardTitle>
+                  <CardTitle>{t('tokenAttribution')}</CardTitle>
                   <CardDescription>
-                    See where tokens are being consumed
+                    {t('seeWhereTokensAreBeingConsumed')}
                   </CardDescription>
                 </div>
                 <div className="flex gap-2">
@@ -275,21 +275,21 @@ export default function UsagePage() {
                     size="sm"
                     onClick={() => setView("tasks")}
                   >
-                    Tasks
+                    {t('tasks')}
                   </Button>
                   <Button
                     variant={view === "agents" ? "default" : "outline"}
                     size="sm"
                     onClick={() => setView("agents")}
                   >
-                    Agents
+                    {t('agents')}
                   </Button>
                   <Button
                     variant={view === "projects" ? "default" : "outline"}
                     size="sm"
                     onClick={() => setView("projects")}
                   >
-                    Projects
+                    {t('projects')}
                   </Button>
                 </div>
               </div>
@@ -298,7 +298,7 @@ export default function UsagePage() {
               {filteredAttribution.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8">
                   <BarChart3 className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No attribution data available</p>
+                  <p className="text-muted-foreground">{t('noAttributionDataAvailable')}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -308,11 +308,11 @@ export default function UsagePage() {
                         <div className="flex items-center gap-2">
                           <span className="font-medium">{item.name}</span>
                           <Badge variant="outline" className="text-xs">
-                            {item.type}
+                            {item.type === 'task' ? t('task') : item.type === 'agent' ? t('agents') : item.type}
                           </Badge>
                         </div>
                         <div className="text-right">
-                          <span className="font-semibold">{item.tokens.toLocaleString()} tokens</span>
+                          <span className="font-semibold">{item.tokens.toLocaleString()} {t('tokens')}</span>
                           <span className="text-muted-foreground ml-2">
                             ({item.percentage.toFixed(1)}%)
                           </span>
@@ -326,7 +326,7 @@ export default function UsagePage() {
                       </div>
                       <div className="flex items-center justify-between text-xs text-muted-foreground">
                         <span>${item.cost.toFixed(2)}</span>
-                        <span>Avg: ${(item.cost / item.tokens * 1000000).toFixed(2)} per 1M tokens</span>
+                        <span>{t('avgPer1MTokens', { cost: (item.cost / item.tokens * 1000000).toFixed(2) })}</span>
                       </div>
                     </div>
                   ))}
@@ -339,7 +339,7 @@ export default function UsagePage() {
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Today vs Yesterday</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('todayVsYesterday')}</CardTitle>
                 {data.today.tokens > 0 ? (
                   <TrendingUp className="h-4 w-4 text-green-500" />
                 ) : (
@@ -356,26 +356,26 @@ export default function UsagePage() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">7-Day Trend</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('trend7Day')}</CardTitle>
                 <Calendar className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{data.last7days.tokens.toLocaleString()}</div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Avg {Math.round(data.last7days.tokens / 7).toLocaleString()} / day
+                  {t('avgPerDay', { count: Math.round(data.last7days.tokens / 7).toLocaleString() })}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">30-Day Trend</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('trend30Day')}</CardTitle>
                 <BarChart3 className="h-4 w-4 text-purple-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{data.last30days.tokens.toLocaleString()}</div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Avg {Math.round(data.last30days.tokens / 30).toLocaleString()} / day
+                  {t('avgPerDay', { count: Math.round(data.last30days.tokens / 30).toLocaleString() })}
                 </p>
               </CardContent>
             </Card>
@@ -384,9 +384,9 @@ export default function UsagePage() {
           {/* Data Connection Status */}
           <Card>
             <CardHeader>
-              <CardTitle>Data Connection Status</CardTitle>
+              <CardTitle>{t('dataConnectionStatus')}</CardTitle>
               <CardDescription>
-                Status of usage and cost data sources
+                {t('statusOfUsageAndCostDataSources')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -394,23 +394,23 @@ export default function UsagePage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-green-500" />
-                    <span className="text-sm">OpenClaw Gateway</span>
+                    <span className="text-sm">{t('openclawGateway')}</span>
                   </div>
-                  <Badge variant="default">Connected</Badge>
+                  <Badge variant="default">{tCommon('connected')}</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-green-500" />
-                    <span className="text-sm">Runtime Data</span>
+                    <span className="text-sm">{t('runtimeData')}</span>
                   </div>
-                  <Badge variant="default">Connected</Badge>
+                  <Badge variant="default">{tCommon('connected')}</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-yellow-500" />
-                    <span className="text-sm">Subscription Data</span>
+                    <span className="text-sm">{t('subscriptionData')}</span>
                   </div>
-                  <Badge variant="outline">Partial</Badge>
+                  <Badge variant="outline">{t('partial')}</Badge>
                 </div>
               </div>
             </CardContent>

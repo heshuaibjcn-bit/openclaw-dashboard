@@ -444,9 +444,9 @@ export default function MemoryPage() {
       {/* Memory Info */}
       <Card>
         <CardHeader>
-          <CardTitle>About Memory & Agent Filtering</CardTitle>
+          <CardTitle>{t('aboutMemory')}</CardTitle>
           <CardDescription>
-            How the agent uses LanceDB with agent-specific filtering
+            {t('aboutMemoryDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

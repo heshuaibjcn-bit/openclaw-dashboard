@@ -241,7 +241,7 @@ export default function AgentsPage() {
                     </div>
 
                     <div>
-                      <p className="text-xs text-muted-foreground mb-1">Created</p>
+                      <p className="text-xs text-muted-foreground mb-1">{t('created')}</p>
                       <p className="text-xs">
                         {new Date(agent.createdAt).toLocaleString()}
                       </p>
@@ -255,7 +255,7 @@ export default function AgentsPage() {
                         onClick={() => handleEdit(agent)}
                       >
                         <Edit className="mr-1 h-3 w-3" />
-                        Edit
+                        {t('edit')}
                       </Button>
                       <Button
                         variant="outline"
@@ -264,7 +264,7 @@ export default function AgentsPage() {
                         onClick={() => handleDelete(agent)}
                       >
                         <Trash2 className="mr-1 h-3 w-3" />
-                        Delete
+                        {t('delete')}
                       </Button>
                     </div>
                   </CardContent>
@@ -276,13 +276,13 @@ export default function AgentsPage() {
               <Bot className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-muted-foreground">
                 {searchQuery
-                  ? "No agents match your search"
-                  : "No agents configured"}
+                  ? t('noAgentsMatchSearch')
+                  : t('noAgentsConfigured')}
               </p>
               {!searchQuery && (
                 <Button className="mt-4" size="sm">
                   <Plus className="mr-2 h-4 w-4" />
-                  Create Your First Agent
+                  {t('createYourFirstAgent')}
                 </Button>
               )}
             </div>
@@ -295,29 +295,27 @@ export default function AgentsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {selectedAgent ? "Edit Agent" : "Create Agent"}
+              {selectedAgent ? t('editAgent') : t('createAgent')}
             </DialogTitle>
             <DialogDescription>
-              {selectedAgent
-                ? "Update agent configuration"
-                : "Configure a new AI agent"}
+              {selectedAgent ? t('editAgentDesc') : t('createAgentDesc')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{tCommon('name')}</Label>
               <Input
                 id="name"
                 value={editingAgent.name}
                 onChange={(e) =>
                   setEditingAgent({ ...editingAgent, name: e.target.value })
                 }
-                placeholder="e.g., Main Agent"
+                placeholder={t('namePlaceholder')}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="model">Model</Label>
+              <Label htmlFor="model">{t('model')}</Label>
               <Select
                 value={editingAgent.model}
                 onValueChange={(value) =>
@@ -325,7 +323,7 @@ export default function AgentsPage() {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a model" />
+                  <SelectValue placeholder={t('selectModel')} />
                 </SelectTrigger>
                 <SelectContent>
                   {modelOptions.map((model) => (
@@ -338,7 +336,7 @@ export default function AgentsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Capabilities</Label>
+              <Label>{t('capabilities')}</Label>
               <div className="grid grid-cols-2 gap-2">
                 {capabilityOptions.map((cap) => {
                   const Icon = cap.icon;
@@ -364,10 +362,10 @@ export default function AgentsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
-              Cancel
+              {tCommon('cancel')}
             </Button>
             <Button onClick={handleSave}>
-              {selectedAgent ? "Save Changes" : "Create Agent"}
+              {selectedAgent ? t('saveChanges') : t('createAgent')}
             </Button>
           </DialogFooter>
         </DialogContent>
