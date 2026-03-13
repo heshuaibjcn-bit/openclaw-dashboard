@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Users,
   Bot,
@@ -245,14 +246,38 @@ export default function StaffPage() {
       {/* Staff List */}
       <div className="space-y-4">
         {loading ? (
-          <Card>
-            <CardContent className="flex items-center justify-center py-16">
-              <div className="text-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
-                <p className="text-muted-foreground">{t('loadingStaffStatus')}</p>
-              </div>
-            </CardContent>
-          </Card>
+          // Skeleton loading state
+          [...Array(3)].map((_, i) => (
+            <Card key={i} className="overflow-hidden">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between gap-6">
+                  <div className="flex-1 space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-2 flex-1">
+                        <Skeleton className="h-6 w-32" />
+                        <Skeleton className="h-4 w-48" />
+                      </div>
+                      <Skeleton className="h-8 w-8 rounded" />
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Skeleton className="h-6 w-20 rounded-full" />
+                      <Skeleton className="h-6 w-24 rounded-full" />
+                      <Skeleton className="h-6 w-20 rounded-full" />
+                    </div>
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-3/4" />
+                    </div>
+                  </div>
+                  <div className="space-y-3 w-48 flex-shrink-0">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-32" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
         ) : staff.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">
