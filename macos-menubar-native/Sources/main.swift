@@ -152,21 +152,52 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func isDashboardRunning() -> Bool {
+        // 首先检查我们启动的进程
         if let process = dashboardProcess, process.isRunning {
             return true
         }
 
+        // 更精确的检测：查找包含 openclaw-dashboard 路径的 next dev 进程
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/bin/pgrep")
-        task.arguments = ["-f", "next dev"]
+        task.arguments = ["-f", "openclaw-dashboard.*next dev"]
 
         do {
             try task.run()
             task.waitUntilExit()
-            return task.terminationStatus == 0
+            let hasProcess = task.terminationStatus == 0
+
+            // 额外验证：检查 localhost:3000 端口是否可访问
+            if hasProcess {
+                return isServerResponding()
+            }
+
+            return false
         } catch {
             return false
         }
+    }
+
+    func isServerResponding() -> Bool {
+        let url = URL(string: "http://localhost:3000")!
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 1.0
+
+        let semaphore = DispatchSemaphore(value: 0)
+        var isResponding = false
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let httpResponse = response as? HTTPURLResponse,
+               httpResponse.statusCode == 200 {
+                isResponding = true
+            }
+            semaphore.signal()
+        }
+
+        task.resume()
+        semaphore.wait()
+
+        return isResponding
     }
 
     func updateMenu() {
