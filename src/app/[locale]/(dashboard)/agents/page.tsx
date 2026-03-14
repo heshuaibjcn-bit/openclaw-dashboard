@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -37,9 +37,42 @@ import {
   Zap,
   Database,
   FileText,
+  Shield,
+  CheckCircle2,
+  Server,
+  Cpu,
+  Clock,
+  AlertTriangle,
 } from "lucide-react";
 import { useAgents, useSkills } from "@/lib/openclaw";
 import type { Agent } from "@/lib/openclaw";
+
+interface ModelConfig {
+  primaryModel: string;
+  fallbackModels: string[];
+  providers: Array<{
+    id: string;
+    name: string;
+    baseUrl: string;
+    models: Array<{
+      id: string;
+      name: string;
+      reasoning: boolean;
+      cost: { input: number; output: number };
+      contextWindow: number;
+      maxTokens: number;
+    }>;
+    isPrimary: boolean;
+    isFallback: boolean;
+    authProfile: string;
+  }>;
+  cooldownConfig: {
+    billingBackoffHours: number;
+    billingMaxHours: number;
+    failureWindowHours: number;
+  };
+  configPath: string;
+}
 
 export default function AgentsPage() {
   const t = useTranslations('agents');
@@ -54,6 +87,28 @@ export default function AgentsPage() {
     model: "",
     capabilities: [] as string[],
   });
+  const [modelConfig, setModelConfig] = useState<ModelConfig | null>(null);
+  const [modelConfigLoading, setModelConfigLoading] = useState(true);
+
+  // Fetch model configuration
+  useEffect(() => {
+    fetchModelConfig();
+  }, []);
+
+  const fetchModelConfig = async () => {
+    try {
+      setModelConfigLoading(true);
+      const response = await fetch('/api/models');
+      if (response.ok) {
+        const config = await response.json();
+        setModelConfig(config);
+      }
+    } catch (error) {
+      console.error('Failed to fetch model config:', error);
+    } finally {
+      setModelConfigLoading(false);
+    }
+  };
 
   const filteredAgents = agents?.filter((agent) =>
     agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -175,6 +230,131 @@ export default function AgentsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Model Disaster Recovery Configuration */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-purple-500" />
+                Model Disaster Recovery
+              </CardTitle>
+              <CardDescription className="mt-1">
+                OpenClaw model failover and redundancy configuration
+              </CardDescription>
+            </div>
+            <Badge variant="outline" className="text-xs">
+              {modelConfig?.providers.length || 0} Providers
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {modelConfigLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : modelConfig ? (
+            <div className="space-y-6">
+              {/* Primary and Fallback Models */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  Primary Model
+                </div>
+                <div className="pl-6">
+                  <Badge variant="default" className="text-sm">
+                    {modelConfig.primaryModel}
+                  </Badge>
+                </div>
+
+                {modelConfig.fallbackModels.length > 0 && (
+                  <>
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <Server className="h-4 w-4 text-orange-500" />
+                      Fallback Models
+                    </div>
+                    <div className="pl-6 flex flex-wrap gap-2">
+                      {modelConfig.fallbackModels.map((model, index) => (
+                        <Badge key={model} variant="outline" className="text-sm">
+                          {index + 1}. {model}
+                        </Badge>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Providers List */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Database className="h-4 w-4 text-blue-500" />
+                  Model Providers
+                </div>
+                <div className="space-y-3">
+                  {modelConfig.providers.map((provider) => (
+                    <div key={provider.id} className="border rounded-lg p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Cpu className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">{provider.name}</span>
+                        </div>
+                        <div className="flex gap-1">
+                          {provider.isPrimary && (
+                            <Badge variant="default" className="text-xs">Primary</Badge>
+                          )}
+                          {provider.isFallback && (
+                            <Badge variant="outline" className="text-xs">Fallback</Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-xs text-muted-foreground space-y-1">
+                        <div>Base URL: <code className="bg-muted px-1 py-0.5 rounded">{provider.baseUrl}</code></div>
+                        <div>Auth Profile: <code className="bg-muted px-1 py-0.5 rounded">{provider.authProfile}</code></div>
+                        <div>Models: {provider.models.length} available</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Cooldown Configuration */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Clock className="h-4 w-4 text-yellow-500" />
+                  Failure Cooldown Settings
+                </div>
+                <div className="grid grid-cols-3 gap-4 pl-6">
+                  <div>
+                    <div className="text-xs text-muted-foreground">Billing Backoff</div>
+                    <div className="text-sm font-medium">{modelConfig.cooldownConfig.billingBackoffHours}h</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Max Backoff</div>
+                    <div className="text-sm font-medium">{modelConfig.cooldownConfig.billingMaxHours}h</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Failure Window</div>
+                    <div className="text-sm font-medium">{modelConfig.cooldownConfig.failureWindowHours}h</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Configuration File Path */}
+              <div className="pt-3 border-t">
+                <div className="text-xs text-muted-foreground">
+                  Configuration: <code className="bg-muted px-1 py-0.5 rounded">{modelConfig.configPath}</code>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8">
+              <AlertTriangle className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">Failed to load model configuration</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Available Skills */}
       <Card>
