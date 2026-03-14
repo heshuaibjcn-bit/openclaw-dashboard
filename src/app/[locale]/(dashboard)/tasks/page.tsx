@@ -68,6 +68,7 @@ export default function TasksPage() {
 
   const tasks = apiTasks || [];
   const [searchQuery, setSearchQuery] = useState("");
+  const [taskTypeFilter, setTaskTypeFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"updated" | "created" | "priority" | "due">("updated");
@@ -148,6 +149,9 @@ export default function TasksPage() {
           !task.tags?.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase()))) {
         return false;
       }
+      if (taskTypeFilter !== "all" && task.taskType !== taskTypeFilter) {
+        return false;
+      }
       if (statusFilter !== "all" && task.status !== statusFilter) {
         return false;
       }
@@ -215,7 +219,7 @@ export default function TasksPage() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t('stats.total')}</CardTitle>
@@ -225,6 +229,32 @@ export default function TasksPage() {
             <div className="text-2xl font-bold">{stats.total}</div>
             <p className="text-xs text-muted-foreground mt-1">
               {t('stats.totalDesc')}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">项目任务</CardTitle>
+            <CheckSquare className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{tasks.filter(t => t.taskType === 'project').length}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              来自 task.json
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Cron 任务</CardTitle>
+            <Clock className="h-4 w-4 text-orange-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{tasks.filter(t => t.taskType === 'cron').length}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              定时任务
             </p>
           </CardContent>
         </Card>
@@ -267,19 +297,6 @@ export default function TasksPage() {
             </p>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('stats.blocked')}</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.blocked}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {t('stats.blockedDesc')}
-            </p>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Filters */}
@@ -295,6 +312,16 @@ export default function TasksPage() {
                 className="pl-9"
               />
             </div>
+            <Select value={taskTypeFilter} onValueChange={(value) => setTaskTypeFilter(value ?? 'all')}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="任务类型" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部任务</SelectItem>
+                <SelectItem value="project">📋 项目任务</SelectItem>
+                <SelectItem value="cron">⏰ Cron 任务</SelectItem>
+              </SelectContent>
+            </Select>
             <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value ?? 'all')}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder={tCommon('status')} />
@@ -379,7 +406,12 @@ export default function TasksPage() {
           </Card>
         ) : (
           filteredTasks.map((task) => (
-            <Card key={task.id} className="hover:shadow-md transition-shadow">
+            <Card
+              key={task.id}
+              className={`hover:shadow-md transition-shadow ${
+                task.taskType === 'cron' ? 'border-orange-200 bg-orange-50/30 dark:border-orange-900 dark:bg-orange-950/20' : ''
+              }`}
+            >
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 space-y-2">
@@ -388,6 +420,11 @@ export default function TasksPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="font-semibold">{task.title}</h3>
+                          {task.taskType === 'cron' && (
+                            <Badge variant="outline" className="text-xs bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900 dark:text-orange-300 dark:border-orange-700">
+                              ⏰ 定时
+                            </Badge>
+                          )}
                           {getStatusBadge(task.status)}
                           {getPriorityBadge(task.priority)}
                         </div>
@@ -399,24 +436,33 @@ export default function TasksPage() {
 
                     <div className="flex items-center gap-4 flex-wrap text-sm text-muted-foreground">
                       {task.taskType === 'cron' && (
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          <span className="font-mono text-xs">{task.schedule}</span>
-                        </div>
-                      )}
-                      {task.taskType === 'cron' && task.cronExpression && (
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs bg-secondary px-2 py-0.5 rounded">
-                            {task.cronExpression}
-                          </span>
-                          {task.timezone && (
-                            <span className="text-xs text-muted-foreground">
-                              ({task.timezone})
-                            </span>
+                        <>
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3 text-orange-500" />
+                            <span className="font-mono text-xs">{task.schedule}</span>
+                          </div>
+                          {task.cronExpression && (
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded dark:bg-orange-900 dark:text-orange-300">
+                                {task.cronExpression}
+                              </span>
+                              {task.timezone && (
+                                <span className="text-xs text-muted-foreground">
+                                  ({task.timezone})
+                                </span>
+                              )}
+                            </div>
                           )}
-                        </div>
+                          {task.enabled !== undefined && (
+                            <div className="flex items-center gap-1">
+                              <span className={`text-xs px-2 py-0.5 rounded ${task.enabled ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'}`}>
+                                {task.enabled ? '已启用' : '已禁用'}
+                              </span>
+                            </div>
+                          )}
+                        </>
                       )}
-                      {task.projectTitle && (
+                      {task.taskType === 'project' && task.projectTitle && (
                         <div className="flex items-center gap-1">
                           <Tag className="h-3 w-3" />
                           <span>{task.projectTitle}</span>
