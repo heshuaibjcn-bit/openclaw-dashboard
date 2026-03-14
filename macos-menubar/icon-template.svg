@@ -1,0 +1,31 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="56" fill="#1f2937"/>
+
+  <!-- Claw shape - 4 segments -->
+  <g stroke="#60a5fa" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Top left claw -->
+    <path d="M64 64 Q48 48 36 40"/>
+    <!-- Top right claw -->
+    <path d="M64 64 Q80 48 92 40"/>
+    <!-- Bottom left claw -->
+    <path d="M64 64 Q48 80 36 88"/>
+    <!-- Bottom right claw -->
+    <path d="M64 64 Q80 80 92 88"/>
+
+    <!-- Center circle -->
+    <circle cx="64" cy="64" r="12" fill="#60a5fa" stroke="none"/>
+
+    <!-- Connection lines -->
+    <line x1="56" y1="64" x2="44" y2="52" stroke-width="3"/>
+    <line x1="72" y1="64" x2="84" y2="52" stroke-width="3"/>
+    <line x1="56" y1="64" x2="44" y2="76" stroke-width="3"/>
+    <line x1="72" y1="64" x2="84" y2="76" stroke-width="3"/>
+  </g>
+
+  <!-- Status indicator dots -->
+  <circle cx="48" cy="40" r="4" fill="#22c55e"/>
+  <circle cx="80" cy="40" r="4" fill="#22c55e"/>
+  <circle cx="48" cy="88" r="4" fill="#22c55e"/>
+  <circle cx="80" cy="88" r="4" fill="#22c55e"/>
+</svg>

@@ -27,6 +27,163 @@ For each completed task, add a new section with:
 
 ## Task Completion History
 
+### 2026-03-14 - macOS Menubar Application - Functionality Updated
+
+#### Completed Work:
+- Changed app functionality from controlling OpenClaw Gateway to controlling Dashboard service
+- Updated Rust backend to manage Next.js dev server instead of Gateway
+- Updated React frontend UI text and descriptions
+- Updated all documentation files
+
+#### Implementation Details:
+
+**1. Rust Backend Changes (src-tauri/src/)**
+
+- **services.rs**: Completely rewritten for Dashboard service management
+  - `start_dashboard()`: Execute `npm run dev` in Dashboard project directory
+  - `stop_dashboard()`: Execute `pkill -f "next dev"` to stop Next.js server
+  - `get_status()`: Check process via `pgrep -f "next dev"`
+  - Project path: `/Users/alex/openclaw-dashboard`
+
+- **commands.rs**: Updated command names
+  - `start_gateway()` → `start_dashboard()`
+  - `stop_gateway()` → `stop_dashboard()`
+  - `get_gateway_status()` → `get_dashboard_status()`
+  - `open_dashboard()` remains the same
+
+- **lib.rs**: Updated invoke handler with new command names
+
+**2. React Frontend Changes (src/App.tsx)**
+
+- Updated UI text from "Gateway" to "Dashboard"
+- Changed header: "Gateway Control" → "Dashboard Service Control"
+- Updated status text: "Gateway Running/Stopped" → "Dashboard Running/Stopped"
+- Added disable state for "Open Dashboard" button when Dashboard is not running
+- Added footer showing port information (3000)
+- Updated wait time for start operation (3 seconds instead of 2)
+
+**3. Configuration Updates**
+
+- `src-tauri/tauri.conf.json`: Updated window title to "OpenClaw Dashboard"
+- `src-tauri/Cargo.toml`: Updated description
+- All descriptions changed from "Gateway" to "Dashboard service"
+
+**4. Documentation Updates**
+
+- **README.md**: Updated to reflect Dashboard service control
+- **DEVELOPMENT.md**: Updated with Dashboard-specific information
+- **IMPLEMENTATION_SUMMARY.md**: Updated all content
+- **setup.sh**: Added Dashboard project check
+
+#### Testing Method:
+- Frontend builds successfully: `npm run build` ✓
+- Code changes verified ✓
+
+#### Notes:
+- App now controls the Next.js dev server instead of OpenClaw Gateway
+- Requires Dashboard project to exist at `/Users/alex/openclaw-dashboard`
+- More practical for daily development workflow
+- Allows quick start/stop of Dashboard from menu bar
+
+---
+
+### 2026-03-14 - macOS Menubar Application - Complete
+
+#### Completed Work:
+- Created Tauri 2.0 project structure for macOS menubar app
+- Implemented React frontend with Tailwind CSS
+- Implemented Rust backend for OpenClaw Gateway service management
+- Configured Tauri for menubar behavior (borderless, always-on-top, skip-taskbar)
+- Set up build pipeline (Vite + Tauri)
+- Created comprehensive documentation (README.md, DEVELOPMENT.md)
+- Added quick-start setup script
+
+#### Implementation Details:
+
+**1. Project Structure Created**
+```
+macos-menubar/
+├── src/                    # React frontend
+│   ├── App.tsx            # Main UI with Gateway controls
+│   ├── main.tsx           # React entry point
+│   └── styles.css         # Tailwind CSS styles
+├── src-tauri/             # Rust backend
+│   ├── src/
+│   │   ├── commands.rs    # Tauri commands
+│   │   ├── services.rs    # OpenClaw service management
+│   │   └── lib.rs         # Main entry point
+│   ├── capabilities/      # Tauri permissions
+│   └── tauri.conf.json    # Menubar configuration
+└── package.json           # Node dependencies
+```
+
+**2. Rust Backend (src-tauri/src/)**
+- **commands.rs**: Exposed 4 commands to frontend:
+  - `start_gateway()`: Execute `openclaw gateway start`
+  - `stop_gateway()`: Execute `openclaw gateway stop`
+  - `get_gateway_status()`: Check process via `pgrep`
+  - `open_dashboard()`: Open localhost:3000 in browser
+
+- **services.rs**: OpenClaw service management
+  - Process execution of OpenClaw CLI commands
+  - Status detection via process checking
+  - Error handling with helpful messages
+
+**3. React Frontend (src/)**
+- **App.tsx**: Menubar popup UI (300x400px)
+  - Gateway status display (green/gray indicator)
+  - Start/Stop buttons with loading states
+  - "Open Dashboard" button
+  - Error message display
+  - Auto-refresh every 5 seconds
+
+**4. Tauri Configuration**
+- Window: 300x400px, borderless, always-on-top
+- Skip taskbar (doesn't show in Dock)
+- Transparent background
+- macOS Private API enabled for menubar features
+- Bundle identifier: com.openclaw.menubar
+
+**5. Build System**
+- Vite for frontend bundling
+- Tauri 2.0 for native app packaging
+- TypeScript for type safety
+- Tailwind CSS for styling
+
+#### Testing Method:
+- Frontend builds successfully: `npm run build` ✓
+- Project structure verified ✓
+- Rust source files compile (syntax checked) ✓
+
+#### How to Run:
+```bash
+cd macos-menubar
+npm run tauri:dev    # Development mode
+npm run tauri:build  # Production build
+```
+
+#### Prerequisites:
+- OpenClaw CLI must be installed
+- macOS 12+ (Monterey or later)
+- Rust 1.77+
+- Node.js 18+
+
+#### Notes:
+- The app is ready for development testing
+- Icons are placeholders (default Tauri icons)
+- Requires OpenClaw Gateway to be installed for full functionality
+- Menubar icons can be customized in src-tauri/icons/
+- Code signing needed for distribution (not configured yet)
+
+#### Next Steps (when OpenClaw Gateway is available):
+1. Run `npm run tauri:dev` to test the app
+2. Verify Gateway start/stop commands work
+3. Test status monitoring
+4. Customize icons for different states (running/stopped/error)
+5. Add code signing for distribution
+
+---
+
 ### 2026-03-14 - Task 9: Implement Loading Skeleton States - Complete
 **Commit**: [pending]
 
