@@ -14,33 +14,56 @@
 
 ### 方式一：自包含版本（推荐普通用户）
 
-**文件：** `OpenClaw-Dashboard-Standalone.dmg` (796MB)
+**下载：** 从 [GitHub Releases](https://github.com/heshuaibjcn-bit/openclaw-dashboard/releases) 下载最新的 `OpenClaw-Dashboard-Standalone.dmg`
+
+**文件大小：** ~807 MB
 
 **特点：**
 - ✅ 完全自包含，开箱即用
-- ✅ 内置 Node.js 运行时
+- ✅ 内置 Node.js v24.14.0 运行时
 - ✅ 包含所有依赖（node_modules）
 - ✅ 无需任何预装软件
+- ✅ 支持端口配置
 
 **安装步骤：**
-1. 双击打开 `OpenClaw-Dashboard-Standalone.dmg`
-2. 将 `OpenClaw Dashboard` 拖拽到 Applications 文件夹
-3. 从 Launchpad 启动应用
-4. 点击菜单栏图标，选择"启动服务"
+1. 从 [GitHub Releases](https://github.com/heshuaibjcn-bit/openclaw-dashboard/releases) 下载最新版本
+2. 双击打开 `OpenClaw-Dashboard-Standalone.dmg`
+3. 将 `OpenClaw Dashboard` 拖拽到 Applications 文件夹
+4. 从 Launchpad 启动应用
+5. 点击菜单栏图标，选择"启动服务"
 
-### 方式二：轻量版本（推荐开发者）
+**版本管理：**
+- 使用 GitHub Releases 进行版本发布
+- 每个版本包含完整的 DMG 安装包
+- 发布格式：`v{version}-standalone`（如 `v1.0.0-standalone`）
 
-**文件：** `OpenClaw-Dashboard-1.0.0.dmg` (43KB)
+### 方式二：源代码部署（推荐开发者）
+
+**代码：** 从 `main` 分支获取最新源代码
 
 **特点：**
-- ✅ 体积小，下载快
+- ✅ 最新功能和更新
+- ✅ 体积小，便于修改
 - ✅ 需要系统已安装 Node.js
 - ✅ 使用系统的 Node.js 和依赖
 
 **系统要求：**
-- macOS 10.15 (Catalina) 或更高版本
-- Node.js 已安装（推荐通过 nvm 安装）
+- macOS 12.0 (Monterey) 或更高版本
+- Node.js v24.14.0+ 已安装
 - Next.js 项目依赖已安装
+
+**开发步骤：**
+```bash
+# 克隆仓库
+git clone https://github.com/heshuaibjcn-bit/openclaw-dashboard.git
+cd macos-menubar-native
+
+# 构建应用
+./build.sh
+
+# 打包应用
+./package-dmg.sh
+```
 
 ## 使用说明
 
@@ -164,15 +187,63 @@ macos-menubar-native/
 └── OpenClaw-Dashboard-Standalone.dmg   # 自包含版 DMG (796MB)
 ```
 
+## 版本管理策略
+
+本项目采用 **Git 分支 + GitHub Releases** 的双版本管理方式：
+
+### 1. 源代码版本（main 分支）
+- **位置**: [main 分支](https://github.com/heshuaibjcn-bit/openclaw-dashboard/tree/main)
+- **内容**: 完整的源代码（Swift、脚本、配置文件）
+- **用途**: 开发者部署和自定义构建
+- **更新**: 频繁更新，包含最新功能和修复
+
+### 2. 发布版本（GitHub Releases）
+- **位置**: [Releases 页面](https://github.com/heshuaibjcn-bit/openclaw-dashboard/releases)
+- **内容**: 已打包的 DMG 安装文件
+- **用途**: 最终用户直接安装使用
+- **更新**: 稳定版本发布
+
+### 版本对应关系
+
+| 版本类型 | Git Tag | Release 名称 | 文件名 |
+|---------|---------|--------------|--------|
+| 自包含版 | `v1.0.0-standalone` | v1.0.0-standalone | OpenClaw-Dashboard-Standalone.dmg |
+| 源代码版 | `v1.0.0` | v1.0.0 | 源代码压缩包 |
+
+### 开发流程
+
+```bash
+# 1. 开发新功能（在 main 分支）
+git checkout main
+# ... 进行开发和测试
+
+# 2. 创建源代码版本标签
+git tag -a v1.0.0 -m "Release v1.0.0"
+git push origin v1.0.0
+
+# 3. 构建自包含版本
+./package-standalone.sh
+./package-dmg-standalone.sh
+
+# 4. 创建发布版本（包含 DMG）
+gh release create v1.0.0-standalone OpenClaw-Dashboard-Standalone.dmg \
+  --title "OpenClaw Dashboard - Standalone macOS App v1.0.0" \
+  --notes "Release notes here..."
+```
+
 ## 版本对比
 
-| 特性 | 轻量版 | 自包含版 |
-|------|--------|----------|
-| 大小 | 43KB | 796MB |
-| Node.js | 需要安装 | 已内置 |
+| 特性 | 源代码版 | 自包含版 |
+|------|---------|----------|
+| 获取方式 | main 分支 | GitHub Releases |
+| 大小 | ~100KB（源代码） | ~807MB（DMG） |
+| Node.js | 需要安装 | 已内置 v24.14.0 |
 | 依赖 | 需要 npm install | 已内置 |
+| 构建工具 | Swift 编译器 | 无需 |
 | 目标用户 | 开发者 | 普通用户 |
+| 更新频率 | 实时更新 | 稳定版本 |
 | 离线运行 | 否 | 是 |
+| 自定义 | 完全支持 | 有限支持 |
 
 ## 功能状态
 
@@ -187,14 +258,26 @@ macos-menubar-native/
 
 ## 更新日志
 
-### v1.0.0 (当前版本)
+### v1.0.0-standalone (2025-03-14)
+**发布版本** - 可从 [GitHub Releases](https://github.com/heshuaibjcn-bit/openclaw-dashboard/releases/tag/v1.0.0-standalone) 下载
+
+- ✅ 完全自包含的 macOS 应用（~807MB）
+- ✅ 内置 Node.js v24.14.0 和所有依赖
 - ✅ 精美的龙虾 + 眼睛图标设计
 - ✅ 左键和右键点击都可显示菜单
-- ✅ 实时状态监控
+- ✅ 实时状态监控（绿色/灰色指示器）
 - ✅ 服务启动/停止功能
 - ✅ 快速打开 Dashboard
-- ✅ 自包含版本（包含 Node.js 和所有依赖）
-- ✅ 仅 43KB 超小体积（轻量版）
+- ✅ 端口配置功能（默认 3000，可自定义）
+- ✅ 服务器就绪检测（支持 HTTP 2xx/3xx）
+- ✅ 中文本地化界面
+
+### v1.0.0 (源代码版本)
+**开发版本** - 可从 [main 分支](https://github.com/heshuaibjcn-bit/openclaw-dashboard) 获取
+
+- 完整的源代码
+- 开发脚本和构建工具
+- 便于开发者自定义和扩展
 
 ## 许可证
 
