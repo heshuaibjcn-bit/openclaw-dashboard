@@ -420,7 +420,12 @@
     "title": "Sessions",
     "subtitle": "Active and historical session information",
     "stats": {
+      "total": "Total Sessions",
+      "totalSessions": "Total sessions",
       "active": "Active Sessions",
+      "activeSessions": "Active sessions",
+      "types": "Unique Types",
+      "uniqueTypes": "Unique chat types",
       "totalTokens": "Total Tokens",
       "avgDuration": "Avg Duration",
       "agents": "Agents"
@@ -428,6 +433,7 @@
     "searchPlaceholder": "Search sessions...",
     "loading": "Loading sessions...",
     "noSessions": "No sessions found",
+    "noSessionsMatch": "No sessions match your search",
     "currentlyRunning": "Currently running",
     "acrossAllSessions": "Across all sessions",
     "avgUsage": "Avg Usage",
@@ -443,7 +449,18 @@
     "messages": "Messages",
     "userMessages": "User messages",
     "agentResponses": "Agent responses",
-    "totalMessages": "Total messages"
+    "totalMessages": "Total messages",
+    "listTitle": "All Sessions",
+    "listDescription": "View and manage all OpenClaw sessions",
+    "table": {
+      "id": "Session ID",
+      "agent": "Agent",
+      "type": "Type",
+      "channel": "Channel",
+      "origin": "Origin",
+      "status": "Status",
+      "lastActivity": "Last Activity"
+    }
   },
   "agents": {
     "title": "Agents",

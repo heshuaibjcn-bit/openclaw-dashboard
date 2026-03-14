@@ -420,7 +420,12 @@
     "title": "会话",
     "subtitle": "活跃和历史会话信息",
     "stats": {
+      "total": "总会话",
+      "totalSessions": "总会话数",
       "active": "活跃会话",
+      "activeSessions": "活跃会话",
+      "types": "唯一类型",
+      "uniqueTypes": "唯一聊天类型",
       "totalTokens": "总令牌",
       "avgDuration": "平均时长",
       "agents": "代理"
@@ -428,6 +433,7 @@
     "searchPlaceholder": "搜索会话...",
     "loading": "加载会话中...",
     "noSessions": "未找到会话",
+    "noSessionsMatch": "没有符合条件的会话",
     "currentlyRunning": "当前运行中",
     "acrossAllSessions": "所有会话总计",
     "avgUsage": "平均使用",
@@ -443,7 +449,18 @@
     "messages": "消息",
     "userMessages": "用户消息",
     "agentResponses": "代理响应",
-    "totalMessages": "总消息"
+    "totalMessages": "总消息",
+    "listTitle": "所有会话",
+    "listDescription": "查看和管理所有 OpenClaw 会话",
+    "table": {
+      "id": "会话 ID",
+      "agent": "代理",
+      "type": "类型",
+      "channel": "频道",
+      "origin": "来源",
+      "status": "状态",
+      "lastActivity": "最后活动"
+    }
   },
   "agents": {
     "title": "代理",
