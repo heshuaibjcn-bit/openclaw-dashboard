@@ -13,6 +13,7 @@ import {
   RefreshCw,
   Pause,
   Play,
+  MessageSquare,
 } from "lucide-react";
 import { useGatewayHealth, useSessions, useAgents } from "@/lib/openclaw";
 
@@ -43,6 +44,13 @@ export default function GatewayPage() {
     if (diffSecs < 60) return `${diffSecs}s ago`;
     if (diffSecs < 3600) return `${Math.floor(diffSecs / 60)}m ${diffSecs % 60}s ago`;
     return date.toLocaleTimeString();
+  };
+
+  const formatUptime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
   };
 
   return (
@@ -116,9 +124,7 @@ export default function GatewayPage() {
                     <Clock className="h-4 w-4" />
                     <span>{t('uptime')}</span>
                   </div>
-                  <p className="text-lg font-semibold">
-                    {Math.floor(health.uptime / 3600)}h {Math.floor((health.uptime % 3600) / 60)}m
-                  </p>
+                  <p className="text-lg font-semibold">{formatUptime(health.uptime)}</p>
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -172,14 +178,14 @@ export default function GatewayPage() {
           <CardDescription>{t('connectedCommunicationChannels')}</CardDescription>
         </CardHeader>
         <CardContent>
-          {health?.channels ? (
+          {health?.channels && health.channels.length > 0 ? (
             <div className="space-y-2">
               {health.channels.map((channel: { name: string; enabled: boolean; status: string }) => (
                 <div key={channel.name} className="flex items-center justify-between rounded-lg border p-3">
                   <div className="flex items-center gap-3">
                     <div
                       className={`h-2 w-2 rounded-full ${
-                        channel.status === "OK" ? "bg-green-500" : "bg-red-500"
+                        channel.status === "connected" ? "bg-green-500" : "bg-red-500"
                       }`}
                     />
                     <span className="font-medium">{channel.name}</span>
@@ -188,8 +194,8 @@ export default function GatewayPage() {
                     <Badge variant={channel.enabled ? "default" : "secondary"} className={channel.enabled ? "bg-green-500 hover:bg-green-600" : ""}>
                       {channel.enabled ? t('enabled') : t('disabled')}
                     </Badge>
-                    <Badge variant={channel.status === "OK" ? "default" : "destructive"} className={channel.status === "OK" ? "bg-green-500 hover:bg-green-600" : ""}>
-                      {channel.status}
+                    <Badge variant={channel.status === "connected" ? "default" : "destructive"} className={channel.status === "connected" ? "bg-green-500 hover:bg-green-600" : ""}>
+                      {channel.status === "connected" ? "connected" : "disconnected"}
                     </Badge>
                   </div>
                 </div>
@@ -219,21 +225,23 @@ export default function GatewayPage() {
               {sessions.map((session) => (
                 <div key={session.id} className="rounded-lg border p-4">
                   <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <p className="font-medium">{session.id}</p>
-                      <p className="text-sm text-muted-foreground">{t('model')}: {session.model}</p>
+                    <div className="space-y-1 flex-1">
+                      <p className="font-medium text-sm">{session.id.substring(0, 8)}...</p>
                       <p className="text-sm text-muted-foreground">
-                        {t('created')}: {new Date(session.createdAt).toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium">
-                        {session.tokens.total.toLocaleString()} / {session.tokens.max.toLocaleString()} {t('tokens')}
+                        <span className="inline-flex items-center gap-1">
+                          <MessageSquare className="h-3 w-3" />
+                          {session.chatType || 'unknown'}
+                        </span>
+                        {' • '}
+                        <span>{session.lastChannel || session.origin || 'webchat'}</span>
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {Math.round((session.tokens.total / session.tokens.max) * 100)}% {t('used')}
+                        {session.updatedAt ? `Updated: ${new Date(session.updatedAt).toLocaleString()}` : ''}
                       </p>
                     </div>
+                    <Badge variant="outline" className="text-xs">
+                      {session.status === 'active' ? 'Active' : 'Inactive'}
+                    </Badge>
                   </div>
                 </div>
               ))}
@@ -265,21 +273,33 @@ export default function GatewayPage() {
                     <div className="space-y-1">
                       <p className="font-medium">{agent.name}</p>
                       <p className="text-sm text-muted-foreground">{t('model')}: {agent.model}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {t('created')}: {new Date(agent.createdAt).toLocaleString()}
-                      </p>
+                      {agent.modelId && (
+                        <p className="text-xs text-muted-foreground">ID: {agent.modelId}</p>
+                      )}
+                      {agent.contextWindow && (
+                        <p className="text-xs text-muted-foreground">Context: {agent.contextWindow.toLocaleString()} tokens</p>
+                      )}
+                      {agent.totalSessions !== undefined && (
+                        <p className="text-xs text-muted-foreground">Sessions: {agent.totalSessions}</p>
+                      )}
                     </div>
                     <Badge variant={agent.status === "active" ? "default" : "secondary"} className={agent.status === "active" ? "bg-green-500 hover:bg-green-600" : ""}>
                       {agent.status}
                     </Badge>
                   </div>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {agent.capabilities.map((cap: string) => (
-                      <Badge key={cap} variant="outline" className="text-xs">
-                        {cap}
-                      </Badge>
-                    ))}
-                  </div>
+                  {agent.activeSession && (
+                    <div className="mt-3 pt-3 border-t">
+                      <p className="text-xs text-muted-foreground mb-1">Active Session:</p>
+                      <div className="flex items-center gap-2 text-xs">
+                        <Badge variant="outline" className="text-xs">
+                          {agent.activeSession.lastChannel || 'webchat'}
+                        </Badge>
+                        <span className="text-muted-foreground">
+                          {agent.activeSession.updatedAt ? new Date(agent.activeSession.updatedAt).toLocaleString() : 'Unknown'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

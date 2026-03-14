@@ -5,7 +5,6 @@ import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -15,42 +14,38 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   MessageSquare,
   Search,
-  TrendingUp,
   Clock,
   Bot,
   RefreshCw,
-  Filter,
 } from "lucide-react";
 import { useSessions } from "@/lib/openclaw";
-import type { Session } from "@/lib/openclaw";
 
 export default function SessionsPage() {
   const t = useTranslations('sessions');
   const tCommon = useTranslations('common');
   const { data: sessions, loading, refetch } = useSessions();
-  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredSessions = sessions?.filter((session) =>
     session.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    session.model.toLowerCase().includes(searchQuery.toLowerCase())
+    session.chatType?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    session.lastChannel?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    session.origin?.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
   const handleRefresh = () => {
     refetch();
   };
 
-  const getTokenUsagePercentage = (session: Session) => {
-    return Math.round((session.tokens.total / session.tokens.max) * 100);
+  const formatDate = (dateStr: string | null | undefined) => {
+    if (!dateStr) return '-';
+    try {
+      return new Date(dateStr).toLocaleString();
+    } catch {
+      return '-';
+    }
   };
 
   return (
@@ -69,295 +64,135 @@ export default function SessionsPage() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('stats.active')}</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('stats.total')}</CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{sessions?.length || 0}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              {t('currentlyRunning')}
+              {t('stats.totalSessions')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('stats.totalTokens')}</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">{t('stats.active')}</CardTitle>
+            <Clock className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {sessions?.reduce((sum, s) => sum + s.tokens.total, 0).toLocaleString() || 0}
+              {sessions?.filter(s => s.status === 'active').length || 0}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {t('acrossAllSessions')}
+              {t('stats.activeSessions')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('avgUsage')}</CardTitle>
-            <Bot className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">{t('stats.types')}</CardTitle>
+            <Bot className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {sessions?.length
-                ? Math.round(
-                    sessions.reduce((sum, s) => sum + getTokenUsagePercentage(s), 0) /
-                      sessions.length
-                  )
-                : 0}%
+              {new Set(sessions?.map(s => s.chatType) || []).size}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {t('tokenUtilization')}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('stats.avgDuration')}</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {sessions && sessions.length > 0
-                ? Math.floor(
-                    (Date.now() - new Date(sessions[0].createdAt).getTime()) /
-                      (1000 * 60 * 60)
-                  ) + "h"
-                : "-"}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {t('runningDuration')}
+              {t('stats.uniqueTypes')}
             </p>
           </CardContent>
         </Card>
       </div>
 
+      {/* Search */}
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder={t('searchPlaceholder')}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 pl-9 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          />
+        </div>
+      </div>
+
       {/* Sessions Table */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>{tCommon('all')} {t('title')}</CardTitle>
-              <CardDescription>
-                {loading
-                  ? t('loading')
-                  : `Showing ${filteredSessions.length} of ${sessions?.length || 0} sessions`}
-              </CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder={t('searchPlaceholder')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8 w-64"
-                />
-              </div>
-            </div>
-          </div>
+          <CardTitle>{t('listTitle')}</CardTitle>
+          <CardDescription>{t('listDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-8">
+            <div className="flex items-center justify-center py-16">
               <p className="text-muted-foreground">{t('loading')}</p>
             </div>
-          ) : filteredSessions.length > 0 ? (
+          ) : filteredSessions.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">
+                {searchQuery ? t('noSessionsMatch') : t('noSessions')}
+              </p>
+            </div>
+          ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Session ID</TableHead>
-                  <TableHead>Agent</TableHead>
-                  <TableHead>Model</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Last Activity</TableHead>
-                  <TableHead>Token Usage</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>{t('table.id')}</TableHead>
+                  <TableHead>{t('table.agent')}</TableHead>
+                  <TableHead>{t('table.type')}</TableHead>
+                  <TableHead>{t('table.channel')}</TableHead>
+                  <TableHead>{t('table.origin')}</TableHead>
+                  <TableHead>{t('table.status')}</TableHead>
+                  <TableHead>{t('table.lastActivity')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredSessions.map((session) => (
                   <TableRow key={session.id}>
-                    <TableCell className="font-mono text-sm">
-                      {session.id}
-                    </TableCell>
-                    <TableCell>{session.agentId}</TableCell>
-                    <TableCell>{session.model}</TableCell>
-                    <TableCell>
-                      {new Date(session.createdAt).toLocaleString()}
+                    <TableCell className="font-mono text-xs">
+                      {session.id.substring(0, 8)}...
                     </TableCell>
                     <TableCell>
-                      {Math.floor(
-                        (Date.now() - new Date(session.lastActivity).getTime()) /
-                          (1000 * 60)
-                      )}{" "}
-                      min ago
+                      <Badge variant="outline" className="text-xs">
+                        {session.agentId}
+                      </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 bg-secondary rounded-full h-2 w-24">
-                          <div
-                            className="bg-primary h-2 rounded-full"
-                            style={{
-                              width: `${getTokenUsagePercentage(session)}%`,
-                            }}
-                          />
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          {getTokenUsagePercentage(session)}%
-                        </span>
-                      </div>
+                      <Badge variant="secondary" className="text-xs">
+                        {session.chatType || 'unknown'}
+                      </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="default">Active</Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {session.lastChannel || session.origin || '-'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {session.origin || '-'}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedSession(session)}
-                      >
-                        View
-                      </Button>
+                      <Badge variant={session.status === 'active' ? 'default' : 'secondary'} className={session.status === 'active' ? 'bg-green-500 hover:bg-green-600' : 'text-xs'}>
+                        {session.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {formatDate(session.updatedAt)}
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-8">
-              <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">
-                {searchQuery
-                  ? "No sessions match your search"
-                  : t('noSessions')}
-              </p>
-            </div>
           )}
         </CardContent>
       </Card>
-
-      {/* Session Detail Dialog */}
-      <Dialog
-        open={!!selectedSession}
-        onOpenChange={() => setSelectedSession(null)}
-      >
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Session Details</DialogTitle>
-            <DialogDescription>
-              {selectedSession?.id}
-            </DialogDescription>
-          </DialogHeader>
-          {selectedSession && (
-            <div className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <p className="text-sm font-medium">{t('agentId')}</p>
-                  <p className="text-sm text-muted-foreground">{selectedSession.agentId}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">{tCommon('model')}</p>
-                  <p className="text-sm text-muted-foreground">{selectedSession.model}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">{t('createdAt')}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(selectedSession.createdAt).toLocaleString()}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">{t('lastActivity')}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(selectedSession.lastActivity).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm font-medium mb-2">{t('tokenUsage')}</p>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span>{t('inputTokens')}</span>
-                    <span>{selectedSession.tokens.input.toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span>{t('outputTokens')}</span>
-                    <span>{selectedSession.tokens.output.toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm font-medium">
-                    <span>{t('totalTokens')}</span>
-                    <span>
-                      {selectedSession.tokens.total.toLocaleString()} /{" "}
-                      {selectedSession.tokens.max.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="bg-secondary rounded-full h-2">
-                    <div
-                      className="bg-primary h-2 rounded-full"
-                      style={{
-                        width: `${getTokenUsagePercentage(selectedSession)}%`,
-                      }}
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground text-right">
-                    {getTokenUsagePercentage(selectedSession)}% {tCommon('loading').includes('...') ? '已使用' : 'used'}
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm font-medium mb-2">{t('messages')}</p>
-                {selectedSession.messages && selectedSession.messages.length > 0 ? (
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {selectedSession.messages.map((message) => (
-                      <div
-                        key={message.id}
-                        className="rounded-lg border p-3 text-sm"
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <Badge
-                            variant={
-                              message.role === "user"
-                                ? "secondary"
-                                : message.role === "assistant"
-                                ? "default"
-                                : "outline"
-                            }
-                          >
-                            {message.role}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(message.timestamp).toLocaleString()}
-                          </span>
-                        </div>
-                        <p className="text-sm">{message.content}</p>
-                        {message.tokens && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {message.tokens} tokens
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No messages in this session yet.
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

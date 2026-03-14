@@ -11,24 +11,40 @@ export interface Agent {
   id: string;
   name: string;
   model: string;
+  modelId?: string;
   status: "active" | "inactive" | "error";
   capabilities: string[];
-  createdAt: Date;
+  contextWindow?: number;
+  maxTokens?: number;
+  totalSessions?: number;
+  activeSession?: {
+    id: string;
+    updatedAt: number;
+    lastChannel?: string;
+    chatType?: string;
+  };
+  createdAt: string;
+  recentOutput?: {
+    count: number;
+    lastActivity: string;
+  };
 }
 
 export interface Session {
   id: string;
+  sessionKey: string;
   agentId: string;
-  model: string;
-  createdAt: Date;
-  lastActivity: Date;
-  tokens: {
-    input: number;
-    output: number;
-    total: number;
-    max: number;
-  };
-  messages: Message[];
+  chatType?: string;
+  status: string;
+  lastChannel?: string;
+  origin?: string;
+  updatedAt?: string;
+  createdAt?: string | null;
+  systemSent?: boolean;
+  compactionCount?: number;
+  sessionFile?: string;
+  hasSkills?: boolean;
+  messageCount?: number;
 }
 
 export interface Message {
