@@ -332,11 +332,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        // 显示等待提示
-        showAlert(message: "Dashboard 正在启动中...\n\n请在几秒后刷新浏览器页面。")
-
-        // 等待服务器就绪后打开浏览器
-        checkServerAndOpen()
+        // 检查服务器是否已经就绪
+        if isServerResponding() {
+            // 服务器已就绪，直接打开浏览器
+            Swift.print("✅ 服务器已就绪，打开浏览器")
+            if let url = URL(string: "http://localhost:3000") {
+                NSWorkspace.shared.open(url)
+            }
+        } else {
+            // 服务器尚未就绪，显示提示并等待
+            Swift.print("⏳ 服务器尚未就绪，等待中...")
+            checkServerAndOpen()
+        }
     }
 
     func checkServerAndOpen() {
