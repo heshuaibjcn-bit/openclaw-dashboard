@@ -1,0 +1,17 @@
+# Build outputs
+build/
+dist/
+
+# Standalone DMG (too large for GitHub)
+OpenClaw-Dashboard-Standalone.dmg
+
+# Node modules and dependencies
+node_modules/
+*.node
+
+# Temporary files
+*.log
+*.tmp
+
+# OS files
+.DS_Store

@@ -4,6 +4,8 @@ import AppKit
 class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem?
     var dashboardProcess: Process?
+    var nodePath: String?
+    var nextPath: String?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // 创建状态栏项目
@@ -33,7 +35,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         rightClaw.fill()
 
         // 眼睛（白色圆圈 + 黑色瞳孔）
-        // 左眼
         NSColor.white.setFill()
         let leftEye = NSBezierPath(ovalIn: NSRect(x: 6, y: 6, width: 3, height: 3))
         leftEye.fill()
@@ -41,7 +42,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let leftPupil = NSBezierPath(ovalIn: NSRect(x: 7, y: 7, width: 1, height: 1))
         leftPupil.fill()
 
-        // 右眼
         NSColor.white.setFill()
         let rightEye = NSBezierPath(ovalIn: NSRect(x: 10, y: 6, width: 3, height: 3))
         rightEye.fill()
@@ -68,32 +68,94 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // 设置图标
         button.image = image
 
-        // 设置点击动作（支持左键和右键）
+        // 设置点击动作
         button.action = #selector(statusBarButtonClicked)
         button.target = self
         button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+
+        // 查找 Node.js 路径
+        findNodePaths()
 
         // 初始化菜单
         updateMenu()
 
         Swift.print("✅ OpenClaw Dashboard 菜单栏应用已启动")
-        Swift.print("📍 图标：红色龙虾 + 眼睛")
-        Swift.print("💡 左键或右键点击显示菜单")
+        if let node = nodePath {
+            Swift.print("📍 Node.js: \(node)")
+        } else {
+            Swift.print("⚠️ 未找到 Node.js")
+        }
     }
 
     @objc func statusBarButtonClicked() {
-        // 每次点击时更新菜单
         updateMenu()
     }
 
-    // 检查 Dashboard 是否正在运行
+    func findNodePaths() {
+        // 优先查找应用包内的 Node.js
+        let bundlePath = Bundle.main.bundlePath
+        let bundledNode = bundlePath + "/Contents/Resources/node"
+        let bundledNext = bundlePath + "/Contents/Resources/node_modules/.bin/next"
+
+        if FileManager.default.fileExists(atPath: bundledNode) {
+            nodePath = bundledNode
+            Swift.print("使用打包的 Node.js: \(bundledNode)")
+        }
+
+        if FileManager.default.fileExists(atPath: bundledNext) {
+            nextPath = bundledNext
+            Swift.print("使用打包的 Next.js: \(bundledNext)")
+        }
+
+        // 如果没有打包的 Node.js，查找系统安装的
+        if nodePath == nil {
+            let possiblePaths = [
+                "/Users/alex/.nvm/versions/node/v24.14.0/bin/node",
+                "/opt/homebrew/bin/node",
+                "/usr/local/bin/node",
+                "/usr/bin/node"
+            ]
+
+            for path in possiblePaths {
+                if FileManager.default.fileExists(atPath: path) {
+                    nodePath = path
+                    Swift.print("使用系统的 Node.js: \(path)")
+                    break
+                }
+            }
+        }
+
+        // 如果还是没有找到，查找 PATH 中的
+        if nodePath == nil {
+            if let pathEnv = ProcessInfo.processInfo.environment["PATH"] {
+                let searchPaths = pathEnv.split(separator: ":").map(String.init)
+                for searchPath in searchPaths {
+                    let nodePathInPath = "\(searchPath)/node"
+                    if FileManager.default.fileExists(atPath: nodePathInPath) {
+                        nodePath = nodePathInPath
+                        Swift.print("从 PATH 找到 Node.js: \(nodePathInPath)")
+                        break
+                    }
+                }
+            }
+        }
+
+        // 查找 Next.js
+        if nextPath == nil {
+            let dashboardPath = "/Users/alex/openclaw-dashboard"
+            let localNext = dashboardPath + "/node_modules/.bin/next"
+
+            if FileManager.default.fileExists(atPath: localNext) {
+                nextPath = localNext
+            }
+        }
+    }
+
     func isDashboardRunning() -> Bool {
-        // 方法1: 检查我们启动的进程
         if let process = dashboardProcess, process.isRunning {
             return true
         }
 
-        // 方法2: 检查系统中是否有 next dev 进程运行
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/bin/pgrep")
         task.arguments = ["-f", "next dev"]
@@ -110,7 +172,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func updateMenu() {
         let menu = NSMenu()
 
-        // 状态项 - 根据实际运行状态显示
         let statusMenuItem = NSMenuItem()
         statusMenuItem.isEnabled = false
 
@@ -123,7 +184,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(statusMenuItem)
         menu.addItem(NSMenuItem.separator())
 
-        // 启动/停止按钮
         if isDashboardRunning() {
             let stopItem = NSMenuItem(title: "停止服务", action: #selector(stopDashboard), keyEquivalent: "")
             stopItem.target = self
@@ -136,19 +196,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu.addItem(NSMenuItem.separator())
 
-        // 打开 Dashboard
         let openItem = NSMenuItem(title: "打开 Dashboard", action: #selector(openDashboard), keyEquivalent: "o")
         openItem.target = self
         menu.addItem(openItem)
 
         menu.addItem(NSMenuItem.separator())
 
-        // 退出
         let quitItem = NSMenuItem(title: "退出", action: #selector(quit), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
 
-        // 将菜单设置到 statusItem
         statusItem?.menu = menu
     }
 
@@ -161,23 +218,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         Swift.print("🚀 启动 Dashboard 服务...")
 
-        // 使用启动脚本
-        let scriptPath = "/Users/alex/openclaw-dashboard/macos-menubar-native/start-dashboard.sh"
+        // 确保 Node.js 路径已更新
+        findNodePaths()
 
-        guard FileManager.default.fileExists(atPath: scriptPath) else {
-            Swift.print("❌ 找不到启动脚本: \(scriptPath)")
-            showAlert(message: "找不到启动脚本")
+        guard let node = nodePath else {
+            Swift.print("❌ 找不到 Node.js")
+            showAlert(message: "找不到 Node.js。\n\n请安装 Node.js:\n1. 访问 https://nodejs.org\n2. 或使用 Homebrew: brew install node\n3. 或使用 nvm: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash")
             return
         }
 
+        guard let next = nextPath else {
+            Swift.print("❌ 找不到 Next.js")
+            showAlert(message: "找不到 Next.js。\n\n请在项目目录运行: npm install")
+            return
+        }
+
+        Swift.print("使用 Node.js: \(node)")
+        Swift.print("使用 Next.js: \(next)")
+
         dashboardProcess = Process()
-        dashboardProcess?.executableURL = URL(fileURLWithPath: scriptPath)
+        dashboardProcess?.executableURL = URL(fileURLWithPath: node)
+        dashboardProcess?.arguments = [next, "dev"]
+        dashboardProcess?.currentDirectoryURL = URL(fileURLWithPath: "/Users/alex/openclaw-dashboard")
 
         do {
             try dashboardProcess?.run()
-            Swift.print("✅ Dashboard 启动脚本已执行")
+            Swift.print("✅ Dashboard 启动命令已执行")
 
-            // 3秒后更新菜单状态
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
                 self?.updateMenu()
             }
@@ -190,10 +257,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func stopDashboard() {
         Swift.print("🛑 停止 Dashboard 服务...")
 
-        // 停止我们启动的进程
         dashboardProcess?.terminate()
 
-        // 使用 pkill 确保停止所有 next dev 进程
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/bin/pkill")
         task.arguments = ["-f", "next dev"]
@@ -223,7 +288,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func quit() {
         Swift.print("👋 退出应用")
 
-        // 停止 Dashboard 进程
         if let process = dashboardProcess, process.isRunning {
             process.terminate()
         }
@@ -240,14 +304,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func startStatusCheck() {
-        // 每2秒检查一次状态并更新菜单
         Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
             self?.updateMenu()
         }
     }
 }
 
-// 启动应用
 let app = NSApplication.shared
 let delegate = AppDelegate()
 app.delegate = delegate
