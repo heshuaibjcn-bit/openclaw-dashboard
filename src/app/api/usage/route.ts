@@ -59,13 +59,12 @@ export async function GET(request: Request) {
       '7days': now - 7 * 24 * 60 * 60 * 1000,
       '30days': now - 30 * 24 * 60 * 60 * 1000,
     };
-    const startTime = ranges[timeRange as keyof typeof ranges] || ranges['7days'];
 
-    // Collect usage data from all sessions
-    const usageStats = await collectUsageStats(startTime);
+    // Collect ALL usage data without time filtering (use 30days as minimum)
+    const usageStats = await collectUsageStats(ranges['30days']);
 
-    // Calculate attribution data
-    const attribution = generateAttribution(usageStats);
+    // Calculate attribution data based on requested time range
+    const attribution = generateAttribution(usageStats, ranges[timeRange as keyof typeof ranges] || ranges['7days']);
 
     // Calculate time range specific stats
     const today = calculateTimeRangeStats(usageStats.byDate, ranges.today);
@@ -204,7 +203,7 @@ function calculateTimeRangeStats(
   return { tokens, cost };
 }
 
-function generateAttribution(stats: UsageStats): Array<{
+function generateAttribution(stats: UsageStats, startTime: number): Array<{
   id: string;
   name: string;
   type: 'task' | 'agent' | 'project';
@@ -221,7 +220,16 @@ function generateAttribution(stats: UsageStats): Array<{
     percentage: number;
   }> = [];
 
-  const totalTokens = stats.tokens || 1; // Avoid division by zero
+  // Calculate total tokens for the time range from byDate map
+  let totalTokens = 0;
+  for (const [dateStr, dateStats] of stats.byDate.entries()) {
+    const date = new Date(dateStr).getTime();
+    if (date >= startTime) {
+      totalTokens += dateStats.tokens;
+    }
+  }
+
+  if (totalTokens === 0) totalTokens = 1; // Avoid division by zero
 
   // Add agent attribution
   for (const [agentId, agentStats] of stats.byAgent.entries()) {
