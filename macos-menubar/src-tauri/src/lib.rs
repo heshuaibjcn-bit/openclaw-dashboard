@@ -19,12 +19,22 @@ pub fn run() {
                 )?;
             }
 
+            // 创建系统托盘图标 - 使用简单的白色方块
+            let icon = tauri::image::Image::new(&[255u8, 255, 255, 255], 32, 32);
+
+            let _tray = tauri::tray::TrayIconBuilder::new()
+                .icon(icon)
+                .show_menu_on_left_click(cfg!(target_os = "macos"))
+                .build(app)?;
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            start_dashboard,
+            stop_dashboard,
             get_dashboard_status,
-            get_health_status,
-            open_dashboard
+            open_dashboard,
+            get_menu_items
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

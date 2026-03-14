@@ -5,32 +5,9 @@
   "identifier": "com.openclaw.dashboard",
   "build": {
     "frontendDist": "../dist",
-    "devUrl": "http://localhost:3000",
-    "beforeDevCommand": "echo 'Dashboard should be running on localhost:3000'",
+    "devUrl": "http://localhost:1420",
+    "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build"
-  },
-  "app": {
-    "windows": [
-      {
-        "label": "main",
-        "title": "OpenClaw Dashboard",
-        "width": 1200,
-        "height": 800,
-        "resizable": true,
-        "fullscreen": false,
-        "decorations": false,
-        "transparent": false,
-        "alwaysOnTop": true,
-        "skipTaskbar": true,
-        "center": true,
-        "hiddenTitle": true
-      }
-    ],
-    "security": {
-      "csp": null
-    },
-    "macOSPrivateApi": true,
-    "withGlobalTauri": true
   },
   "bundle": {
     "active": true,
@@ -44,5 +21,12 @@
     "shortDescription": "OpenClaw Dashboard",
     "longDescription": "OpenClaw Dashboard - AI Agent Management Interface",
     "category": "public.app-category.productivity"
+  },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": null
+    },
+    "withGlobalTauri": true
   }
 }

@@ -1,111 +1,104 @@
-# OpenClaw Dashboard - Menu Bar Application
+# OpenClaw Dashboard - 菜单栏应用
 
-A macOS menu bar application for OpenClaw Dashboard - AI Agent Management Interface.
+macOS 菜单栏应用，用于管理 OpenClaw Dashboard 服务。
 
-## Features
+## 功能
 
-- Quick access to OpenClaw Dashboard from menu bar
-- Real-time Dashboard status monitoring
-- Opens Dashboard directly in the menu bar window (1200x800)
-- Option to open Dashboard in browser
-- Lightweight and always accessible
+- **系统托盘图标** - 在 macOS 菜单栏显示图标
+- **服务状态监控** - 实时显示 Dashboard 运行状态
+- **服务控制** - 启动/停止 Dashboard 服务
+- **快速访问** - 一键在浏览器中打开 Dashboard
 
-## Quick Start
+## 快速开始
 
-### Method 1: Using the launch script (Recommended)
-
-```bash
-cd /Users/alex/openclaw-dashboard/macos-menubar
-chmod +x start.sh
-./start.sh
-```
-
-This will:
-1. Start the Dashboard server (localhost:3000) if not running
-2. Launch the menubar application
-
-### Method 2: Manual startup
-
-1. Start the Dashboard server:
-```bash
-cd /Users/alex/openclaw-dashboard
-npm run dev
-```
-
-2. In a separate terminal, start the menubar app:
-```bash
-cd /Users/alex/openclaw-dashboard/macos-menubar
-npm run tauri:dev
-```
-
-## Development
-
-### Prerequisites
-
-- Node.js 18+
-- Rust 1.77+
-- OpenClaw Dashboard project
-
-### Build for Production
+### 启动应用
 
 ```bash
 cd /Users/alex/openclaw-dashboard/macos-menubar
+export PATH="$HOME/.cargo/bin:$PATH"
+npx tauri dev
+```
+
+### 打包应用
+
+```bash
 npm run tauri:build
 ```
 
-The built `.app` file will be in:
+生成的 DMG 文件位于：
 ```
 src-tauri/target/release/bundle/dmg/OpenClaw Dashboard_0.1.0_x64.dmg
 ```
 
-## How It Works
+## 菜单栏功能
 
-1. **Dashboard Server**: Runs Next.js dev server on localhost:3000
-2. **Menubar App**: Native macOS application that provides quick access
-3. **Integration**: Menubar window loads Dashboard directly
+点击菜单栏图标后显示的菜单：
 
-## Window Features
+1. **服务运行状态** (不可点击)
+   - 绿色圆点 + "Dashboard 运行中"
+   - 灰色圆点 + "Dashboard 已停止"
 
-- Size: 1200x800 pixels (suitable for full Dashboard interface)
-- Borderless (no title bar)
-- Always on top
-- Hidden from Dock
-- Transparent background option
+2. **启动/停止服务**
+   - 服务停止时显示"启动服务"
+   - 服务运行时显示"停止服务"
 
-## Project Structure
+3. **打开 Dashboard**
+   - 点击后在浏览器中打开 http://localhost:3000
+
+## 系统要求
+
+- macOS 12+ (Monterey 或更高版本)
+- Node.js 18+
+- Rust 1.77+
+
+## 开发
+
+### 项目结构
 
 ```
 macos-menubar/
-├── src/                      # React frontend
-│   ├── App.tsx              # Welcome screen with Dashboard links
-│   ├── main.tsx             # React entry point
-│   └── styles.css           # Global styles
-├── src-tauri/               # Rust backend
+├── src/                      # React 前端
+│   ├── App.tsx              # 菜单组件
+│   ├── main.tsx             # 入口文件
+│   └── styles.css           # 样式
+├── src-tauri/               # Rust 后端
 │   ├── src/
-│   │   ├── commands.rs      # Tauri commands
-│   │   ├── services.rs      # Dashboard status monitoring
-│   │   └── lib.rs           # Main entry point
-│   ├── capabilities/        # Tauri permissions
-│   └── tauri.conf.json      # Menubar configuration
-├── package.json             # Node dependencies
-├── start.sh                 # Launch script
-└── README.md                # This file
+│   │   ├── commands.rs      # Tauri 命令
+│   │   ├── services.rs      # 服务管理
+│   │   └── lib.rs           # 主入口
+│   └── tauri.conf.json      # Tauri 配置
+└── package.json             # Node 依赖
 ```
 
-## Usage
+### 技术栈
 
-1. **Click the menu bar icon** - Shows the Dashboard welcome screen
-2. **Open Dashboard** - Click to load full Dashboard interface
-3. **Open in Browser** - Opens Dashboard in default browser
-4. **Status Indicator** - Shows if Dashboard is running (green/gray)
+- **前端**: React 18 + TypeScript + Tailwind CSS
+- **后端**: Rust + Tauri 2.0
+- **构建**: Vite + Cargo
 
-## Notes
+## 使用说明
 
-- The Dashboard server must be running on localhost:3000
-- Use the launch script (`start.sh`) for automatic startup
-- The menubar app connects to the running Dashboard instance
-- For production, both Dashboard and menubar app should be packaged together
+### 日常使用
 
-## License
+1. 点击菜单栏中的 OpenClaw 图标
+2. 查看服务运行状态
+3. 点击"启动服务"或"停止服务"
+4. 点击"打开 Dashboard"在浏览器中查看界面
+
+### 安装 DMG
+
+1. 下载 `OpenClaw Dashboard_0.1.0_x64.dmg`
+2. 双击打开 DMG 文件
+3. 将应用拖到 Applications 文件夹
+4. 从 Launchpad 或 Applications 启动应用
+
+## 注意事项
+
+- Dashboard 服务运行在 localhost:3000
+- 启动服务需要等待 3-5 秒
+- 停止服务需要等待 1-2 秒
+- 菜单栏图标为白色方块（可自定义）
+
+## 许可证
 
 MIT
