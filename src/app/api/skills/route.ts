@@ -3,6 +3,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 
 const EXTENSIONS_PATH = path.join(process.env.HOME || '', '.openclaw', 'extensions');
+const WORKSPACE_SKILLS_PATH = path.join(process.env.HOME || '', '.openclaw', 'workspace', 'skills');
 
 interface ExtensionSkill {
   id: string;
@@ -26,8 +27,8 @@ export async function GET() {
       const extensionDirs = await fs.readdir(EXTENSIONS_PATH);
 
       for (const extDir of extensionDirs) {
-        // Skip node_modules
-        if (extDir === 'node_modules' || extDir.startsWith('.')) {
+        // Skip hidden directories but include node_modules (for skills detection)
+        if (extDir.startsWith('.')) {
           continue;
         }
 
@@ -191,10 +192,201 @@ export async function GET() {
               tools: Array.from(foundTools),
             });
           }
+
+          // Also check for skills directory in this extension
+          const skillsDir = path.join(extPath, 'skills');
+          try {
+            await fs.access(skillsDir);
+            const skillDirs = await fs.readdir(skillsDir);
+
+            for (const skillDir of skillDirs) {
+              if (skillDir.startsWith('.')) continue;
+
+              const skillPath = path.join(skillsDir, skillDir);
+              const skillMdPath = path.join(skillPath, 'SKILL.md');
+
+              try {
+                await fs.access(skillMdPath);
+                const skillContent = await fs.readFile(skillMdPath, 'utf-8');
+
+                // Parse frontmatter from SKILL.md
+                const nameMatch = skillContent.match(/^name:\s*(.+)$/m);
+                const descMatch = skillContent.match(/^description:\s*(.+)$/m);
+
+                const skillName = nameMatch ? nameMatch[1].trim() : skillDir;
+                // Handle multi-line descriptions
+                const descLines: string[] = [];
+                let inDesc = false;
+                for (const line of skillContent.split('\n')) {
+                  if (line.startsWith('description:')) {
+                    inDesc = true;
+                    const desc = line.replace(/^description:\s*/, '').trim();
+                    if (desc && !desc.startsWith('|')) {
+                      descLines.push(desc);
+                    }
+                  } else if (inDesc) {
+                    if (line.startsWith('---') || line.match(/^\S+:/)) {
+                      break;
+                    }
+                    const trimmed = line.trim();
+                    if (trimmed && !trimmed.startsWith('|')) {
+                      descLines.push(trimmed);
+                    }
+                  }
+                }
+                const skillDesc = descLines.length > 0 ? descLines.join(' ') : `Skill from ${extDir}`;
+
+                skills.push({
+                  id: `${extDir}-${skillDir}`,
+                  name: skillName,
+                  description: skillDesc,
+                  extension: extDir,
+                  category: 'Native Skill',
+                  tools: [],
+                });
+              } catch (skillError) {
+                // Not a valid skill directory
+                continue;
+              }
+            }
+          } catch (skillsError) {
+            // No skills directory in this extension
+            // Ignore this error
+          }
         } catch (extError) {
           // Not a valid extension or can't be read
           continue;
         }
+      }
+
+      // Also scan node_modules for skills
+      const nodeModulesPath = path.join(EXTENSIONS_PATH, 'node_modules');
+      try {
+        await fs.access(nodeModulesPath);
+        const nodeModuleDirs = await fs.readdir(nodeModulesPath);
+
+        for (const moduleDir of nodeModuleDirs) {
+          if (moduleDir.startsWith('.')) continue;
+
+          const modulePath = path.join(nodeModulesPath, moduleDir);
+          const skillsDir = path.join(modulePath, 'skills');
+
+          // Check if this module has a skills directory
+          try {
+            await fs.access(skillsDir);
+            const skillDirs = await fs.readdir(skillsDir);
+
+            for (const skillDir of skillDirs) {
+              if (skillDir.startsWith('.')) continue;
+
+              const skillPath = path.join(skillsDir, skillDir);
+              const skillMdPath = path.join(skillPath, 'SKILL.md');
+
+              try {
+                await fs.access(skillMdPath);
+                const skillContent = await fs.readFile(skillMdPath, 'utf-8');
+
+                // Parse frontmatter from SKILL.md
+                const nameMatch = skillContent.match(/^name:\s*(.+)$/m);
+                const descMatch = skillContent.match(/^description:\s*(.+)$/m);
+
+                const skillName = nameMatch ? nameMatch[1].trim() : skillDir;
+                const skillDesc = descMatch ? descMatch[1].trim() : `Skill from ${moduleDir}`;
+
+                skills.push({
+                  id: `${moduleDir}-${skillDir}`,
+                  name: skillName,
+                  description: skillDesc,
+                  extension: moduleDir,
+                  category: 'Native Skill',
+                  tools: [],
+                });
+              } catch (skillError) {
+                // Not a valid skill directory
+                continue;
+              }
+            }
+          } catch (skillsError) {
+            // No skills directory in this module
+            continue;
+          }
+        }
+      } catch (nodeModulesError) {
+        // No node_modules directory
+        // Ignore this error
+      }
+
+      // Also scan workspace skills directory
+      try {
+        await fs.access(WORKSPACE_SKILLS_PATH);
+        const workspaceSkillDirs = await fs.readdir(WORKSPACE_SKILLS_PATH);
+
+        for (const skillDir of workspaceSkillDirs) {
+          if (skillDir.startsWith('.')) continue;
+
+          const skillPath = path.join(WORKSPACE_SKILLS_PATH, skillDir);
+          const skillMdPath = path.join(skillPath, 'SKILL.md');
+
+          try {
+            await fs.access(skillMdPath);
+            const skillContent = await fs.readFile(skillMdPath, 'utf-8');
+
+            // Parse frontmatter from SKILL.md
+            const nameMatch = skillContent.match(/^name:\s*(.+)$/m);
+            const descMatch = skillContent.match(/^description:\s*(.+)$/m);
+
+            const skillName = nameMatch ? nameMatch[1].trim() : skillDir;
+            let skillDesc = '';
+
+            if (descMatch) {
+              skillDesc = descMatch[1].trim();
+              // Handle multi-line descriptions
+              const descLines: string[] = [skillDesc];
+              let inDesc = false;
+              for (const line of skillContent.split('\n').slice(1)) {
+                if (line.startsWith('description:')) {
+                  inDesc = true;
+                  const desc = line.replace(/^description:\s*/, '').trim();
+                  if (desc && !desc.startsWith('|') && !desc.startsWith('>')) {
+                    descLines.push(desc);
+                  }
+                } else if (inDesc) {
+                  if (line.startsWith('---') || line.match(/^\S+:/)) {
+                    break;
+                  }
+                  const trimmed = line.trim();
+                  if (trimmed && !trimmed.startsWith('|') && !trimmed.startsWith('>')) {
+                    descLines.push(trimmed);
+                  }
+                }
+              }
+              skillDesc = descLines.join(' ').replace(/\s+/g, ' ');
+            }
+
+            // Check for allowed-tools field
+            const allowedToolsMatch = skillContent.match(/^allowed-tools:\s*(.+)$/m);
+            let tools: string[] = [];
+            if (allowedToolsMatch) {
+              const toolsStr = allowedToolsMatch[1].trim();
+              tools = toolsStr.split(',').map(t => t.trim());
+            }
+
+            skills.push({
+              id: `workspace-${skillDir}`,
+              name: skillName,
+              description: skillDesc || `Workspace skill from ${skillDir}`,
+              extension: 'workspace',
+              category: 'Workspace Skill',
+              tools,
+            });
+          } catch (skillError) {
+            // Not a valid skill directory
+            continue;
+          }
+        }
+      } catch (workspaceError) {
+        // No workspace skills directory
+        // Ignore this error
       }
 
       // Sort by extension and category
