@@ -492,7 +492,12 @@
     "selectModel": "选择模型",
     "capabilities": "能力",
     "saveChanges": "保存更改",
-    "namePlaceholder": "例如：主代理"
+    "namePlaceholder": "例如：主代理",
+    "availableSkills": "可用技能",
+    "skillsDescription": "{extensions} 个扩展中的 {count} 个技能",
+    "skills": "技能",
+    "noSkills": "未找到技能",
+    "noSkillsDesc": "安装 OpenClaw 扩展以启用代理技能"
   },
   "channels": {
     "title": "频道",

@@ -237,6 +237,39 @@ export function useMemoryList(options?: { limit?: number; offset?: number; enabl
   return { data, loading, error, refetch: fetchMemories, total, hasMore };
 }
 
+export function useSkills() {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [extensions, setExtensions] = useState<string[]>([]);
+
+  const fetchSkills = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch('/api/skills');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch skills: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      setData(result.skills || []);
+      setExtensions(result.extensions || []);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error("Failed to fetch skills"));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSkills();
+  }, [fetchSkills]);
+
+  return { data, loading, error, refetch: fetchSkills, extensions };
+}
+
 export function useTasks(params?: { limit?: number; offset?: number }) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

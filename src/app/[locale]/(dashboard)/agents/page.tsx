@@ -33,14 +33,19 @@ import {
   MessageSquare,
   Edit,
   Trash2,
+  Wrench,
+  Zap,
+  Database,
+  FileText,
 } from "lucide-react";
-import { useAgents } from "@/lib/openclaw";
+import { useAgents, useSkills } from "@/lib/openclaw";
 import type { Agent } from "@/lib/openclaw";
 
 export default function AgentsPage() {
   const t = useTranslations('agents');
   const tCommon = useTranslations('common');
   const { data: agents, loading, refetch } = useAgents();
+  const { data: skills, loading: skillsLoading, extensions } = useSkills();
   const [searchQuery, setSearchQuery] = useState("");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
@@ -170,6 +175,115 @@ export default function AgentsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Available Skills */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Wrench className="h-5 w-5" />
+                {t('availableSkills')}
+              </CardTitle>
+              <CardDescription>
+                {skillsLoading ? t('loading') : t('skillsDescription', { count: skills.length, extensions: extensions.length })}
+              </CardDescription>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+              <RefreshCw className={`mr-2 h-4 w-4 ${skillsLoading ? 'animate-spin' : ''}`} />
+              {tCommon('refresh')}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {skillsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <p className="text-muted-foreground">{t('loading')}</p>
+            </div>
+          ) : skills.length > 0 ? (
+            <div className="space-y-6">
+              {/* Group skills by extension */}
+              {extensions.map((ext) => {
+                const extSkills = skills.filter((s) => s.extension === ext);
+                if (extSkills.length === 0) return null;
+
+                // Get extension icon based on type
+                const getExtIcon = (extension: string) => {
+                  switch (extension) {
+                    case 'feishu': return <MessageSquare className="h-4 w-4" />;
+                    case 'memory-lancedb-pro': return <Database className="h-4 w-4" />;
+                    case 'openai': return <Sparkles className="h-4 w-4" />;
+                    default: return <Zap className="h-4 w-4" />;
+                  }
+                };
+
+                return (
+                  <div key={ext} className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      {getExtIcon(ext)}
+                      <h4 className="text-sm font-semibold capitalize">{ext}</h4>
+                      <Badge variant="outline" className="text-xs">
+                        {extSkills.length} {t('skills')}
+                      </Badge>
+                    </div>
+
+                    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                      {extSkills.map((skill) => {
+                        const getCategoryIcon = (category: string) => {
+                          switch (category) {
+                            case 'Documents': return <FileText className="h-3 w-3" />;
+                            case 'Knowledge': return <Database className="h-3 w-3" />;
+                            case 'Memory': return <Database className="h-3 w-3" />;
+                            case 'Communication': return <MessageSquare className="h-3 w-3" />;
+                            default: return <Zap className="h-3 w-3" />;
+                          }
+                        };
+
+                        return (
+                          <div
+                            key={skill.id}
+                            className="flex items-start gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors"
+                          >
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
+                              {getCategoryIcon(skill.category)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{skill.name}</p>
+                              <p className="text-xs text-muted-foreground line-clamp-2">{skill.description}</p>
+                              {skill.tools && skill.tools.length > 0 && (
+                                <div className="flex gap-1 mt-2 flex-wrap">
+                                  {skill.tools.slice(0, 3).map((tool: string) => (
+                                    <Badge key={tool} variant="outline" className="text-xs">
+                                      {tool}
+                                    </Badge>
+                                  ))}
+                                  {skill.tools.length > 3 && (
+                                    <Badge variant="outline" className="text-xs">
+                                      +{skill.tools.length - 3}
+                                    </Badge>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Wrench className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">{t('noSkills')}</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                {t('noSkillsDesc')}
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Agents Grid */}
       <Card>

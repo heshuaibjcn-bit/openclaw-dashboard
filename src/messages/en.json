@@ -492,7 +492,12 @@
     "selectModel": "Select a model",
     "capabilities": "Capabilities",
     "saveChanges": "Save Changes",
-    "namePlaceholder": "e.g., Main Agent"
+    "namePlaceholder": "e.g., Main Agent",
+    "availableSkills": "Available Skills",
+    "skillsDescription": "{count} skills from {extensions} extensions",
+    "skills": "skills",
+    "noSkills": "No skills found",
+    "noSkillsDesc": "Install OpenClaw extensions to enable agent skills"
   },
   "channels": {
     "title": "Channels",
