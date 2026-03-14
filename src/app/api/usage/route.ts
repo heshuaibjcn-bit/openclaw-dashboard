@@ -44,7 +44,7 @@ interface UsageStats {
   cost: number;
   messageCount: number;
   byDate: Map<string, { tokens: number; cost: number }>;
-  byAgent: Map<string, { tokens: number; cost: number; messages: number }>;
+  byAgentAndDate: Map<string, Map<string, { tokens: number; cost: number; messages: number }>>;
 }
 
 export async function GET(request: Request) {
@@ -94,7 +94,7 @@ async function collectUsageStats(startTime: number): Promise<UsageStats> {
     cost: 0,
     messageCount: 0,
     byDate: new Map(),
-    byAgent: new Map(),
+    byAgentAndDate: new Map(),
   };
 
   const homeDir = process.env.HOME || '';
@@ -168,12 +168,16 @@ async function processSessionFile(
           dateStats.cost += cost;
           stats.byDate.set(dateKey, dateStats);
 
-          // Group by agent
-          const agentStats = stats.byAgent.get(agentId) || { tokens: 0, cost: 0, messages: 0 };
-          agentStats.tokens += tokens;
-          agentStats.cost += cost;
-          agentStats.messages++;
-          stats.byAgent.set(agentId, agentStats);
+          // Group by agent and date
+          if (!stats.byAgentAndDate.has(agentId)) {
+            stats.byAgentAndDate.set(agentId, new Map());
+          }
+          const agentDateMap = stats.byAgentAndDate.get(agentId)!;
+          const agentDateStats = agentDateMap.get(dateKey) || { tokens: 0, cost: 0, messages: 0 };
+          agentDateStats.tokens += tokens;
+          agentDateStats.cost += cost;
+          agentDateStats.messages++;
+          agentDateMap.set(dateKey, agentDateStats);
         }
       } catch (parseError) {
         // Skip invalid JSON lines
@@ -220,19 +224,32 @@ function generateAttribution(stats: UsageStats, startTime: number): Array<{
     percentage: number;
   }> = [];
 
-  // Calculate total tokens for the time range from byDate map
+  // Calculate total tokens and per-agent tokens for the time range
   let totalTokens = 0;
-  for (const [dateStr, dateStats] of stats.byDate.entries()) {
-    const date = new Date(dateStr).getTime();
-    if (date >= startTime) {
-      totalTokens += dateStats.tokens;
+  const agentTotals = new Map<string, { tokens: number; cost: number }>();
+
+  for (const [agentId, dateMap] of stats.byAgentAndDate.entries()) {
+    let agentTokens = 0;
+    let agentCost = 0;
+
+    for (const [dateStr, dateStats] of dateMap.entries()) {
+      const date = new Date(dateStr).getTime();
+      if (date >= startTime) {
+        agentTokens += dateStats.tokens;
+        agentCost += dateStats.cost;
+        totalTokens += dateStats.tokens;
+      }
+    }
+
+    if (agentTokens > 0) {
+      agentTotals.set(agentId, { tokens: agentTokens, cost: agentCost });
     }
   }
 
   if (totalTokens === 0) totalTokens = 1; // Avoid division by zero
 
   // Add agent attribution
-  for (const [agentId, agentStats] of stats.byAgent.entries()) {
+  for (const [agentId, agentStats] of agentTotals.entries()) {
     attribution.push({
       id: agentId,
       name: agentId === 'main' ? 'Main Agent' : agentId,

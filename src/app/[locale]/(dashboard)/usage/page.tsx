@@ -85,9 +85,15 @@ export default function UsagePage() {
 
   const getQuotaStatus = () => {
     const percentage = getQuotaPercentage();
-    if (percentage >= 95) return { status: "critical", color: "text-red-500", bg: "bg-red-50 dark:bg-red-900/20" };
-    if (percentage >= 80) return { status: "warning", color: "text-yellow-500", bg: "bg-yellow-50 dark:bg-yellow-900/20" };
+    if (percentage >= 90) return { status: "critical", color: "text-red-500", bg: "bg-red-50 dark:bg-red-900/20" };
+    if (percentage >= 70) return { status: "warning", color: "text-yellow-500", bg: "bg-yellow-50 dark:bg-yellow-900/20" };
     return { status: "healthy", color: "text-green-500", bg: "bg-green-50 dark:bg-green-900/20" };
+  };
+
+  const getTrendDirection = (current: number, previous: number) => {
+    if (current > previous) return 'up';
+    if (current < previous) return 'down';
+    return 'stable';
   };
 
   const currentData = getCurrentData();
@@ -336,24 +342,20 @@ export default function UsagePage() {
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{t('todayVsYesterday')}</CardTitle>
-                {data.today.tokens > 0 ? (
-                  <TrendingUp className="h-4 w-4 text-green-500" />
-                ) : (
-                  <TrendingDown className="h-4 w-4 text-red-500" />
-                )}
+                <CardTitle className="text-sm font-medium">{t('today')}</CardTitle>
+                <Zap className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{data.today.tokens.toLocaleString()}</div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {data.today.cost > 0 ? "+" : ""}${data.today.cost.toFixed(2)}
+                  ${data.today.cost.toFixed(2)}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{t('trend7Day')}</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('days7')}</CardTitle>
                 <Calendar className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
@@ -366,7 +368,7 @@ export default function UsagePage() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{t('trend30Day')}</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('days30')}</CardTitle>
                 <BarChart3 className="h-4 w-4 text-purple-500" />
               </CardHeader>
               <CardContent>
@@ -391,23 +393,23 @@ export default function UsagePage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-green-500" />
-                    <span className="text-sm">{t('openclawGateway')}</span>
+                    <span className="text-sm">Session Data</span>
                   </div>
                   <Badge variant="default">{tCommon('connected')}</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-green-500" />
-                    <span className="text-sm">{t('runtimeData')}</span>
+                    <span className="text-sm">Token Usage</span>
                   </div>
                   <Badge variant="default">{tCommon('connected')}</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-yellow-500" />
-                    <span className="text-sm">{t('subscriptionData')}</span>
+                    <div className="h-2 w-2 rounded-full bg-green-500" />
+                    <span className="text-sm">Provider Info</span>
                   </div>
-                  <Badge variant="outline">{t('partial')}</Badge>
+                  <Badge variant="default">{tCommon('connected')}</Badge>
                 </div>
               </div>
             </CardContent>
