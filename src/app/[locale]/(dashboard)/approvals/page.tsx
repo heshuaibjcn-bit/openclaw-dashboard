@@ -73,9 +73,20 @@ export default function ApprovalsPage() {
   const [dryRun, setDryRun] = useState(true);
 
   // Use real API hook - will fetch filtered data based on statusFilter
-  const { data: apiActions, loading, refetch, approveAction, rejectAction } = useApprovals(
+  const { data: apiData, loading, refetch, approveAction, rejectAction } = useApprovals(
     statusFilter === "all" ? undefined : statusFilter
   );
+
+  // Extract results from API response (which has format { results: [], count, method })
+  const apiActions: ApprovalAction[] = useMemo(() => {
+    if (!apiData) return [];
+    if (Array.isArray(apiData)) {
+      return apiData as ApprovalAction[];
+    }
+    // Handle API response format: { results: [], count, method }
+    const dataObj = apiData as { results?: ApprovalAction[] };
+    return dataObj.results || [];
+  }, [apiData]);
 
   // Apply client-side filtering for category and search
   const filteredActions = useMemo(() => {
