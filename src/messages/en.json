@@ -143,6 +143,12 @@
       "errors": "errors",
       "warnings": "warnings"
     },
+    "channels": {
+      "title": "Connected Channels",
+      "connected": "connected",
+      "total": "total",
+      "description": "Communication channel status"
+    },
     "pendingItems": {
       "title": "Pending Items",
       "description": "{count} items require attention",

@@ -143,6 +143,12 @@
       "errors": "错误",
       "warnings": "警告"
     },
+    "channels": {
+      "title": "已连接频道",
+      "connected": "已连接",
+      "total": "总计",
+      "description": "通信频道状态"
+    },
     "pendingItems": {
       "title": "待处理项目",
       "description": "{count} 个项目需要关注",
