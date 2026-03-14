@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -80,7 +79,12 @@ export default function ChatPage() {
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      // Use setTimeout to ensure DOM has updated
+      setTimeout(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+      }, 100);
     }
   }, [messages]);
 
@@ -383,92 +387,96 @@ export default function ChatPage() {
             </div>
           </CardHeader>
 
-          <CardContent className="flex-1 flex flex-col p-0 min-h-0">
+          <CardContent className="flex-1 flex flex-col p-0 min-h-0 overflow-hidden">
             {/* Messages */}
-            <ScrollArea className="flex-1">
-              <div ref={scrollRef} className="p-4 space-y-4">
-                {messages.length === 0 ? (
-                  <div className="flex items-center justify-center h-full text-muted-foreground">
-                    <div className="text-center">
-                      <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>No messages in this session</p>
-                      <p className="text-sm mt-2">Select a different session or send a new message</p>
-                    </div>
+            <div
+              ref={scrollRef}
+              className="flex-1 overflow-y-auto p-4 space-y-4"
+              style={{
+                scrollBehavior: 'smooth',
+              }}
+            >
+              {messages.length === 0 ? (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  <div className="text-center">
+                    <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No messages in this session</p>
+                    <p className="text-sm mt-2">Select a different session or send a new message</p>
                   </div>
-                ) : (
-                  messages.map((message) => (
+                </div>
+              ) : (
+                messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex gap-3 ${
+                      message.role === "user" ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    {message.role === "assistant" && (
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
+                        <Bot className="h-4 w-4 text-primary" />
+                      </div>
+                    )}
+
                     <div
-                      key={message.id}
-                      className={`flex gap-3 ${
-                        message.role === "user" ? "justify-end" : "justify-start"
+                      className={`max-w-[80%] rounded-lg p-3 ${
+                        message.role === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : message.role === "system"
+                          ? "bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700"
+                          : "bg-muted"
                       }`}
                     >
-                      {message.role === "assistant" && (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
-                          <Bot className="h-4 w-4 text-primary" />
-                        </div>
+                      {message.thinking && (
+                        <details className="mb-2">
+                          <summary className="text-xs cursor-pointer text-muted-foreground hover:text-foreground">
+                            Thinking process
+                          </summary>
+                          <p className="text-xs mt-1 whitespace-pre-wrap">{message.thinking}</p>
+                        </details>
                       )}
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                        {message.content}
+                      </p>
 
-                      <div
-                        className={`max-w-[80%] rounded-lg p-3 ${
-                          message.role === "user"
-                            ? "bg-primary text-primary-foreground"
-                            : message.role === "system"
-                            ? "bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700"
-                            : "bg-muted"
-                        }`}
-                      >
-                        {message.thinking && (
-                          <details className="mb-2">
-                            <summary className="text-xs cursor-pointer text-muted-foreground hover:text-foreground">
-                              Thinking process
-                            </summary>
-                            <p className="text-xs mt-1 whitespace-pre-wrap">{message.thinking}</p>
-                          </details>
+                      <div className="flex items-center gap-2 mt-2">
+                        <div className="flex items-center gap-1 text-xs opacity-70">
+                          <Clock className="h-3 w-3" />
+                          {new Date(message.timestamp).toLocaleTimeString()}
+                        </div>
+
+                        {message.role === "assistant" && message.tokens && (
+                          <span className="text-xs opacity-70">
+                            {message.tokens.total} tokens
+                          </span>
                         )}
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                          {message.content}
-                        </p>
-
-                        <div className="flex items-center gap-2 mt-2">
-                          <div className="flex items-center gap-1 text-xs opacity-70">
-                            <Clock className="h-3 w-3" />
-                            {new Date(message.timestamp).toLocaleTimeString()}
-                          </div>
-
-                          {message.role === "assistant" && message.tokens && (
-                            <span className="text-xs opacity-70">
-                              {message.tokens.total} tokens
-                            </span>
-                          )}
-                        </div>
                       </div>
-
-                      {message.role === "user" && (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary flex-shrink-0">
-                          <User className="h-4 w-4 text-primary-foreground" />
-                        </div>
-                      )}
                     </div>
-                  ))
-                )}
 
-                {isLoading && (
-                  <div className="flex gap-3 justify-start">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
-                      <Bot className="h-4 w-4 text-primary" />
-                    </div>
-                    <div className="bg-muted rounded-lg p-3">
-                      <div className="flex gap-1">
-                        <div className="w-2 h-2 bg-foreground/30 rounded-full animate-bounce" />
-                        <div className="w-2 h-2 bg-foreground/30 rounded-full animate-bounce delay-100" />
-                        <div className="w-2 h-2 bg-foreground/30 rounded-full animate-bounce delay-200" />
+                    {message.role === "user" && (
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary flex-shrink-0">
+                        <User className="h-4 w-4 text-primary-foreground" />
                       </div>
+                    )}
+                  </div>
+                ))
+              )}
+
+              {isLoading && (
+                <div className="flex gap-3 justify-start">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
+                    <Bot className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="bg-muted rounded-lg p-3">
+                    <div className="flex gap-1">
+                      <div className="w-2 h-2 bg-foreground/30 rounded-full animate-bounce" />
+                      <div className="w-2 h-2 bg-foreground/30 rounded-full animate-bounce delay-100" />
+                      <div className="w-2 h-2 bg-foreground/30 rounded-full animate-bounce delay-200" />
                     </div>
                   </div>
-                )}
-              </div>
-            </ScrollArea>
+                </div>
+              )}
+            </div>
 
             {/* Input Area */}
             <div className="border-t p-4">
