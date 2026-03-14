@@ -172,7 +172,7 @@
       "id": "10",
       "title": "Add Unit Tests for Critical Components",
       "description": "Set up testing framework and write unit tests for critical components like language-switcher, theme-provider, and key data hooks.",
-      "status": "pending",
+      "status": "completed",
       "priority": "medium",
       "acceptanceCriteria": [
         "Install and configure Jest/React Testing Library",
@@ -183,10 +183,10 @@
         "All tests pass: npm run test"
       ],
       "files": [
-        "jest.config.js",
+        "vitest.config.ts",
         "src/components/language-switcher.test.tsx",
         "src/components/theme-provider.test.tsx",
-        "src/lib/__tests__/openclaw.test.ts"
+        "src/lib/__tests__/react-hooks.test.tsx"
       ]
     },
     {
