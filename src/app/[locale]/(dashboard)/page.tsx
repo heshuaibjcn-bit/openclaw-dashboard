@@ -362,7 +362,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {pendingItems.map((item) => (
+                {pendingItems.map((item: any) => (
                   <div
                     key={item.id}
                     className="flex items-start gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors"
@@ -417,7 +417,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {risks.map((risk) => (
+                {risks.map((risk: any) => (
                   <div
                     key={risk.id}
                     className="rounded-lg border p-3 space-y-2"

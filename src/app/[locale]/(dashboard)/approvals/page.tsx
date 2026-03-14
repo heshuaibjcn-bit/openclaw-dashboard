@@ -336,8 +336,8 @@ export default function ApprovalsPage() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t('riskLevel')}</p>
-                <p className={`font-medium ${riskColors[selectedAction.riskLevel]}`}>
-                  {selectedAction.riskLevel.toUpperCase()}
+                <p className={`font-medium ${riskColors[selectedAction.riskLevel as keyof typeof riskColors] || riskColors.medium}`}>
+                  {selectedAction.riskLevel?.toUpperCase() || 'UNKNOWN'}
                 </p>
               </div>
               <div>
@@ -430,9 +430,9 @@ export default function ApprovalsPage() {
 
                     <div className="flex items-center gap-3">
                       {getStatusBadge(action.status)}
-                      <Badge variant="outline" className={`text-xs ${riskColors[action.riskLevel]}`}>
+                      <Badge variant="outline" className={`text-xs ${riskColors[action.riskLevel as keyof typeof riskColors] || riskColors.medium}`}>
                         <AlertTriangle className="mr-1 h-3 w-3" />
-                        {action.riskLevel.toUpperCase()}
+                        {action.riskLevel?.toUpperCase() || 'UNKNOWN'}
                       </Badge>
                     </div>
                   </div>

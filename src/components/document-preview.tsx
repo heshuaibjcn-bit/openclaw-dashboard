@@ -147,12 +147,12 @@ export function DocumentPreview({
 
     const blob = new Blob([previewContent], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = window.document.createElement("a");
     a.href = url;
     a.download = document?.name || "document";
-    document.body.appendChild(a);
+    window.document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
+    window.document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 

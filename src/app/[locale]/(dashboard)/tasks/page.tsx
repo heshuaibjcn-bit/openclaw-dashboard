@@ -77,7 +77,8 @@ export default function TasksPage() {
       "feature": { en: "Feature", zh: "功能" },
       "enhancement": { en: "Enhancement", zh: "增强" },
     };
-    return tagMap[tag]?.[locale] || tag;
+    const localeKey = locale as 'en' | 'zh';
+    return tagMap[tag as keyof typeof tagMap]?.[localeKey] || tag;
   };
 
   // No mock data fallback - use real API only
@@ -138,7 +139,7 @@ export default function TasksPage() {
     .filter(task => {
       if (searchQuery && !task.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
           !task.description?.toLowerCase().includes(searchQuery.toLowerCase()) &&
-          !task.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))) {
+          !task.tags?.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase()))) {
         return false;
       }
       if (statusFilter !== "all" && task.status !== statusFilter) {
@@ -413,7 +414,7 @@ export default function TasksPage() {
 
                     {task.tags && task.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1">
-                        {task.tags.map((tag) => (
+                        {task.tags.map((tag: string) => (
                           <Badge key={tag} variant="outline" className="text-xs">
                             {getTagName(tag)}
                           </Badge>

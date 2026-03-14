@@ -98,7 +98,7 @@ export default function UsagePage() {
     refetchSubscription();
   };
 
-  const filteredAttribution = data?.attribution.filter(item => {
+  const filteredAttribution = data?.attribution.filter((item: any) => {
     if (view === "tasks") return item.type === "task";
     if (view === "agents") return item.type === "agent";
     if (view === "projects") return item.type === "project";
@@ -299,7 +299,7 @@ export default function UsagePage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {filteredAttribution.map((item) => (
+                  {filteredAttribution.map((item: any) => (
                     <div key={item.id} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">

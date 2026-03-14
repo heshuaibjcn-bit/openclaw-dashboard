@@ -103,7 +103,8 @@ export default function StaffPage() {
       "support": { en: "Support", zh: "支持" },
       "writing": { en: "Writing", zh: "写作" },
     };
-    return capabilityMap[cap]?.[locale] || cap;
+    const localeKey = locale as 'en' | 'zh';
+    return capabilityMap[cap as keyof typeof capabilityMap]?.[localeKey] || cap;
   };
 
   const getStatusBadge = (status: StaffMember["status"]) => {
@@ -307,7 +308,7 @@ export default function StaffPage() {
 
                     {/* Capabilities */}
                     <div className="flex flex-wrap gap-2">
-                      {member.capabilities.map((cap) => (
+                      {member.capabilities.map((cap: string) => (
                         <Badge key={cap} variant="outline" className="text-xs">
                           {getCapabilityName(cap)}
                         </Badge>

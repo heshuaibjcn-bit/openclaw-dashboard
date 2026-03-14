@@ -101,7 +101,7 @@ export default function DocumentsPage() {
     return mockContent;
   };
 
-  const handleFileClick = async (node: DocumentNode, event: React.MouseEvent) => {
+  const handleFileClick = async (node: DocumentNode, event?: React.MouseEvent) => {
     if (node.type === "folder") {
       toggleFolder(node.path);
       return;
@@ -152,7 +152,7 @@ export default function DocumentsPage() {
     return <File className="h-4 w-4 text-gray-500" />;
   };
 
-  const getFilteredDocuments = () => {
+  const getFilteredDocuments = (): Record<string, DocumentNode[]> => {
     if (selectedAgent === "all") {
       return documents;
     }
@@ -230,9 +230,10 @@ export default function DocumentsPage() {
     );
   };
 
+  const allNodes = Object.values(documents).flat() as DocumentNode[];
   const stats = {
-    totalFiles: Object.values(documents).flat().filter(n => n.type === "file").length,
-    totalFolders: Object.values(documents).flat().filter(n => n.type === "folder").length,
+    totalFiles: allNodes.filter(n => n.type === "file").length,
+    totalFolders: allNodes.filter(n => n.type === "folder").length,
     totalAgents: activeAgents.length,
   };
 

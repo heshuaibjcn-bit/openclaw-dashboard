@@ -59,7 +59,8 @@ export default function MemoryPage() {
       "performance": { en: "Performance", zh: "性能" },
       "configuration": { en: "Configuration", zh: "配置" },
     };
-    return typeMap[type]?.[locale] || type;
+    const localeKey = locale as 'en' | 'zh';
+    return typeMap[type as keyof typeof typeMap]?.[localeKey] || type;
   };
 
   const getMetadataImportanceName = (importance: string): string => {
@@ -68,7 +69,8 @@ export default function MemoryPage() {
       "medium": { en: "Medium", zh: "中" },
       "low": { en: "Low", zh: "低" },
     };
-    return importanceMap[importance]?.[locale] || importance;
+    const localeKey = locale as 'en' | 'zh';
+    return importanceMap[importance as keyof typeof importanceMap]?.[localeKey] || importance;
   };
 
   useEffect(() => {

@@ -36,7 +36,12 @@ export async function GET() {
   }
 }
 
-async function getGatewayProcess() {
+interface GatewayProcess {
+  pid: number;
+  uptime: number;
+}
+
+async function getGatewayProcess(): Promise<GatewayProcess | null> {
   try {
     const { exec } = require('child_process');
     return new Promise((resolve) => {
