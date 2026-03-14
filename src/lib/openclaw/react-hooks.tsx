@@ -280,7 +280,9 @@ export function useTasks(params?: { limit?: number; offset?: number }) {
       setLoading(true);
       setError(null);
       const client = getAPIClient();
-      const tasks = await client.getTasks(params);
+      // Default to fetching all tasks to avoid pagination issues
+      const taskParams = params?.limit ? params : { limit: 100 };
+      const tasks = await client.getTasks(taskParams);
       setData(tasks);
     } catch (e) {
       setError(e instanceof Error ? e : new Error("Failed to fetch tasks"));
