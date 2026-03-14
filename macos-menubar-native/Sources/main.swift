@@ -187,9 +187,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         var isResponding = false
 
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let httpResponse = response as? HTTPURLResponse,
-               httpResponse.statusCode == 200 {
-                isResponding = true
+            if let httpResponse = response as? HTTPURLResponse {
+                let statusCode = httpResponse.statusCode
+                // 接受 2xx (成功) 或 3xx (重定向) 状态码
+                isResponding = (200...299).contains(statusCode) || (300...399).contains(statusCode)
             }
             semaphore.signal()
         }
