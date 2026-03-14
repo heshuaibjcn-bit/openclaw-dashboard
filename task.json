@@ -78,7 +78,7 @@
       "id": "5",
       "title": "Implement Real Agent Session Management",
       "description": "The Staff page currently shows mock agent data. Implement real connection to OpenClaw agent system to show actual agents, their sessions, and allow starting/stopping agents.",
-      "status": "pending",
+      "status": "completed",
       "priority": "high",
       "acceptanceCriteria": [
         "Connect to OpenClaw Gateway to retrieve real agent list",

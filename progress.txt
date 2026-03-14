@@ -375,6 +375,119 @@ Given technical constraints with LanceDB native modules in Next.js environment, 
 
 ---
 
+### 2026-03-14 - Task 5: Real Agent Session Management - Complete
+**Commit**: [pending]
+
+#### Completed Work:
+- Enhanced agents API with detailed agent information including sessions
+- Implemented start/stop agent endpoints with Gateway + CLI fallback
+- Created agent logs API endpoint
+- Connected to real agent sessions from ~/.openclaw/agents/*/sessions/
+- Added comprehensive error handling and fallback logic
+
+#### Implementation Details:
+
+**1. Enhanced Agent Details API**
+- Created `/api/agents/[id]/route.ts`
+- GET endpoint returns detailed agent info with sessions
+- Reads sessions from `sessions/sessions.json`
+- Transforms sessions to array format sorted by updatedAt
+- Displays session metadata (sessionId, chatType, channel, etc.)
+
+**2. Start/Stop Agent Control**
+- POST endpoint at `/api/agents/[id]` with action parameter
+- Supports `start` and `stop` actions
+- Gateway-first approach with CLI fallback
+- Returns method indicator (gateway or local-cli)
+
+**3. Agent Logs API**
+- Created `/api/agents/[id]/logs/route.ts`
+- Supports pagination with limit and offset parameters
+- Searches multiple log file locations
+- Parses JSON log entries with fallback to plain text
+- Extracts logs from recent sessions as fallback
+
+**4. Hybrid Architecture**
+- Primary: OpenClaw Gateway API (http://127.0.0.1:18789)
+- Fallback: Local file reads and CLI commands
+- Automatic method detection and response tagging
+
+#### API Response Examples:
+
+**Agent Details:**
+```json
+{
+  "id": "main",
+  "name": "Main",
+  "model": "unknown",
+  "sessions": [
+    {
+      "id": "agent:main:main",
+      "sessionId": "uuid",
+      "updatedAt": 1773362362200,
+      "chatType": "direct",
+      "lastChannel": "webchat"
+    }
+  ],
+  "method": "local-fallback"
+}
+```
+
+**Start/Stop Response:**
+```json
+{
+  "success": true,
+  "message": "Agent main started successfully",
+  "agentId": "main",
+  "method": "local-cli"
+}
+```
+
+**Logs Response:**
+```json
+{
+  "logs": [...],
+  "method": "local-fallback",
+  "agentId": "main",
+  "count": 10
+}
+```
+
+#### Acceptance Criteria:
+✅ Connect to OpenClaw Gateway to retrieve real agent list (via existing agents API)
+✅ Show actual agent sessions from ~/.openclaw/agents/*/sessions/ (implemented in details API)
+✅ Implement start/stop agent functionality (POST endpoint with action parameter)
+✅ Display real-time agent status (already implemented in Staff page)
+✅ Show actual agent output and logs (new logs API endpoint)
+
+#### Testing Method:
+- Dev server tested successfully on port 3000
+- Tested `/api/agents` - Returns agent list
+- Tested `/api/agents/main` - Returns detailed agent info with sessions
+- Tested `/api/agents/main/logs?limit=5` - Returns logs (empty when no log files)
+- Build successful with no TypeScript errors
+
+#### Files Created:
+- `src/app/api/agents/[id]/route.ts` - Agent details and control API
+- `src/app/api/agents/[id]/logs/route.ts` - Agent logs API
+
+#### Files Modified:
+- `task.json` - Updated Task 5 status to completed
+- `progress.txt` - Added Task 5 completion record
+
+#### Issues Encountered:
+- TypeScript error with spread operator on unknown type
+- Fixed by adding type assertion: `(sessionData as object)`
+
+#### Notes:
+- Staff page already uses real agent data via useAgents() hook
+- Session data includes comprehensive metadata (chatType, channel, skills, etc.)
+- Start/stop uses openclaw CLI commands when Gateway unavailable
+- Logs API searches multiple common log file locations
+- All APIs include method indicator for debugging
+
+---
+
 ### 2026-03-14 - Task 2: Fix Settings Page Translation Gaps
 **Commit**: 17ce1d4
 
