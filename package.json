@@ -5,6 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:static": "next build",
+    "build:tauri": "next build && npm run copy:tauri",
+    "copy:tauri": "cp -r out/* ../macos-menubar/src-tauri/static/ 2>/dev/null || mkdir -p ../macos-menubar/src-tauri/static && cp -r out/* ../macos-menubar/src-tauri/static/",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",

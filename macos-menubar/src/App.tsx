@@ -9,7 +9,7 @@ interface DashboardStatus {
 
 export default function App() {
   const [status, setStatus] = useState<DashboardStatus>({ running: false, uptime: 0 });
-  const [loading, setLoading] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -26,118 +26,128 @@ export default function App() {
       setError(null);
     } catch (err) {
       console.error('Failed to get status:', err);
-      // 静默失败，不显示错误
+      setError('Dashboard is not running. Please start it first.');
     }
   };
 
-  const handleStart = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      await invoke('start_dashboard');
-      await new Promise(resolve => setTimeout(resolve, 3000)); // 等待启动
-      await refreshStatus();
-    } catch (err) {
-      console.error('Failed to start dashboard:', err);
-      setError('Failed to start dashboard: ' + err);
-    } finally {
-      setLoading(false);
-    }
+  const handleOpenDashboard = () => {
+    // 直接在当前窗口中显示 Dashboard
+    window.location.href = 'http://localhost:3000';
   };
 
-  const handleStop = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      await invoke('stop_dashboard');
-      await new Promise(resolve => setTimeout(resolve, 1000)); // 等待停止
-      await refreshStatus();
-    } catch (err) {
-      console.error('Failed to stop dashboard:', err);
-      setError('Failed to stop dashboard: ' + err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleOpenDashboard = async () => {
+  const handleOpenInBrowser = async () => {
     try {
       await open('http://localhost:3000');
     } catch (err) {
       console.error('Failed to open dashboard:', err);
-      setError('Failed to open dashboard: ' + err);
+      setError('Failed to open dashboard in browser: ' + err);
     }
   };
 
   return (
-    <div className="min-w-[300px] bg-gray-900 text-white">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-gray-800 px-4 py-3 border-b border-gray-700">
-        <h1 className="text-lg font-semibold">OpenClaw</h1>
-        <p className="text-xs text-gray-400">Dashboard Service Control</p>
-      </div>
-
-      {/* Status Display */}
-      <div className="p-4 border-b border-gray-700">
-        <div className="flex items-center gap-2">
-          <div className={`w-3 h-3 rounded-full ${
-            status.running ? 'bg-green-500' : 'bg-gray-500'
-          }`} />
-          <span className="font-medium">
-            {status.running ? 'Dashboard Running' : 'Dashboard Stopped'}
-          </span>
+      <div className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">OpenClaw Dashboard</h1>
+              <p className="text-sm text-gray-500">AI Agent Management Interface</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
+                status.running ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+              }`}>
+                <div className={`w-2 h-2 rounded-full ${
+                  status.running ? 'bg-green-500' : 'bg-gray-400'
+                }`} />
+                <span>{status.running ? 'Running' : 'Stopped'}</span>
+              </div>
+              <button
+                onClick={handleOpenDashboard}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+              >
+                Open Dashboard
+              </button>
+              <button
+                onClick={handleOpenInBrowser}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
+              >
+                Open in Browser
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Error Display */}
       {error && (
-        <div className="p-3 bg-red-900/50 border-b border-red-700">
-          <p className="text-sm text-red-200">{error}</p>
+        <div className="bg-red-50 border-b border-red-200">
+          <div className="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8">
+            <div className="flex items-center">
+              <svg className="h-5 w-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <p className="text-sm text-red-800">{error}</p>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Actions */}
-      <div className="p-4 space-y-2">
-        {!status.running ? (
-          <button
-            onClick={handleStart}
-            disabled={loading}
-            className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Starting...' : 'Start Dashboard'}
-          </button>
-        ) : (
-          <button
-            onClick={handleStop}
-            disabled={loading}
-            className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Stopping...' : 'Stop Dashboard'}
-          </button>
-        )}
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <div className="bg-white rounded-lg shadow p-8 text-center">
+          <div className="max-w-md mx-auto">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              Welcome to OpenClaw Dashboard
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Click the button below to open the full Dashboard interface where you can manage your AI agents, monitor tasks, and view analytics.
+            </p>
+            <button
+              onClick={handleOpenDashboard}
+              className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+            >
+              Open Dashboard Interface
+            </button>
 
-        <button
-          onClick={handleOpenDashboard}
-          disabled={!status.running}
-          className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Open Dashboard
-        </button>
-
-        <button
-          onClick={refreshStatus}
-          disabled={loading}
-          className="w-full px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Refresh Status
-        </button>
+            {status.running && (
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-green-600">Active</div>
+                    <div className="text-sm text-gray-500">Status</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-blue-600">:3000</div>
+                    <div className="text-sm text-gray-500">Port</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-purple-600">v1.0</div>
+                    <div className="text-sm text-gray-500">Version</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-2 border-t border-gray-700">
-        <p className="text-xs text-gray-500 text-center">
-          Port: 3000
-        </p>
+      <div className="bg-white border-t border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between text-sm text-gray-500">
+            <span>© 2026 OpenClaw. All rights reserved.</span>
+            <span>Running on localhost:3000</span>
+          </div>
+        </div>
       </div>
     </div>
   );

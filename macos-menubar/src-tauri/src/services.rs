@@ -1,5 +1,4 @@
-use std::process::{Command, Stdio};
-use std::path::PathBuf;
+use std::process::Command;
 
 #[derive(serde::Serialize)]
 pub struct DashboardStatus {
@@ -10,82 +9,6 @@ pub struct DashboardStatus {
 pub struct DashboardService;
 
 impl DashboardService {
-    /// 获取 Dashboard 项目路径
-    fn get_dashboard_path() -> PathBuf {
-        // Dashboard 项目在上级目录
-        PathBuf::from("/Users/alex/openclaw-dashboard")
-    }
-
-    /// 启动 Dashboard 服务
-    pub async fn start_dashboard() -> Result<String, String> {
-        let dashboard_path = Self::get_dashboard_path();
-
-        // 检查目录是否存在
-        if !dashboard_path.exists() {
-            return Err(format!("Dashboard directory not found: {}", dashboard_path.display()));
-        }
-
-        // 在后台启动 npm run dev
-        let mut output = Command::new("npm")
-            .args(["run", "dev"])
-            .current_dir(&dashboard_path)
-            .stdout(Stdio::null())
-            .stderr(Stdio::piped())
-            .spawn()
-            .map_err(|e| {
-                if e.kind() == std::io::ErrorKind::NotFound {
-                    "npm not found. Please install Node.js and npm first.".to_string()
-                } else {
-                    format!("Failed to start dashboard: {}", e)
-                }
-            })?;
-
-        // 给进程一些时间启动
-        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
-
-        // 检查进程是否还在运行
-        let is_running = output.try_wait()
-            .map_err(|e| format!("Failed to check process status: {}", e))?;
-
-        if is_running.is_none() {
-            // 进程仍在运行，说明启动成功
-            Ok("Dashboard started successfully".to_string())
-        } else {
-            // 进程已经退出，启动失败
-            Err("Dashboard failed to start. Check the logs for details.".to_string())
-        }
-    }
-
-    /// 停止 Dashboard 服务
-    pub async fn stop_dashboard() -> Result<String, String> {
-        // 通过 pkill 杀死 Next.js 开发服务器进程
-        let output = Command::new("pkill")
-            .args(["-f", "next dev"])
-            .output()
-            .map_err(|e| format!("Failed to execute pkill: {}", e))?;
-
-        // 检查是否找到并杀死了进程
-        if output.status.success() {
-            Ok("Dashboard stopped successfully".to_string())
-        } else {
-            // 可能进程没有在运行，尝试其他方式
-            let output2 = Command::new("pkill")
-                .args(["-f", "node.*next"])
-                .output()
-                .ok();
-
-            if let Some(out) = output2 {
-                if out.status.success() {
-                    Ok("Dashboard stopped successfully".to_string())
-                } else {
-                    Err("Dashboard was not running".to_string())
-                }
-            } else {
-                Err("Failed to stop dashboard".to_string())
-            }
-        }
-    }
-
     /// 获取 Dashboard 状态
     pub async fn get_status() -> Result<DashboardStatus, String> {
         // 通过 pgrep 检查 Next.js 进程
@@ -110,7 +33,7 @@ impl DashboardService {
 
         Ok(DashboardStatus {
             running,
-            uptime: 0, // TODO: 从进程启动时间计算
+            uptime: 0,
         })
     }
 
