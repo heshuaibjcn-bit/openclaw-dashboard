@@ -5,25 +5,45 @@ import path from 'path';
 export async function GET() {
   try {
     const sessionsPath = path.join(process.env.HOME || '', '.openclaw', 'agents', 'main', 'sessions', 'sessions.json');
+
     const content = await fs.readFile(sessionsPath, 'utf-8');
-    const sessions = JSON.parse(content);
+    const sessionsData: Record<string, any> = JSON.parse(content);
 
-    const sessionList = Object.entries(sessions).map(([sessionId, sessionData]: [string, any]) => ({
-      id: sessionId,
-      agentId: 'main',
-      model: sessionData.model || 'unknown',
-      createdAt: new Date(sessionData.createdAt || Date.now()).toISOString(),
-      lastActivity: new Date(sessionData.updatedAt || Date.now()).toISOString(),
-      tokens: {
-        input: 0,
-        output: 0,
-        total: 0,
-        max: 1000000,
-      },
-    }));
+    // Convert sessions object to array and enrich with metadata
+    const sessionsArray = Object.entries(sessionsData).map(([sessionKey, session]: [string, any]) => {
+      // Parse session key (format: "agent:main:main" or just session ID)
+      const keyParts = sessionKey.split(':');
+      const agentId = keyParts.length > 2 ? keyParts[1] : 'main';
+      const sessionId = session.sessionId || sessionKey;
 
-    return NextResponse.json(sessionList);
+      return {
+        id: sessionId,
+        sessionKey: sessionKey,
+        agentId,
+        chatType: session.chatType || 'unknown',
+        status: session.abortedLastRun ? 'aborted' : 'active',
+        lastChannel: session.lastChannel || session.deliveryContext?.channel || 'unknown',
+        origin: session.origin?.label || session.origin?.provider || 'unknown',
+        updatedAt: session.updatedAt ? new Date(session.updatedAt).toISOString() : null,
+        createdAt: session.createdAt ? new Date(session.createdAt).toISOString() : null,
+        systemSent: session.systemSent || false,
+        compactionCount: session.compactionCount || 0,
+        sessionFile: session.sessionFile,
+        hasSkills: !!(session.skillsSnapshot && session.skillsSnapshot.prompt),
+        messageCount: 0, // Would need to parse session file to get actual count
+      };
+    });
+
+    // Sort by updatedAt descending
+    sessionsArray.sort((a, b) => {
+      const aTime = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+      const bTime = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+      return bTime - aTime;
+    });
+
+    return NextResponse.json(sessionsArray);
   } catch (error) {
+    console.error('Error reading sessions:', error);
     return NextResponse.json([], { status: 500 });
   }
 }

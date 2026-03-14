@@ -1,27 +1,65 @@
 import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
+
+interface OpenClawConfig {
+  meta?: {
+    lastTouchedVersion?: string;
+  };
+  channels?: {
+    imessage?: {
+      enabled: boolean;
+    };
+    feishu?: {
+      enabled: boolean;
+    };
+  };
+}
 
 export async function GET() {
   try {
     const openclawConfigPath = path.join(process.env.HOME || '', '.openclaw', 'openclaw.json');
     const configContent = await fs.readFile(openclawConfigPath, 'utf-8');
-    const config = JSON.parse(configContent);
+    const config: OpenClawConfig = JSON.parse(configContent);
 
-    // Get gateway status from process
-    const gatewayProcess = await getGatewayProcess();
+    // Check if OpenClaw Gateway is running
+    const gatewayRunning = await isGatewayRunning();
+
+    // Get system uptime (not Gateway uptime)
+    const uptime = await getSystemUptime();
+
+    // Get channels from config
+    const channels = [];
+    if (config.channels?.imessage?.enabled) {
+      channels.push({ name: 'iMessage', enabled: true, status: 'connected' });
+    }
+    if (config.channels?.feishu?.enabled) {
+      channels.push({ name: 'Feishu', enabled: true, status: 'connected' });
+    }
+
+    // Get session count
+    const sessions = await getSessionCount();
+
+    // Get agent count
+    const agents = await getAgentCount();
 
     return NextResponse.json({
-      status: gatewayProcess ? 'healthy' : 'degraded',
-      uptime: gatewayProcess?.uptime || 0,
+      status: gatewayRunning ? 'healthy' : 'degraded',
+      uptime,
       version: config.meta?.lastTouchedVersion || 'unknown',
       os: process.platform,
       nodeVersion: process.version,
-      channels: await getChannelsStatus(),
-      sessions: await getSessionCount(),
-      agents: await getAgentCount(),
+      channels,
+      sessions,
+      agents,
+      gatewayRunning,
     });
   } catch (error) {
+    console.error('Health check error:', error);
     return NextResponse.json({
       status: 'unhealthy',
       uptime: 0,
@@ -31,100 +69,44 @@ export async function GET() {
       channels: [],
       sessions: 0,
       agents: 0,
+      gatewayRunning: false,
       error: error instanceof Error ? error.message : 'Unknown error',
     }, { status: 500 });
   }
 }
 
-interface GatewayProcess {
-  pid: number;
-  uptime: number;
-}
-
-async function getGatewayProcess(): Promise<GatewayProcess | null> {
+async function isGatewayRunning(): Promise<boolean> {
   try {
-    const { exec } = require('child_process');
-    return new Promise((resolve) => {
-      exec('pgrep -f "openclaw-gateway"', (error: any, stdout: string) => {
-        if (error || !stdout.trim()) {
-          resolve(null);
-          return;
-        }
-        const pid = parseInt(stdout.trim());
-        exec(`ps -p ${pid} -o etime=`, (error: any, etime: string) => {
-          if (error) {
-            resolve(null);
-            return;
-          }
-          // Parse uptime from etime format and convert to seconds
-          const uptimeStr = etime.trim();
-          const uptimeSeconds = parseEtimeToSeconds(uptimeStr);
-          resolve({ pid, uptime: uptimeSeconds });
-        });
-      });
-    });
+    // Check if Gateway process is running
+    const { stdout } = await execAsync('pgrep -fl "openclaw.*gateway" || echo "not running"');
+    return stdout.trim() !== '' && !stdout.includes('not running');
   } catch {
-    return null;
+    return false;
   }
 }
 
-// Parse etime format to seconds
-// etime format can be: "DD-HH:MM:SS" or "HH:MM:SS" or "MM:SS"
-function parseEtimeToSeconds(etime: string): number {
+async function getSystemUptime(): Promise<number> {
   try {
-    // Check if format includes days (DD-HH:MM:SS)
-    if (etime.includes('-')) {
-      const [days, timePart] = etime.split('-');
-      const timeParts = timePart.split(':');
-      const hours = parseInt(timeParts[0]) || 0;
-      const minutes = parseInt(timeParts[1]) || 0;
-      const seconds = parseInt(timeParts[2]) || 0;
-      return (
-        (parseInt(days) || 0) * 86400 +
-        hours * 3600 +
-        minutes * 60 +
-        seconds
-      );
+    if (process.platform === 'darwin') {
+      // macOS: use uptime command
+      const { stdout } = await execAsync('uptime | awk \'{print $3}\'');
+      const uptimeStr = stdout.trim();
+      const parts = uptimeStr.split(':');
+      if (parts.length === 2) {
+        const hours = parseInt(parts[0]);
+        const minutes = parseInt(parts[1]);
+        return (hours * 3600) + (minutes * 60);
+      }
     }
 
-    // Format is HH:MM:SS or MM:SS
-    const parts = etime.split(':').map(p => parseInt(p) || 0);
-
-    if (parts.length === 3) {
-      // HH:MM:SS
-      return parts[0] * 3600 + parts[1] * 60 + parts[2];
-    } else if (parts.length === 2) {
-      // MM:SS
-      return parts[0] * 60 + parts[1];
-    }
-
-    return 0;
+    // Fallback: use process.uptime()
+    return process.uptime();
   } catch {
-    return 0;
+    return process.uptime();
   }
 }
 
-async function getChannelsStatus() {
-  try {
-    const openclawConfigPath = path.join(process.env.HOME || '', '.openclaw', 'openclaw.json');
-    const configContent = await fs.readFile(openclawConfigPath, 'utf-8');
-    const config = JSON.parse(configContent);
-
-    const channels = [];
-    if (config.channels?.imessage?.enabled) {
-      channels.push({ name: 'iMessage', enabled: true, status: 'connected' });
-    }
-    if (config.channels?.feishu?.enabled) {
-      channels.push({ name: 'Feishu', enabled: true, status: 'connected' });
-    }
-
-    return channels;
-  } catch {
-    return [];
-  }
-}
-
-async function getSessionCount() {
+async function getSessionCount(): Promise<number> {
   try {
     const sessionsPath = path.join(process.env.HOME || '', '.openclaw', 'agents', 'main', 'sessions', 'sessions.json');
     const content = await fs.readFile(sessionsPath, 'utf-8');
@@ -135,7 +117,7 @@ async function getSessionCount() {
   }
 }
 
-async function getAgentCount() {
+async function getAgentCount(): Promise<number> {
   try {
     const agentsPath = path.join(process.env.HOME || '', '.openclaw', 'agents');
     const agentDirs = await fs.readdir(agentsPath);
