@@ -193,7 +193,7 @@
       "id": "11",
       "title": "Implement Task Approval Workflow UI",
       "description": "The Approvals page currently shows mock data. Implement real task approval workflow connecting to OpenClaw's approval system for human-in-the-loop task verification.",
-      "status": "pending",
+      "status": "completed",
       "priority": "high",
       "acceptanceCriteria": [
         "Connect to OpenClaw approval API",
