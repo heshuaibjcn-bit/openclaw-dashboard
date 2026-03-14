@@ -9,6 +9,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var portNumber: Int = 3000  // 默认端口号
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // 从 UserDefaults 读取保存的端口号
+        let savedPort = UserDefaults.standard.integer(forKey: "dashboardPortNumber")
+        if savedPort >= 1024 && savedPort <= 65535 {
+            portNumber = savedPort
+            Swift.print("📌 从配置读取端口号: \(portNumber)")
+        }
+
         // 创建状态栏项目
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
@@ -245,6 +252,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         portInfoItem.title = "端口: \(portNumber)"
         menu.addItem(portInfoItem)
 
+        // 设置端口号菜单项
+        let setPortItem = NSMenuItem(title: "设置端口号", action: #selector(setPortNumber), keyEquivalent: "")
+        setPortItem.target = self
+        menu.addItem(setPortItem)
+
         let openItem = NSMenuItem(title: "打开 Dashboard", action: #selector(openDashboard), keyEquivalent: "o")
         openItem.target = self
         menu.addItem(openItem)
@@ -265,14 +277,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        // 弹出对话框让用户输入端口号
-        let portInput = showPortInputDialog()
-        guard let port = portInput, let portNum = Int(port), portNum >= 1024 && portNum <= 65535 else {
-            showAlert(message: "请输入有效的端口号（1024-65535）")
-            return
-        }
-
-        portNumber = portNum
         Swift.print("🚀 启动 Dashboard 服务 (端口: \(portNumber))...")
 
         // 确保 Node.js 路径已更新
@@ -434,6 +438,44 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         return nil
+    }
+
+    @objc func setPortNumber() {
+        // 检查 Dashboard 是否正在运行
+        if isDashboardRunning() {
+            showAlert(message: "Dashboard 正在运行中。\n\n请先停止服务后再修改端口号。")
+            return
+        }
+
+        let alert = NSAlert()
+        alert.messageText = "设置端口号"
+        alert.informativeText = "请输入 Dashboard 服务运行的端口号\n\n当前端口: \(portNumber)\n默认端口: 3000\n有效范围: 1024-65535"
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "保存")
+        alert.addButton(withTitle: "取消")
+
+        let input = NSTextField(frame: NSRect(x: 0, y: 0, width: 300, height: 24))
+        input.placeholderString = "3000"
+        input.stringValue = "\(portNumber)"
+        alert.accessoryView = input
+
+        let response = alert.runModal()
+
+        if response == .alertFirstButtonReturn {
+            let portText = input.stringValue.trimmingCharacters(in: .whitespaces)
+            if !portText.isEmpty, let portNum = Int(portText), portNum >= 1024 && portNum <= 65535 {
+                // 保存到 UserDefaults
+                UserDefaults.standard.set(portNum, forKey: "dashboardPortNumber")
+                portNumber = portNum
+                Swift.print("✅ 端口号已更新为: \(portNumber)")
+                showAlert(message: "端口号已更新为: \(portNumber)\n\n下次启动服务时将使用新端口。")
+
+                // 更新菜单
+                updateMenu()
+            } else {
+                showAlert(message: "请输入有效的端口号（1024-65535）")
+            }
+        }
     }
 
     func showAlert(message: String) {
