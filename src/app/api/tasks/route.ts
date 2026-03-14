@@ -8,42 +8,41 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    // Try to read tasks from workspace state or create sample tasks
-    const workspaceStatePath = path.join(process.env.HOME || '', '.openclaw', 'workspace', '.openclaw', 'workspace-state.json');
+    // Read tasks from project task.json file
+    const projectRoot = process.cwd();
+    const taskJsonPath = path.join(projectRoot, 'task.json');
 
     let tasks: any[] = [];
 
     try {
-      const workspaceState = JSON.parse(await fs.readFile(workspaceStatePath, 'utf-8'));
-      tasks = workspaceState.tasks || [];
-    } catch {
-      // Return sample tasks if no workspace state found
-      tasks = [
-        {
-          id: 'task-1',
-          title: 'Review code changes',
-          description: 'Review and approve pending PRs',
-          status: 'in-progress',
-          priority: 'high',
-          createdAt: new Date(Date.now() - 86400000).toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        {
-          id: 'task-2',
-          title: 'Update documentation',
-          description: 'Update API documentation with new endpoints',
-          status: 'pending',
-          priority: 'medium',
-          createdAt: new Date(Date.now() - 172800000).toISOString(),
-          updatedAt: new Date(Date.now() - 86400000).toISOString(),
-        },
-      ];
+      const taskJsonContent = await fs.readFile(taskJsonPath, 'utf-8');
+      const taskData = JSON.parse(taskJsonContent);
+
+      // Transform task.json format to Dashboard format
+      tasks = (taskData.tasks || []).map((task: any) => ({
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        status: task.status,
+        priority: task.priority,
+        createdAt: task.createdAt || new Date().toISOString(),
+        updatedAt: task.updatedAt || new Date().toISOString(),
+        tags: task.tags || [],
+        // Map acceptance criteria to subtasks
+        subtaskCount: task.acceptanceCriteria?.length || 0,
+        completedSubtasks: task.status === 'completed' ? (task.acceptanceCriteria?.length || 0) : 0,
+      }));
+    } catch (error) {
+      console.error('Error reading task.json:', error);
+      // Return empty array if task.json not found or invalid
+      tasks = [];
     }
 
     const paginatedTasks = tasks.slice(offset, offset + limit);
 
     return NextResponse.json(paginatedTasks);
   } catch (error) {
+    console.error('Error in tasks API:', error);
     return NextResponse.json([], { status: 500 });
   }
 }
