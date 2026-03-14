@@ -47,6 +47,25 @@ import {
 import { useAgents, useSkills } from "@/lib/openclaw";
 import type { Agent } from "@/lib/openclaw";
 
+const ArrowDown = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    width="12"
+    height="12"
+    viewBox="0 0 12 12"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M6 1L6 11M6 11L3 8M6 11L9 8"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 interface ModelConfig {
   primaryModel: string;
   fallbackModels: string[];
@@ -153,6 +172,64 @@ export default function AgentsPage() {
         ? prev.capabilities.filter((c) => c !== cap)
         : [...prev.capabilities, cap],
     }));
+  };
+
+  const renderFlowchart = (config: ModelConfig) => {
+    const models = [
+      { id: config.primaryModel, type: 'primary', configured: true },
+      ...config.suggestedFallbacks.recommended.map((m) => ({
+        id: m,
+        type: 'fallback',
+        configured: config.suggestedFallbacks.current.includes(m),
+      })),
+    ];
+
+    return (
+      <div className="w-full space-y-2">
+        {models.map((model, index) => (
+          <div key={model.id} className="flex items-center gap-2">
+            {/* Model Node */}
+            <div
+              className={`
+                flex-1 px-3 py-2 rounded-lg border-2 text-center text-sm font-medium
+                ${model.type === 'primary'
+                  ? 'bg-green-50 border-green-500 text-green-700 dark:bg-green-900/20 dark:border-green-500 dark:text-green-400'
+                  : model.configured
+                  ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/20 dark:border-blue-500 dark:text-blue-400'
+                  : 'bg-gray-50 border-gray-300 text-gray-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400'
+                }
+              `}
+            >
+              <div className="flex items-center justify-center gap-2">
+                {model.type === 'primary' && <CheckCircle2 className="h-3 w-3" />}
+                {model.type === 'fallback' && !model.configured && <span className="text-yellow-500">*</span>}
+                <span className="truncate">{model.id}</span>
+              </div>
+            </div>
+
+            {/* Arrow */}
+            {index < models.length - 1 && (
+              <div className="flex flex-col items-center gap-1 px-2">
+                <ArrowDown className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  {index === 0 ? 'Fail' : index === models.length - 2 ? 'Cross-Provider' : 'Downgrade'}
+                </span>
+              </div>
+            )}
+          </div>
+        ))}
+
+        {/* Cooldown Info */}
+        <div className="mt-3 pt-3 border-t border-dashed">
+          <div className="text-xs text-muted-foreground space-y-1">
+            <div className="flex items-center gap-2">
+              <Clock className="h-3 w-3" />
+              <span>Cooldown: {config.cooldownConfig.billingBackoffHours}h backoff, {config.cooldownConfig.failureWindowHours}h failure window</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const capabilityOptions = [
@@ -271,6 +348,17 @@ export default function AgentsPage() {
                   <Badge variant="default" className="text-sm">
                     {modelConfig.primaryModel}
                   </Badge>
+                </div>
+
+                {/* Disaster Recovery Flowchart */}
+                <div className="mt-4 p-4 border rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+                  <div className="flex items-center gap-2 text-sm font-medium mb-4">
+                    <Shield className="h-4 w-4 text-purple-500" />
+                    Disaster Recovery Flow
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    {renderFlowchart(modelConfig)}
+                  </div>
                 </div>
 
                 {modelConfig.fallbackModels.length > 0 || modelConfig.suggestedFallbacks.recommended.length > 0 ? (
