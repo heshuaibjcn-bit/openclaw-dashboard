@@ -353,14 +353,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
-                if error == nil, let httpResponse = response as? HTTPURLResponse,
-                   httpResponse.statusCode == 200 {
-                    // 服务器已就绪，打开浏览器
-                    Swift.print("✅ 服务器已就绪，打开浏览器")
-                    NSWorkspace.shared.open(url!)
+                if error == nil, let httpResponse = response as? HTTPURLResponse {
+                    // 接受任何 2xx 或 3xx 状态码作为服务器就绪的标志
+                    let statusCode = httpResponse.statusCode
+                    let isSuccess = (200...299).contains(statusCode) || (300...399).contains(statusCode)
+
+                    if isSuccess {
+                        // 服务器已就绪，打开浏览器
+                        Swift.print("✅ 服务器已就绪 (HTTP \(statusCode))，打开浏览器")
+                        NSWorkspace.shared.open(url!)
+                    } else {
+                        // 服务器尚未就绪，1秒后重试
+                        Swift.print("⏳ 服务器尚未就绪 (HTTP \(statusCode))，等待中...")
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                            self?.checkServerAndOpen()
+                        }
+                    }
                 } else {
-                    // 服务器尚未就绪，1秒后重试
-                    Swift.print("⏳ 服务器尚未就绪，等待中...")
+                    // 请求失败，1秒后重试
+                    Swift.print("⏳ 请求失败，等待中... 错误: \(error?.localizedDescription ?? "unknown")")
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
                         self?.checkServerAndOpen()
                     }
