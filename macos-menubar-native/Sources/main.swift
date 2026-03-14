@@ -6,6 +6,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var dashboardProcess: Process?
     var nodePath: String?
     var nextPath: String?
+    var portNumber: Int = 3000  // 默认端口号
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // 创建状态栏项目
@@ -179,7 +180,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func isServerResponding() -> Bool {
-        let url = URL(string: "http://localhost:3000")!
+        let url = URL(string: "http://localhost:\(portNumber)")!
         var request = URLRequest(url: url)
         request.timeoutInterval = 1.0
 
@@ -238,6 +239,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu.addItem(NSMenuItem.separator())
 
+        // 显示当前端口号
+        let portInfoItem = NSMenuItem()
+        portInfoItem.isEnabled = false
+        portInfoItem.title = "端口: \(portNumber)"
+        menu.addItem(portInfoItem)
+
         let openItem = NSMenuItem(title: "打开 Dashboard", action: #selector(openDashboard), keyEquivalent: "o")
         openItem.target = self
         menu.addItem(openItem)
@@ -258,7 +265,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        Swift.print("🚀 启动 Dashboard 服务...")
+        // 弹出对话框让用户输入端口号
+        let portInput = showPortInputDialog()
+        guard let port = portInput, let portNum = Int(port), portNum >= 1024 && portNum <= 65535 else {
+            showAlert(message: "请输入有效的端口号（1024-65535）")
+            return
+        }
+
+        portNumber = portNum
+        Swift.print("🚀 启动 Dashboard 服务 (端口: \(portNumber))...")
 
         // 确保 Node.js 路径已更新
         findNodePaths()
@@ -280,15 +295,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         dashboardProcess = Process()
         dashboardProcess?.executableURL = URL(fileURLWithPath: node)
-        dashboardProcess?.arguments = [next, "dev"]
+        dashboardProcess?.arguments = [next, "dev", "--port", "\(portNumber)"]
         dashboardProcess?.currentDirectoryURL = URL(fileURLWithPath: "/Users/alex/openclaw-dashboard")
 
         do {
             try dashboardProcess?.run()
-            Swift.print("✅ Dashboard 启动命令已执行")
+            Swift.print("✅ Dashboard 启动命令已执行 (端口: \(portNumber))")
 
             // 显示等待提示
-            showAlert(message: "Dashboard 正在启动中...\n\n请等待 5-10 秒让服务完全启动，然后再点击「打开 Dashboard」。\n\n启动完成后，图标会变为绿色圆点。")
+            showAlert(message: "Dashboard 正在启动中...\n\n端口: \(portNumber)\n\n请等待 5-10 秒让服务完全启动，然后再点击「打开 Dashboard」。\n\n启动完成后，图标会变为绿色圆点。")
 
             // 5秒后更新菜单状态
             DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
@@ -337,7 +352,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if isServerResponding() {
             // 服务器已就绪，直接打开浏览器到中文页面
             Swift.print("✅ 服务器已就绪，打开浏览器")
-            if let url = URL(string: "http://localhost:3000/zh") {
+            if let url = URL(string: "http://localhost:\(portNumber)/zh") {
                 NSWorkspace.shared.open(url)
             }
         } else {
@@ -348,9 +363,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func checkServerAndOpen() {
-        let checkUrl = URL(string: "http://localhost:3000")
+        let checkUrl = URL(string: "http://localhost:\(portNumber)")
         var request = URLRequest(url: checkUrl!)
         request.timeoutInterval = 2.0
+
+        let currentPort = portNumber  // 捕获当前端口号
 
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
@@ -362,7 +379,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     if isSuccess {
                         // 服务器已就绪，打开浏览器到中文页面
                         Swift.print("✅ 服务器已就绪 (HTTP \(statusCode))，打开浏览器")
-                        if let openUrl = URL(string: "http://localhost:3000/zh") {
+                        if let openUrl = URL(string: "http://localhost:\(currentPort)/zh") {
                             NSWorkspace.shared.open(openUrl)
                         }
                     } else {
@@ -392,6 +409,31 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         NSApplication.shared.terminate(nil)
+    }
+
+    func showPortInputDialog() -> String? {
+        let alert = NSAlert()
+        alert.messageText = "设置端口号"
+        alert.informativeText = "请输入 Dashboard 服务运行的端口号\n（默认: 3000，范围: 1024-65535）"
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "确定")
+        alert.addButton(withTitle: "取消")
+
+        let input = NSTextField(frame: NSRect(x: 0, y: 0, width: 300, height: 24))
+        input.placeholderString = "3000"
+        input.stringValue = "\(portNumber)"
+        alert.accessoryView = input
+
+        let response = alert.runModal()
+
+        if response == .alertFirstButtonReturn {
+            let portText = input.stringValue.trimmingCharacters(in: .whitespaces)
+            if !portText.isEmpty {
+                return portText
+            }
+        }
+
+        return nil
     }
 
     func showAlert(message: String) {
