@@ -49,6 +49,11 @@ interface Task {
   tags?: string[];
   subtaskCount?: number;
   completedSubtasks?: number;
+  taskType?: 'project' | 'cron';
+  schedule?: string;
+  cronExpression?: string;
+  timezone?: string;
+  enabled?: boolean;
 }
 
 export default function TasksPage() {
@@ -393,6 +398,24 @@ export default function TasksPage() {
                     </div>
 
                     <div className="flex items-center gap-4 flex-wrap text-sm text-muted-foreground">
+                      {task.taskType === 'cron' && (
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          <span className="font-mono text-xs">{task.schedule}</span>
+                        </div>
+                      )}
+                      {task.taskType === 'cron' && task.cronExpression && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs bg-secondary px-2 py-0.5 rounded">
+                            {task.cronExpression}
+                          </span>
+                          {task.timezone && (
+                            <span className="text-xs text-muted-foreground">
+                              ({task.timezone})
+                            </span>
+                          )}
+                        </div>
+                      )}
                       {task.projectTitle && (
                         <div className="flex items-center gap-1">
                           <Tag className="h-3 w-3" />
