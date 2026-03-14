@@ -54,6 +54,7 @@ interface Task {
 export default function TasksPage() {
   const t = useTranslations('tasks');
   const tCommon = useTranslations('common');
+  const tSeverity = useTranslations('severity');
   const locale = useLocale();
   const isZh = locale === 'zh';
 
@@ -308,10 +309,10 @@ export default function TasksPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{tCommon('all')} {tCommon('priority')}</SelectItem>
-                <SelectItem value="critical">{t('severity.critical')}</SelectItem>
-                <SelectItem value="high">{t('severity.high')}</SelectItem>
-                <SelectItem value="medium">{t('severity.medium')}</SelectItem>
-                <SelectItem value="low">{t('severity.low')}</SelectItem>
+                <SelectItem value="critical">{tSeverity('critical')}</SelectItem>
+                <SelectItem value="high">{tSeverity('high')}</SelectItem>
+                <SelectItem value="medium">{tSeverity('medium')}</SelectItem>
+                <SelectItem value="low">{tSeverity('low')}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={sortBy} onValueChange={(value) => setSortBy((value ?? 'createdAt') as typeof sortBy)}>
