@@ -24,42 +24,96 @@ import {
   Sparkles,
   Clock,
   MoreVertical,
+  History,
 } from "lucide-react";
 import { useAgents } from "@/lib/openclaw";
 
 interface ChatMessage {
   id: string;
-  role: "user" | "assistant" | "system";
+  role: "user" | "assistant" | "system" | "toolResult";
   content: string;
-  timestamp: Date;
-  status?: "sending" | "sent" | "error";
-  tokens?: number;
+  thinking?: string;
+  timestamp: string;
+  tokens?: {
+    input: number;
+    output: number;
+    total: number;
+  };
+}
+
+interface ChatSession {
+  id: string;
+  filename: string;
+  messageCount: number;
+  firstMessage: string;
+  lastMessage: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default function ChatPage() {
   const t = useTranslations('chat');
   const tCommon = useTranslations('common');
   const { data: agents } = useAgents();
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: "1",
-      role: "assistant",
-      content: "Hello! I'm your OpenClaw assistant. How can I help you today?",
-      timestamp: new Date(Date.now() - 1000 * 60 * 5),
-      status: "sent",
-    },
-  ]);
+
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [selectedSession, setSelectedSession] = useState<string | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [selectedAgent, setSelectedAgent] = useState("main");
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingSessions, setIsLoadingSessions] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Load chat sessions on mount
   useEffect(() => {
-    // Auto-scroll to bottom when new messages arrive
+    loadSessions();
+  }, []);
+
+  // Load messages when session is selected
+  useEffect(() => {
+    if (selectedSession) {
+      loadMessages(selectedSession);
+    }
+  }, [selectedSession]);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const loadSessions = async () => {
+    try {
+      setIsLoadingSessions(true);
+      const response = await fetch('/api/chat/sessions');
+      if (response.ok) {
+        const data = await response.json();
+        setSessions(data);
+        // Auto-select the most recent session
+        if (data.length > 0) {
+          setSelectedSession(data[0].id);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading sessions:', error);
+    } finally {
+      setIsLoadingSessions(false);
+    }
+  };
+
+  const loadMessages = async (sessionId: string) => {
+    try {
+      const response = await fetch(`/api/chat/sessions/${sessionId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data.messages || []);
+      }
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    }
+  };
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -68,43 +122,71 @@ export default function ChatPage() {
       id: Date.now().toString(),
       role: "user",
       content: input.trim(),
-      timestamp: new Date(),
-      status: "sending",
+      timestamp: new Date().toISOString(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const messageToSend = input.trim();
     setInput("");
     setIsLoading(true);
 
-    // Simulate agent response (replace with actual API call)
-    setTimeout(() => {
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === userMessage.id ? { ...m, status: "sent" as const } : m
-        )
-      );
+    try {
+      const response = await fetch('/api/chat/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: messageToSend,
+          agentId: selectedAgent,
+        }),
+      });
 
-      // Mock response based on user input
-      const responses = [
-        "I understand. Let me help you with that.",
-        "That's an interesting question. Based on my knowledge of the OpenClaw system...",
-        "I've processed your request. Here's what I found...",
-        "Thanks for the information. I'll store that in my memory.",
-        "I'm analyzing the current gateway status. Everything appears to be running smoothly.",
-      ];
+      const data = await response.json();
 
-      const assistantMessage: ChatMessage = {
+      if (data.success) {
+        // Add a system message about the send
+        const systemMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          role: "system",
+          content: data.response || "Message sent. Check OpenClaw TUI for response.",
+          timestamp: new Date().toISOString(),
+        };
+
+        setMessages((prev) => [...prev, systemMessage]);
+
+        // Refresh sessions after a delay to get new messages
+        setTimeout(() => {
+          loadSessions();
+          if (selectedSession) {
+            loadMessages(selectedSession);
+          }
+        }, 2000);
+      } else {
+        // Show error message
+        const errorMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          role: "system",
+          content: `Error: ${data.error}`,
+          timestamp: new Date().toISOString(),
+        };
+
+        setMessages((prev) => [...prev, errorMessage]);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+
+      const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: responses[Math.floor(Math.random() * responses.length)],
-        timestamp: new Date(),
-        status: "sent",
-        tokens: Math.floor(Math.random() * 500) + 100,
+        role: "system",
+        content: `Failed to send message: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        timestamp: new Date().toISOString(),
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -114,48 +196,33 @@ export default function ChatPage() {
     }
   };
 
-  const handleClear = () => {
-    setMessages([
-      {
-        id: "1",
-        role: "assistant",
-        content: "Chat cleared. How can I help you?",
-        timestamp: new Date(),
-        status: "sent",
-      },
-    ]);
+  const handleRefresh = () => {
+    loadSessions();
+    if (selectedSession) {
+      loadMessages(selectedSession);
+    }
   };
 
-  const handleRegenerate = () => {
-    const lastAssistantMsg = [...messages]
-      .reverse()
-      .find((m) => m.role === "assistant");
-
-    if (lastAssistantMsg) {
-      setMessages((prev) => prev.filter((m) => m.id !== lastAssistantMsg.id));
-      setIsLoading(true);
-
-      setTimeout(() => {
-        const regeneratedMsg: ChatMessage = {
-          id: Date.now().toString(),
-          role: "assistant",
-          content: "Let me provide a different response to your question.",
-          timestamp: new Date(),
-          status: "sent",
-          tokens: Math.floor(Math.random() * 500) + 100,
-        };
-
-        setMessages((prev) => [...prev, regeneratedMsg]);
-        setIsLoading(false);
-      }, 1500);
-    }
+  const handleClear = () => {
+    setMessages([]);
   };
 
   const stats = {
     total: messages.length,
     user: messages.filter((m) => m.role === "user").length,
     assistant: messages.filter((m) => m.role === "assistant").length,
-    tokens: messages.reduce((sum, m) => sum + (m.tokens || 0), 0),
+    tokens: messages.reduce((sum, m) => sum + (m.tokens?.total || 0), 0),
+  };
+
+  const getSessionName = (sessionId: string) => {
+    const session = sessions.find(s => s.id === sessionId);
+    if (!session) return sessionId;
+
+    const date = new Date(session.createdAt);
+    const dateStr = date.toLocaleDateString();
+    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    return `${dateStr} ${timeStr} (${session.messageCount} messages)`;
   };
 
   return (
@@ -168,13 +235,9 @@ export default function ChatPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleClear}>
-            <Trash2 className="mr-2 h-4 w-4" />
-            {tCommon('delete')}
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleRegenerate} disabled={isLoading}>
-            <RefreshCw className="mr-2 h-4 w-4" />
-            {t('regenerate')}
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoadingSessions}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${isLoadingSessions ? 'animate-spin' : ''}`} />
+            {tCommon('refresh')}
           </Button>
         </div>
       </div>
@@ -236,23 +299,32 @@ export default function ChatPage() {
 
       {/* Chat Interface */}
       <div className="grid gap-4 lg:grid-cols-4">
-        {/* Agent Selection Panel */}
+        {/* Session Selection Panel */}
         <Card className="lg:col-span-1">
           <CardHeader>
-            <CardTitle className="text-base">{t('agentSelection')}</CardTitle>
-            <CardDescription>{t('chooseAgent')}</CardDescription>
+            <CardTitle className="text-base flex items-center gap-2">
+              <History className="h-4 w-4" />
+              {t('agentSelection')}
+            </CardTitle>
+            <CardDescription>
+              {isLoadingSessions ? 'Loading sessions...' : `${sessions.length} sessions`}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Select value={selectedAgent} onValueChange={(value) => value && setSelectedAgent(value)}>
+            <Select value={selectedSession || ''} onValueChange={(value) => value && setSelectedSession(value)}>
               <SelectTrigger>
-                <SelectValue placeholder={t('selectAgent')} />
+                <SelectValue placeholder="Select a session">
+                  {selectedSession ? getSessionName(selectedSession).substring(0, 30) + '...' : 'Select session'}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {agents?.map((agent) => (
-                  <SelectItem key={agent.id} value={agent.id}>
-                    <div className="flex items-center gap-2">
-                      <Bot className="h-4 w-4" />
-                      <span>{agent.name}</span>
+                {sessions.map((session) => (
+                  <SelectItem key={session.id} value={session.id}>
+                    <div className="flex flex-col items-start gap-1">
+                      <span className="text-xs">{getSessionName(session.id)}</span>
+                      <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                        {session.lastMessage}
+                      </span>
                     </div>
                   </SelectItem>
                 ))}
@@ -260,7 +332,7 @@ export default function ChatPage() {
             </Select>
 
             {agents?.find((a) => a.id === selectedAgent) && (
-              <div className="space-y-2 text-sm">
+              <div className="space-y-2 text-sm pt-4 border-t">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">{t('model')}</span>
                   <span className="font-medium">
@@ -294,12 +366,20 @@ export default function ChatPage() {
               <div>
                 <CardTitle>{t('conversation')}</CardTitle>
                 <CardDescription>
-                  {t('chattingWith', { agent: agents?.find((a) => a.id === selectedAgent)?.name || "Agent" })}
+                  {selectedSession
+                    ? `Session: ${selectedSession.substring(0, 8)}...`
+                    : t('chattingWith', { agent: agents?.find((a) => a.id === selectedAgent)?.name || "Agent" })
+                  }
                 </CardDescription>
               </div>
-              <Button variant="ghost" size="sm">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={handleClear}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="sm">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </CardHeader>
 
@@ -307,57 +387,71 @@ export default function ChatPage() {
             {/* Messages */}
             <ScrollArea className="flex-1 h-[500px]">
               <div ref={scrollRef} className="p-4 space-y-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex gap-3 ${
-                      message.role === "user" ? "justify-end" : "justify-start"
-                    }`}
-                  >
-                    {message.role === "assistant" && (
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
-                        <Bot className="h-4 w-4 text-primary" />
-                      </div>
-                    )}
-
+                {messages.length === 0 ? (
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    <div className="text-center">
+                      <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>No messages in this session</p>
+                      <p className="text-sm mt-2">Select a different session or send a new message</p>
+                    </div>
+                  </div>
+                ) : (
+                  messages.map((message) => (
                     <div
-                      className={`max-w-[80%] rounded-lg p-3 ${
-                        message.role === "user"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
+                      key={message.id}
+                      className={`flex gap-3 ${
+                        message.role === "user" ? "justify-end" : "justify-start"
                       }`}
                     >
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                        {message.content}
-                      </p>
-
-                      <div className="flex items-center gap-2 mt-2">
-                        <div className="flex items-center gap-1 text-xs opacity-70">
-                          <Clock className="h-3 w-3" />
-                          {new Date(message.timestamp).toLocaleTimeString()}
+                      {message.role === "assistant" && (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
+                          <Bot className="h-4 w-4 text-primary" />
                         </div>
+                      )}
 
-                        {message.status === "sending" && (
-                          <Badge variant="outline" className="text-xs">
-                            {t('sending')}
-                          </Badge>
+                      <div
+                        className={`max-w-[80%] rounded-lg p-3 ${
+                          message.role === "user"
+                            ? "bg-primary text-primary-foreground"
+                            : message.role === "system"
+                            ? "bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700"
+                            : "bg-muted"
+                        }`}
+                      >
+                        {message.thinking && (
+                          <details className="mb-2">
+                            <summary className="text-xs cursor-pointer text-muted-foreground hover:text-foreground">
+                              Thinking process
+                            </summary>
+                            <p className="text-xs mt-1 whitespace-pre-wrap">{message.thinking}</p>
+                          </details>
                         )}
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                          {message.content}
+                        </p>
 
-                        {message.role === "assistant" && message.tokens && (
-                          <span className="text-xs opacity-70">
-                            {message.tokens} tokens
-                          </span>
-                        )}
+                        <div className="flex items-center gap-2 mt-2">
+                          <div className="flex items-center gap-1 text-xs opacity-70">
+                            <Clock className="h-3 w-3" />
+                            {new Date(message.timestamp).toLocaleTimeString()}
+                          </div>
+
+                          {message.role === "assistant" && message.tokens && (
+                            <span className="text-xs opacity-70">
+                              {message.tokens.total} tokens
+                            </span>
+                          )}
+                        </div>
                       </div>
+
+                      {message.role === "user" && (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary flex-shrink-0">
+                          <User className="h-4 w-4 text-primary-foreground" />
+                        </div>
+                      )}
                     </div>
-
-                    {message.role === "user" && (
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary flex-shrink-0">
-                        <User className="h-4 w-4 text-primary-foreground" />
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  ))
+                )}
 
                 {isLoading && (
                   <div className="flex gap-3 justify-start">
