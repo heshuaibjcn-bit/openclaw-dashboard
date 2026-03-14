@@ -8,6 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -30,6 +38,10 @@ import {
   Tag,
   ArrowUpDown,
   RefreshCw,
+  X,
+  Edit,
+  Trash2,
+  ExternalLink,
 } from "lucide-react";
 import { useTasks } from "@/lib/openclaw";
 
@@ -72,6 +84,10 @@ export default function TasksPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"updated" | "created" | "priority" | "due">("updated");
+
+  // Task detail dialog state
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
   // Translate tag codes to display names
   const getTagName = (tag: string): string => {
@@ -195,6 +211,25 @@ export default function TasksPage() {
     if (diffDays < -1) return `${Math.abs(diffDays)} days ago`;
     if (diffDays <= 7) return `In ${diffDays} days`;
     return date.toLocaleDateString();
+  };
+
+  const handleViewDetails = (task: Task) => {
+    setSelectedTask(task);
+    setIsDetailDialogOpen(true);
+  };
+
+  const handleCloseDetailDialog = () => {
+    setIsDetailDialogOpen(false);
+    setSelectedTask(null);
+  };
+
+  const getOriginalTaskData = (task: Task) => {
+    // Try to get original task data from task.json for project tasks
+    if (task.taskType === 'project') {
+      // For now, return the task as-is since we don't have the full acceptance criteria
+      return task;
+    }
+    return task;
   };
 
   return (
@@ -505,7 +540,7 @@ export default function TasksPage() {
                     )}
                   </div>
 
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={() => handleViewDetails(task)}>
                     View Details
                   </Button>
                 </div>
@@ -514,6 +549,146 @@ export default function TasksPage() {
           ))
         )}
       </div>
+
+      {/* Task Detail Dialog */}
+      <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {selectedTask?.taskType === 'cron' && '⏰ '}
+              {selectedTask?.title}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedTask?.taskType === 'project' ? '项目任务详情' : '定时任务详情'}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedTask && (
+            <div className="space-y-6">
+              {/* Status and Priority */}
+              <div className="flex items-center gap-3 flex-wrap">
+                {getStatusBadge(selectedTask.status)}
+                {getPriorityBadge(selectedTask.priority)}
+                {selectedTask.taskType === 'cron' && (
+                  <Badge variant="outline" className="text-xs bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900 dark:text-orange-300">
+                    定时任务
+                  </Badge>
+                )}
+                {selectedTask.taskType === 'project' && (
+                  <Badge variant="outline" className="text-xs">
+                    项目任务
+                  </Badge>
+                )}
+              </div>
+
+              {/* Description */}
+              {selectedTask.description && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2">描述</h4>
+                  <p className="text-sm text-muted-foreground">{selectedTask.description}</p>
+                </div>
+              )}
+
+              {/* Cron-specific details */}
+              {selectedTask.taskType === 'cron' && (
+                <div className="space-y-4 p-4 bg-orange-50 dark:bg-orange-950/20 rounded-lg">
+                  <h4 className="text-sm font-medium flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-orange-500" />
+                    调度配置
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">调度时间:</span>
+                      <span className="font-mono">{selectedTask.schedule}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Cron 表达式:</span>
+                      <span className="font-mono bg-orange-100 px-2 py-0.5 rounded dark:bg-orange-900 dark:text-orange-300">
+                        {selectedTask.cronExpression}
+                      </span>
+                    </div>
+                    {selectedTask.timezone && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">时区:</span>
+                        <span>{selectedTask.timezone}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">状态:</span>
+                      <span className={selectedTask.enabled ? 'text-green-600' : 'text-gray-600'}>
+                        {selectedTask.enabled ? '✓ 已启用' : '✗ 已禁用'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Project-specific details */}
+              {selectedTask.taskType === 'project' && selectedTask.subtaskCount && selectedTask.subtaskCount > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2">验收标准</h4>
+                  <div className="space-y-2">
+                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
+                      <div
+                        className="h-full bg-primary transition-all"
+                        style={{ width: `${(selectedTask.completedSubtasks || 0) / selectedTask.subtaskCount * 100}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>进度</span>
+                      <span>{selectedTask.completedSubtasks || 0} / {selectedTask.subtaskCount}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Metadata */}
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-muted-foreground">创建时间:</span>
+                  <p className="font-mono">{new Date(selectedTask.createdAt).toLocaleString()}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">更新时间:</span>
+                  <p className="font-mono">{new Date(selectedTask.updatedAt).toLocaleString()}</p>
+                </div>
+              </div>
+
+              {/* Tags */}
+              {selectedTask.tags && selectedTask.tags.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2">标签</h4>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedTask.tags.map((tag: string) => (
+                      <Badge key={tag} variant="outline" className="text-xs">
+                        {getTagName(tag)}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseDetailDialog}>
+              关闭
+            </Button>
+            {selectedTask?.taskType === 'project' && (
+              <Button>
+                <Edit className="mr-2 h-4 w-4" />
+                编辑
+              </Button>
+            )}
+            {selectedTask?.taskType === 'cron' && selectedTask.enabled && (
+              <Button variant="destructive">
+                <Pause className="mr-2 h-4 w-4" />
+                禁用
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
