@@ -335,9 +335,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // 检查服务器是否已经就绪
         if isServerResponding() {
-            // 服务器已就绪，直接打开浏览器
+            // 服务器已就绪，直接打开浏览器到中文页面
             Swift.print("✅ 服务器已就绪，打开浏览器")
-            if let url = URL(string: "http://localhost:3000") {
+            if let url = URL(string: "http://localhost:3000/zh") {
                 NSWorkspace.shared.open(url)
             }
         } else {
@@ -348,8 +348,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func checkServerAndOpen() {
-        let url = URL(string: "http://localhost:3000")
-        var request = URLRequest(url: url!)
+        let checkUrl = URL(string: "http://localhost:3000")
+        var request = URLRequest(url: checkUrl!)
         request.timeoutInterval = 2.0
 
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
@@ -360,9 +360,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     let isSuccess = (200...299).contains(statusCode) || (300...399).contains(statusCode)
 
                     if isSuccess {
-                        // 服务器已就绪，打开浏览器
+                        // 服务器已就绪，打开浏览器到中文页面
                         Swift.print("✅ 服务器已就绪 (HTTP \(statusCode))，打开浏览器")
-                        NSWorkspace.shared.open(url!)
+                        if let openUrl = URL(string: "http://localhost:3000/zh") {
+                            NSWorkspace.shared.open(openUrl)
+                        }
                     } else {
                         // 服务器尚未就绪，1秒后重试
                         Swift.print("⏳ 服务器尚未就绪 (HTTP \(statusCode))，等待中...")
