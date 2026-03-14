@@ -185,47 +185,48 @@ export default function AgentsPage() {
     ];
 
     return (
-      <div className="w-full space-y-2">
-        {models.map((model, index) => (
-          <div key={model.id} className="flex items-center gap-2">
-            {/* Model Node */}
-            <div
-              className={`
-                flex-1 px-3 py-2 rounded-lg border-2 text-center text-sm font-medium
-                ${model.type === 'primary'
-                  ? 'bg-green-50 border-green-500 text-green-700 dark:bg-green-900/20 dark:border-green-500 dark:text-green-400'
-                  : model.configured
-                  ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/20 dark:border-blue-500 dark:text-blue-400'
-                  : 'bg-gray-50 border-gray-300 text-gray-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400'
-                }
-              `}
-            >
-              <div className="flex items-center justify-center gap-2">
-                {model.type === 'primary' && <CheckCircle2 className="h-3 w-3" />}
-                {model.type === 'fallback' && !model.configured && <span className="text-yellow-500">*</span>}
-                <span className="truncate">{model.id}</span>
+      <div className="w-full max-w-md mx-auto">
+        {/* Flow Nodes */}
+        <div className="space-y-0">
+          {models.map((model, index) => (
+            <div key={model.id} className="relative">
+              {/* Model Node */}
+              <div
+                className={`
+                  mx-auto px-4 py-3 rounded-lg border-2 text-center text-sm font-medium relative
+                  ${model.type === 'primary'
+                    ? 'bg-green-50 border-green-500 text-green-700 dark:bg-green-900/20 dark:border-green-500 dark:text-green-400 w-64'
+                    : model.configured
+                    ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/20 dark:border-blue-500 dark:text-blue-400 w-64'
+                    : 'bg-gray-50 border-gray-300 text-gray-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 w-64'
+                  }
+                `}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  {model.type === 'primary' && <CheckCircle2 className="h-3 w-3 flex-shrink-0" />}
+                  {model.type === 'fallback' && !model.configured && <span className="text-yellow-500 flex-shrink-0">*</span>}
+                  <span className="truncate">{model.id}</span>
+                </div>
               </div>
-            </div>
 
-            {/* Arrow */}
-            {index < models.length - 1 && (
-              <div className="flex flex-col items-center gap-1 px-2">
-                <ArrowDown className="h-4 w-4 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                  {index === 0 ? 'Fail' : index === models.length - 2 ? 'Cross-Provider' : 'Downgrade'}
-                </span>
-              </div>
-            )}
-          </div>
-        ))}
+              {/* Arrow and Label */}
+              {index < models.length - 1 && (
+                <div className="flex flex-col items-center justify-center py-2">
+                  <ArrowDown className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground whitespace-nowrap mt-1">
+                    {index === 0 ? 'Fail' : index === models.length - 2 ? 'Cross-Provider' : 'Downgrade'}
+                  </span>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
 
         {/* Cooldown Info */}
-        <div className="mt-3 pt-3 border-t border-dashed">
-          <div className="text-xs text-muted-foreground space-y-1">
-            <div className="flex items-center gap-2">
-              <Clock className="h-3 w-3" />
-              <span>Cooldown: {config.cooldownConfig.billingBackoffHours}h backoff, {config.cooldownConfig.failureWindowHours}h failure window</span>
-            </div>
+        <div className="mt-4 pt-3 border-t border-dashed border-border">
+          <div className="text-xs text-muted-foreground flex items-center justify-center gap-2">
+            <Clock className="h-3 w-3" />
+            <span>Cooldown: {config.cooldownConfig.billingBackoffHours}h backoff, {config.cooldownConfig.failureWindowHours}h failure window</span>
           </div>
         </div>
       </div>
@@ -356,7 +357,7 @@ export default function AgentsPage() {
                     <Shield className="h-4 w-4 text-purple-500" />
                     Disaster Recovery Flow
                   </div>
-                  <div className="flex flex-col items-center gap-2">
+                  <div className="flex flex-col items-center">
                     {renderFlowchart(modelConfig)}
                   </div>
                 </div>
