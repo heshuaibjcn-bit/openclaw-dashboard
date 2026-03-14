@@ -245,8 +245,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             try dashboardProcess?.run()
             Swift.print("✅ Dashboard 启动命令已执行")
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
+            // 显示等待提示
+            showAlert(message: "Dashboard 正在启动中...\n\n请等待 5-10 秒让服务完全启动，然后再点击「打开 Dashboard」。\n\n启动完成后，图标会变为绿色圆点。")
+
+            // 5秒后更新菜单状态
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
                 self?.updateMenu()
+                Swift.print("✅ 菜单状态已更新")
             }
         } catch {
             Swift.print("❌ 启动失败: \(error)")
@@ -280,9 +285,41 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func openDashboard() {
         Swift.print("🌐 打开 Dashboard...")
 
-        if let url = URL(string: "http://localhost:3000") {
-            NSWorkspace.shared.open(url)
+        // 检查 Dashboard 是否正在运行
+        if !isDashboardRunning() {
+            showAlert(message: "Dashboard 尚未启动。\n\n请先点击「启动服务」按钮启动 Dashboard。")
+            return
         }
+
+        // 显示等待提示
+        showAlert(message: "Dashboard 正在启动中...\n\n请在几秒后刷新浏览器页面。")
+
+        // 等待服务器就绪后打开浏览器
+        checkServerAndOpen()
+    }
+
+    func checkServerAndOpen() {
+        let url = URL(string: "http://localhost:3000")
+        var request = URLRequest(url: url!)
+        request.timeoutInterval = 2.0
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                if error == nil, let httpResponse = response as? HTTPURLResponse,
+                   httpResponse.statusCode == 200 {
+                    // 服务器已就绪，打开浏览器
+                    Swift.print("✅ 服务器已就绪，打开浏览器")
+                    NSWorkspace.shared.open(url!)
+                } else {
+                    // 服务器尚未就绪，1秒后重试
+                    Swift.print("⏳ 服务器尚未就绪，等待中...")
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                        self?.checkServerAndOpen()
+                    }
+                }
+            }
+        }
+        task.resume()
     }
 
     @objc func quit() {
