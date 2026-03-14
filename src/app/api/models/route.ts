@@ -66,6 +66,11 @@ interface ProviderConfig {
 interface ModelDisasterConfig {
   primaryModel: string;
   fallbackModels: string[];
+  suggestedFallbacks: {
+    current: string[];
+    recommended: string[];
+    reason: string;
+  };
   providers: ProviderConfig[];
   cooldownConfig: {
     billingBackoffHours: number;
@@ -152,9 +157,13 @@ export async function GET() {
       failureWindowHours: 24,
     };
 
+    // Generate suggested fallback chain
+    const suggestedFallbacks = generateSuggestedFallbacks(config, primaryModel, fallbackModels);
+
     return NextResponse.json({
       primaryModel,
       fallbackModels,
+      suggestedFallbacks,
       providers,
       cooldownConfig,
       configPath,
@@ -176,4 +185,53 @@ function getProviderDisplayName(providerId: string): string {
     'codex': 'Codex',
   };
   return names[providerId] || providerId;
+}
+
+function generateSuggestedFallbacks(
+  config: OpenClawConfig,
+  primaryModel: string,
+  currentFallbacks: string[]
+): { current: string[]; recommended: string[]; reason: string } {
+  const [primaryProvider, primaryModelId] = primaryModel.split('/');
+  const recommended: string[] = [];
+
+  // Get all models from primary provider (excluding primary model itself)
+  const primaryProviderModels = config.models?.providers?.[primaryProvider]?.models || [];
+
+  // Sort by capability (higher models first)
+  const modelPriority = ['glm-5', 'glm-4.7', 'glm-4.7-flash', 'glm-4.7-flashx', 'gpt-4', 'gpt-3.5-turbo', 'claude-3-opus', 'claude-3-sonnet'];
+
+  // Add same-provider fallbacks (in priority order, excluding primary)
+  const sameProviderFallbacks = primaryProviderModels
+    .filter(m => m.id !== primaryModelId)
+    .sort((a, b) => {
+      const aIndex = modelPriority.indexOf(a.id);
+      const bIndex = modelPriority.indexOf(b.id);
+      if (aIndex === -1 && bIndex === -1) return a.id.localeCompare(b.id);
+      if (aIndex === -1) return 1;
+      if (bIndex === -1) return -1;
+      return aIndex - bIndex;
+    })
+    .map(m => `${primaryProvider}/${m.id}`);
+
+  recommended.push(...sameProviderFallbacks);
+
+  // Add cross-provider fallbacks
+  recommended.push(...currentFallbacks);
+
+  // Generate reason
+  let reason = '';
+  if (sameProviderFallbacks.length > 0 && currentFallbacks.length > 0) {
+    reason = `Recommended: Try ${sameProviderFallbacks.length} lower-tier models from ${primaryProvider} provider first, then cross-provider fallback to ${currentFallbacks[0].split('/')[0]}`;
+  } else if (currentFallbacks.length === 0) {
+    reason = 'No fallback models configured. Consider adding same-provider or cross-provider fallbacks for redundancy.';
+  } else {
+    reason = `Current configuration uses direct cross-provider fallback. Consider adding same-provider fallbacks first for better performance.`;
+  }
+
+  return {
+    current: currentFallbacks,
+    recommended,
+    reason,
+  };
 }

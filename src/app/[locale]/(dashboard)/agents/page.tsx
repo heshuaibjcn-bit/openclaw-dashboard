@@ -50,6 +50,11 @@ import type { Agent } from "@/lib/openclaw";
 interface ModelConfig {
   primaryModel: string;
   fallbackModels: string[];
+  suggestedFallbacks: {
+    current: string[];
+    recommended: string[];
+    reason: string;
+  };
   providers: Array<{
     id: string;
     name: string;
@@ -268,21 +273,57 @@ export default function AgentsPage() {
                   </Badge>
                 </div>
 
-                {modelConfig.fallbackModels.length > 0 && (
+                {modelConfig.fallbackModels.length > 0 || modelConfig.suggestedFallbacks.recommended.length > 0 ? (
                   <>
                     <div className="flex items-center gap-2 text-sm font-medium">
                       <Server className="h-4 w-4 text-orange-500" />
                       Fallback Models
                     </div>
-                    <div className="pl-6 flex flex-wrap gap-2">
-                      {modelConfig.fallbackModels.map((model, index) => (
-                        <Badge key={model} variant="outline" className="text-sm">
-                          {index + 1}. {model}
-                        </Badge>
-                      ))}
-                    </div>
+
+                    {/* Current Fallbacks */}
+                    {modelConfig.suggestedFallbacks.current.length > 0 && (
+                      <div className="pl-6 space-y-2">
+                        <div className="text-xs text-muted-foreground">Current Configuration:</div>
+                        <div className="flex flex-wrap gap-2">
+                          {modelConfig.suggestedFallbacks.current.map((model, index) => (
+                            <Badge key={model} variant="outline" className="text-xs">
+                              {index + 1}. {model}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Recommended Fallbacks */}
+                    {modelConfig.suggestedFallbacks.recommended.length > 0 && (
+                      <div className="pl-6 space-y-2">
+                        <div className="text-xs text-muted-foreground">Recommended Configuration:</div>
+                        <div className="flex flex-wrap gap-2">
+                          {modelConfig.suggestedFallbacks.recommended.map((model, index) => {
+                            const isCurrent = modelConfig.suggestedFallbacks.current.includes(model);
+                            return (
+                              <Badge
+                                key={model}
+                                variant={isCurrent ? "default" : "secondary"}
+                                className="text-xs"
+                              >
+                                {index + 1}. {model}
+                                {!isCurrent && index < modelConfig.suggestedFallbacks.current.length && (
+                                  <span className="ml-1 text-yellow-500">*</span>
+                                )}
+                              </Badge>
+                            );
+                          })}
+                        </div>
+                        {modelConfig.suggestedFallbacks.reason && (
+                          <div className="text-xs text-muted-foreground mt-2 p-2 bg-muted rounded">
+                            💡 {modelConfig.suggestedFallbacks.reason}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </>
-                )}
+                ) : null}
               </div>
 
               {/* Providers List */}
