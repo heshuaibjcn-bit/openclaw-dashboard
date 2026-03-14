@@ -360,8 +360,8 @@ export default function ChatPage() {
         </Card>
 
         {/* Chat Area */}
-        <Card className="lg:col-span-3 flex flex-col">
-          <CardHeader>
+        <Card className="lg:col-span-3 flex flex-col h-[calc(100vh-12rem)]">
+          <CardHeader className="flex-shrink-0">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle>{t('conversation')}</CardTitle>
@@ -383,9 +383,9 @@ export default function ChatPage() {
             </div>
           </CardHeader>
 
-          <CardContent className="flex-1 flex flex-col p-0">
+          <CardContent className="flex-1 flex flex-col p-0 min-h-0">
             {/* Messages */}
-            <ScrollArea className="flex-1 h-[500px]">
+            <ScrollArea className="flex-1">
               <div ref={scrollRef} className="p-4 space-y-4">
                 {messages.length === 0 ? (
                   <div className="flex items-center justify-center h-full text-muted-foreground">
