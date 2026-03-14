@@ -199,6 +199,44 @@ export function useMemorySearch() {
   return { data, loading, error, search };
 }
 
+export function useMemoryList(options?: { limit?: number; offset?: number; enabled?: boolean }) {
+  const { limit = 50, offset = 0, enabled = true } = options || {};
+  const [data, setData] = useState<MemoryEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+
+  const fetchMemories = useCallback(async () => {
+    if (!enabled) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch(`/api/memory/list?limit=${limit}&offset=${offset}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch memory list: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      setData(result.memories || []);
+      setTotal(result.total || 0);
+      setHasMore(result.hasMore || false);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error("Failed to fetch memory list"));
+    } finally {
+      setLoading(false);
+    }
+  }, [enabled, limit, offset]);
+
+  useEffect(() => {
+    fetchMemories();
+  }, [fetchMemories]);
+
+  return { data, loading, error, refetch: fetchMemories, total, hasMore };
+}
+
 export function useTasks(params?: { limit?: number; offset?: number }) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

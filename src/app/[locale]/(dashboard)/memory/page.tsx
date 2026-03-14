@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -20,7 +19,6 @@ import {
   Search,
   Sparkles,
   Clock,
-  FileText,
   TrendingUp,
   Filter,
   RefreshCw,
@@ -31,24 +29,24 @@ import {
   Calendar,
   Bot,
   Home,
+  MessageSquare,
 } from "lucide-react";
-import { useMemorySearch } from "@/lib/openclaw";
-import type { MemoryEntry } from "@/lib/openclaw";
+import { useMemorySearch, useMemoryList } from "@/lib/openclaw";
+import type { MemoryEntry } from "@/lib/openclaw/types";
 import { getAllAgents } from "@/lib/openclaw/config-reader";
 
 export default function MemoryPage() {
   const t = useTranslations('memory');
   const tCommon = useTranslations('common');
   const locale = useLocale();
-  const { data: memories, loading, search } = useMemorySearch();
+  const { data: searchResults, loading: searchLoading, search } = useMemorySearch();
+  const { data: memories, loading: memoriesLoading, refetch, total, hasMore } = useMemoryList({ limit: 100 });
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAgent, setSelectedAgent] = useState<string>("all");
   const [selectedTag, setSelectedTag] = useState<string>("all");
-  const [searchResults, setSearchResults] = useState<MemoryEntry[]>([]);
+  const [currentSearchResults, setCurrentSearchResults] = useState<MemoryEntry[]>([]);
   const [editingMemory, setEditingMemory] = useState<{ id: string; content: string } | null>(null);
   const [activeAgents, setActiveAgents] = useState<Array<{ id: string; name: string; capabilities?: string[] }>>([]);
-
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   // Translate metadata types to display names
   const getMetadataTypeName = (type: string): string => {
@@ -79,19 +77,12 @@ export default function MemoryPage() {
     setActiveAgents(agents);
   }, []);
 
-  useEffect(() => {
-    // Auto-scroll to bottom when new memories arrive
-    if (scrollRef.current && !editingMemory) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [memories, editingMemory]);
-
   const handleSearch = async () => {
     if (searchQuery.trim()) {
       const results = await search(searchQuery, 20);
-      setSearchResults(results);
+      setCurrentSearchResults(results);
     } else {
-      setSearchResults([]);
+      setCurrentSearchResults([]);
     }
   };
 
@@ -109,10 +100,6 @@ export default function MemoryPage() {
     if (!editingMemory) return;
 
     try {
-      // Find the memory entry to get its metadata
-      const allMemories = Object.values(mockMemoriesByAgent).flat();
-      const memoryEntry = allMemories.find(m => m.id === editingMemory.id);
-
       const response = await fetch(`/api/memory/${editingMemory.id}`, {
         method: 'PUT',
         headers: {
@@ -120,7 +107,6 @@ export default function MemoryPage() {
         },
         body: JSON.stringify({
           content: editingMemory.content,
-          metadata: memoryEntry?.metadata,
         }),
       });
 
@@ -129,20 +115,10 @@ export default function MemoryPage() {
         throw new Error(errorData.error || 'Failed to save memory');
       }
 
-      const result = await response.json();
-
-      // Update the memory in the list
-      if (memoryEntry) {
-        memoryEntry.content = editingMemory.content;
-      }
-
       setEditingMemory(null);
-
-      // Show success message (optional - could add a toast notification)
-      console.log('Memory saved successfully:', result);
+      await refetch();
     } catch (error) {
       console.error('Error saving memory:', error);
-      // Show error to user (optional - could add a toast notification)
       alert(`Failed to save memory: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
@@ -151,52 +127,8 @@ export default function MemoryPage() {
     setEditingMemory(null);
   };
 
-  // Mock memory data organized by agent
-  const mockMemoriesByAgent: Record<string, MemoryEntry[]> = {
-    main: [
-      {
-        id: "1",
-        content: locale === 'zh' ? "用户在所有应用程序中偏好深色模式界面设置" : "User prefers dark mode interface settings across all applications",
-        metadata: { type: "preference", importance: "high", agent: "main" },
-        createdAt: new Date(Date.now() - 1000 * 60 * 30),
-        score: 0.95,
-      },
-      {
-        id: "2",
-        content: locale === 'zh' ? "项目使用 Next.js 15 和 App Router 以及 TypeScript 构建仪表板" : "Project uses Next.js 15 with App Router and TypeScript for the dashboard",
-        metadata: { type: "project", importance: "high", agent: "main" },
-        createdAt: new Date(Date.now() - 1000 * 60 * 60),
-        score: 0.89,
-      },
-    ],
-  };
-
-  // Add agent-specific memories
-  activeAgents.forEach(agent => {
-    mockMemoriesByAgent[agent.id] = [
-      {
-        id: `${agent.id}-1`,
-        content: locale === 'zh'
-          ? `${agent.name} 专长于 ${agent.capabilities?.join("、") || "常规任务"}`
-          : `${agent.name} specializes in ${agent.capabilities?.join(", ") || "general tasks"}`,
-        metadata: { type: "agent", importance: "medium", agent: agent.id },
-        createdAt: new Date(Date.now() - 1000 * 60 * 45),
-        score: 0.92,
-      },
-      {
-        id: `${agent.id}-2`,
-        content: locale === 'zh'
-          ? "最近活动：处理了 15 个任务，成功率为 98%"
-          : `Recent activity: Processed 15 tasks with 98% success rate`,
-        metadata: { type: "performance", importance: "low", agent: agent.id },
-        createdAt: new Date(Date.now() - 1000 * 60 * 90),
-        score: 0.78,
-      },
-    ];
-  });
-
   const getDisplayMemories = () => {
-    let sourceMemories = searchQuery ? searchResults : Object.values(mockMemoriesByAgent).flat();
+    let sourceMemories = searchQuery ? currentSearchResults : memories;
 
     // Filter by agent
     if (selectedAgent !== "all") {
@@ -216,9 +148,11 @@ export default function MemoryPage() {
   const allTags = ["all", "preference", "project", "agent", "performance", "configuration"];
 
   const stats = {
-    total: Object.values(mockMemoriesByAgent).flat().length,
-    highImportance: Object.values(mockMemoriesByAgent).flat().filter((m) => m.metadata.importance === "high").length,
-    avgScore: Object.values(mockMemoriesByAgent).flat().reduce((sum, m) => sum + (m.score || 0), 0) / Object.values(mockMemoriesByAgent).flat().length,
+    total: total,
+    highImportance: memories.filter((m) => m.metadata.importance === "high").length,
+    avgScore: memories.length > 0
+      ? memories.reduce((sum, m) => sum + (m.score || 0), 0) / memories.length
+      : 0,
     totalAgents: activeAgents.length,
   };
 
@@ -238,6 +172,10 @@ export default function MemoryPage() {
     return agentId === "main" ? <Home className="h-3 w-3" /> : <Bot className="h-3 w-3" />;
   };
 
+  const getRoleIcon = (role?: string) => {
+    return role === "user" ? null : <MessageSquare className="h-3 w-3" />;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -247,8 +185,8 @@ export default function MemoryPage() {
             {t('subtitle')}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-          <RefreshCw className="mr-2 h-4 w-4" />
+        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={memoriesLoading}>
+          <RefreshCw className={`mr-2 h-4 w-4 ${memoriesLoading ? 'animate-spin' : ''}`} />
           {tCommon('refresh')}
         </Button>
       </div>
@@ -330,8 +268,8 @@ export default function MemoryPage() {
                 className="pl-9"
               />
             </div>
-            <Button onClick={handleSearch} disabled={!searchQuery.trim() || loading}>
-              {loading ? tCommon('loading') : tCommon('search')}
+            <Button onClick={handleSearch} disabled={!searchQuery.trim() || searchLoading}>
+              {searchLoading ? tCommon('loading') : tCommon('search')}
             </Button>
           </div>
         </CardContent>
@@ -411,27 +349,27 @@ export default function MemoryPage() {
 
       {/* Memory Entries */}
       <div className="grid gap-4">
-        {displayMemories.length > 0 ? (
+        {memoriesLoading ? (
+          <Card>
+            <CardContent className="flex items-center justify-center py-16">
+              <p className="text-muted-foreground">{tCommon('loading')}</p>
+            </CardContent>
+          </Card>
+        ) : displayMemories.length > 0 ? (
           displayMemories.map((memory) => (
             <Card key={memory.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 space-y-2">
-                    {editingMemory?.id === memory.id ? (
-                      <Textarea
-                        value={editingMemory.content}
-                        onChange={(e) => setEditingMemory({ ...editingMemory, content: e.target.value })}
-                        className="min-h-[100px] font-mono text-sm"
-                      />
-                    ) : (
-                      <p className="text-sm leading-relaxed">{memory.content}</p>
-                    )}
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{memory.content}</p>
 
                     <div className="flex items-center gap-3 flex-wrap">
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         {getAgentIcon(memory.metadata.agent as string)}
                         <span>{getAgentName(memory.metadata.agent as string)}</span>
                       </div>
+
+                      {getRoleIcon(memory.metadata.role as string)}
 
                       <Badge variant="outline" className="text-xs">
                         {getMetadataTypeName(String(memory.metadata.type))}
@@ -457,12 +395,19 @@ export default function MemoryPage() {
                           </span>
                         </div>
                       )}
+
+                      {typeof memory.metadata.sessionId === 'string' && (
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Database className="h-3 w-3" />
+                          <span className="font-mono">{memory.metadata.sessionId.substring(0, 8)}...</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Metadata preview */}
                     <div className="flex gap-2 text-xs text-muted-foreground">
                       {Object.entries(memory.metadata).map(([key, value]) => (
-                        key !== "type" && key !== "importance" && key !== "agent" && (
+                        key !== "type" && key !== "importance" && key !== "agent" && key !== "sessionId" && key !== "timestamp" && key !== "role" && (
                           <span key={key} className="bg-muted px-2 py-1 rounded">
                             {key}: {String(value)}
                           </span>
@@ -500,6 +445,15 @@ export default function MemoryPage() {
           </Card>
         )}
       </div>
+
+      {/* Load More */}
+      {hasMore && !searchQuery && (
+        <div className="flex justify-center">
+          <Button variant="outline" onClick={() => refetch()}>
+            {t('loadMore')}
+          </Button>
+        </div>
+      )}
 
       {/* Memory Info */}
       <Card>

@@ -587,7 +587,8 @@
     "agentSpecificMemoryDesc": "按代理筛选记忆以查看每个代理特定的知识。\"主\"显示共享的系统级记忆。",
     "directEditingDesc": "点击编辑按钮直接修改记忆条目。更改会写回源文件。",
     "aboutMemory": "关于记忆与代理筛选",
-    "aboutMemoryDesc": "代理如何使用 LanceDB 进行代理特定的筛选"
+    "aboutMemoryDesc": "代理如何使用 LanceDB 进行代理特定的筛选",
+    "loadMore": "加载更多"
   },
   "approvals": {
     "title": "审批",

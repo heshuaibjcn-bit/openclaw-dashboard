@@ -587,7 +587,8 @@
     "agentSpecificMemoryDesc": "Filter memories by agent to view knowledge specific to each agent. \"Main\" shows shared system-wide memories.",
     "directEditingDesc": "Click the edit button to modify memory entries directly. Changes are written back to the source files.",
     "aboutMemory": "About Memory & Agent Filtering",
-    "aboutMemoryDesc": "How the agent uses LanceDB with agent-specific filtering"
+    "aboutMemoryDesc": "How the agent uses LanceDB with agent-specific filtering",
+    "loadMore": "Load More"
   },
   "approvals": {
     "title": "Approvals",
