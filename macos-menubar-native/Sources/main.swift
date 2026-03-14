@@ -207,9 +207,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusMenuItem.isEnabled = false
 
         if isDashboardRunning() {
-            statusMenuItem.title = "● Dashboard 运行中"
+            // 绿色状态
+            let statusText = "● Dashboard 运行中"
+            let attributedString = NSMutableAttributedString(string: statusText)
+            let range = NSRange(location: 0, length: statusText.count)
+            attributedString.addAttribute(.foregroundColor, value: NSColor.systemGreen, range: range)
+            statusMenuItem.attributedTitle = attributedString
         } else {
-            statusMenuItem.title = "○ Dashboard 已停止"
+            // 灰色状态
+            let statusText = "○ Dashboard 已停止"
+            let attributedString = NSMutableAttributedString(string: statusText)
+            let range = NSRange(location: 0, length: statusText.count)
+            attributedString.addAttribute(.foregroundColor, value: NSColor.systemGray, range: range)
+            statusMenuItem.attributedTitle = attributedString
         }
 
         menu.addItem(statusMenuItem)
