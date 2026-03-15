@@ -35,8 +35,8 @@ const MEMORY_DIR = path.join(process.env.HOME || '', '.openclaw', 'memory', 'jso
 async function ensureMemoryDir() {
   try {
     await fs.mkdir(MEMORY_DIR, { recursive: true });
-  } catch (error) {
-    console.error('Failed to create memory directory:', error);
+  } catch {
+    console.error('Failed to create memory directory');
   }
 }
 
@@ -60,7 +60,7 @@ async function updateViaGateway(memoryId: string, content: string, metadata?: Re
     return { success: false, error: 'Gateway request failed', method: 'gateway' };
   } catch (error) {
     console.log(`[Gateway] Unavailable: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    return { success: false, error, method: 'gateway' };
+    return { success: false, error: 'Unknown error', method: 'gateway' };
   }
 }
 
@@ -96,7 +96,7 @@ async function updateViaLocalFile(memoryId: string, content: string, metadata?: 
     return { success: true, data: updatedMemory, method: 'local-file' };
   } catch (error) {
     console.error('[Local File] Failed to save memory:', error);
-    return { success: false, error, method: 'local-file' };
+    return { success: false, error: 'Unknown error', method: 'local-file' };
   }
 }
 
@@ -182,7 +182,7 @@ export async function GET(
           method: 'gateway',
         });
       }
-    } catch (error) {
+    } catch {
       console.log('[Memory Get] Gateway unavailable, trying local file');
     }
 
@@ -202,7 +202,7 @@ export async function GET(
         { status: 404 }
       );
     }
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to retrieve memory' },
       { status: 500 }
@@ -226,7 +226,7 @@ export async function DELETE(
       if (response.ok) {
         return NextResponse.json({ success: true, id: memoryId, method: 'gateway' });
       }
-    } catch (error) {
+    } catch {
       console.log('[Memory Delete] Gateway unavailable, trying local file');
     }
 
@@ -242,7 +242,7 @@ export async function DELETE(
         { status: 404 }
       );
     }
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to delete memory' },
       { status: 500 }

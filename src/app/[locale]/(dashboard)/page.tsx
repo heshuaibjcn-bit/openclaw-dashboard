@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,18 +9,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Activity,
   MessageSquare,
-  Bot,
   Radio,
-  TrendingUp,
   Clock,
   Zap,
   AlertTriangle,
-  CheckCircle2,
   XCircle,
   Users,
   Search,
   RefreshCw,
-  Filter,
   ArrowRight,
   Bell,
   ShieldAlert,
@@ -30,12 +26,18 @@ import {
   Settings,
   Smartphone,
   Send,
+  CheckCircle2,
+  Bot,
 } from "lucide-react";
 import { useTranslations, useLocale } from 'next-intl';
 import Link from "next/link";
-import { useGatewayHealth, useAgents, useSessions, useChannels, useRuntimeData } from "@/lib/openclaw";
+import { useGatewayHealth, useAgents, useSessions, useChannels, useRuntimeData, useSubscription, useLogs } from "@/lib/openclaw";
+import type { LogEntry, Channel, Agent } from "@/lib/openclaw/types";
 
-// Types for overview data
+interface RuntimeAgentStatus {
+  status: 'working' | 'standby' | 'offline';
+}
+
 interface PendingItem {
   id: string;
   type: "approval" | "exception" | "alert";
@@ -55,17 +57,9 @@ interface RiskItem {
   affected?: string[];
 }
 
-interface StaffStatus {
-  working: number;
-  standby: number;
-  offline: number;
-  total: number;
-}
-
 export default function DashboardPage() {
   const t = useTranslations();
   const locale = useLocale();
-  const isZh = locale === 'zh';
   const [searchQuery, setSearchQuery] = useState("");
 
   // Use real API hooks
@@ -74,9 +68,11 @@ export default function DashboardPage() {
   const { data: sessions, loading: sessionsLoading, refetch: refetchSessions } = useSessions();
   const { data: channels, loading: channelsLoading, refetch: refetchChannels } = useChannels();
   const { data: runtimeData, loading: runtimeLoading, refetch: refetchRuntime } = useRuntimeData();
+  const { data: subscriptionData, loading: subscriptionLoading } = useSubscription();
+  const { data: recentLogs } = useLogs({ limit: 100 });
 
   // Computed values from API data
-  const loading = healthLoading || agentsLoading || sessionsLoading || channelsLoading || runtimeLoading;
+  const loading = healthLoading || agentsLoading || sessionsLoading || channelsLoading || runtimeLoading || subscriptionLoading;
 
   const systemHealth = useMemo(() => {
     const totalChannels = channels?.length || 0;
@@ -99,31 +95,63 @@ export default function DashboardPage() {
     const minutes = Math.floor((uptimeSeconds % 3600) / 60);
     const uptime = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 
+    // Get token usage from subscription data
+    const tokenUsage = {
+      used: subscriptionData?.quota?.used || 0,
+      limit: subscriptionData?.quota?.limit || 1000000,
+      percentage: Math.round((subscriptionData?.quota?.used || 0) / (subscriptionData?.quota?.limit || 1) * 100),
+    };
+
+    // Count errors and warnings from logs
+    const recentErrors = recentLogs?.filter((log: LogEntry) => log.level === 'error').length || 0;
+    const warnings = recentLogs?.filter((log: LogEntry) => log.level === 'warn').length || 0;
+
     return {
       gatewayStatus: healthData.status || "healthy",
       uptime,
       activeSessions: healthData.sessions || sessions?.length || 0,
       totalAgents: healthData.agents || agents?.length || 0,
-      connectedChannels: channels?.filter((c: any) => c.status === "connected").length || 0,
+      connectedChannels: channels?.filter((c: Channel) => c.status === "connected").length || 0,
       totalChannels,
-      tokenUsage: { used: 0, limit: 1000000, percentage: 0 }, // Will be updated from runtime data
-      recentErrors: 0,
-      warnings: 0,
+      tokenUsage,
+      recentErrors,
+      warnings,
     };
-  }, [healthData, agents, sessions, channels]);
+  }, [healthData, agents, sessions, channels, subscriptionData, recentLogs]);
 
   const pendingItems = runtimeData?.pendingItems || [];
   const risks = runtimeData?.risks || [];
 
   const staffStatus = useMemo(() => {
-    const activeAgents = agents?.filter((a: any) => a.status === "active") || [];
+    const allAgents = agents || [];
+    const activeAgents = allAgents.filter((a: Agent) => a.status === "active");
+    const idleAgents = allAgents.filter((a: Agent) => a.status === "inactive");
+    const offlineAgents = allAgents.filter((a: Agent) => a.status === "error");
+
+    // Use runtime data for more accurate status if available
+    const runtimeAgentStatuses = runtimeData?.agentStatuses || {};
+    let working = 0;
+    let standby = 0;
+
+    if (Object.keys(runtimeAgentStatuses).length > 0) {
+      // Use runtime data for precise status
+      (Object.values(runtimeAgentStatuses) as RuntimeAgentStatus[]).forEach((status) => {
+        if (status.status === 'working') working++;
+        else if (status.status === 'standby') standby++;
+      });
+    } else {
+      // Fallback: use agents API status
+      working = activeAgents.length;
+      standby = idleAgents.length;
+    }
+
     return {
-      working: activeAgents.filter((a: any) => (a as any).currentTask !== undefined).length,
-      standby: activeAgents.length - (activeAgents.filter((a: any) => (a as any).currentTask !== undefined).length),
-      offline: (agents?.length || 0) - activeAgents.length,
-      total: agents?.length || 0,
+      working,
+      standby,
+      offline: offlineAgents.length,
+      total: allAgents.length,
     };
-  }, [agents]);
+  }, [agents, runtimeData]);
 
   // Refetch all data
   const handleRefresh = () => {
@@ -163,7 +191,7 @@ export default function DashboardPage() {
   const getRiskTypeIcon = (type: string) => {
     switch (type) {
       case "budget":
-        return <TrendingUp className="h-4 w-4" />;
+        return <Activity className="h-4 w-4" />;
       case "stalled":
         return <PauseCircle className="h-4 w-4" />;
       case "system":
@@ -268,7 +296,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t('overview.metrics.agents')}</CardTitle>
-            <Bot className="h-4 w-4 text-purple-500" />
+            <Activity className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{systemHealth.totalAgents}</div>
@@ -362,7 +390,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {pendingItems.map((item: any) => (
+                {pendingItems.map((item: PendingItem) => (
                   <div
                     key={item.id}
                     className="flex items-start gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors"
@@ -417,7 +445,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {risks.map((risk: any) => (
+                {risks.map((risk: RiskItem) => (
                   <div
                     key={risk.id}
                     className="rounded-lg border p-3 space-y-2"
@@ -525,7 +553,7 @@ export default function DashboardPage() {
             </div>
           ) : channels && channels.length > 0 ? (
             <div className="space-y-3">
-              {channels.map((channel: any) => (
+              {channels.map((channel: Channel) => (
                 <div
                   key={channel.id}
                   className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"

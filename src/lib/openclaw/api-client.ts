@@ -9,6 +9,99 @@ import type {
   MemoryEntry,
 } from "./types";
 
+interface TaskItem {
+  id: string;
+  title: string;
+  description?: string;
+  status: string;
+  priority: string;
+  createdAt: string;
+  updatedAt: string;
+  [key: string]: unknown;
+}
+
+interface UsageData {
+  timeRange: string;
+  totalRequests: number;
+  totalTokens: number;
+  totalCost: number;
+  breakdown: Array<{
+    date: string;
+    requests: number;
+    tokens: number;
+    cost: number;
+  }>;
+  [key: string]: unknown;
+}
+
+interface SubscriptionData {
+  quota?: {
+    used: number;
+    limit: number;
+  };
+  plan?: string;
+  status: string;
+  [key: string]: unknown;
+}
+
+interface DocumentsData {
+  [key: string]: Array<{
+    name: string;
+    path: string;
+    type: string;
+    size?: number;
+    modified?: string;
+  }>;
+}
+
+interface FileContentResponse {
+  content: string;
+  path: string;
+  size?: number;
+  [key: string]: unknown;
+}
+
+interface WriteFileResponse {
+  success: boolean;
+  path: string;
+  [key: string]: unknown;
+}
+
+interface ApprovalItem {
+  id: string;
+  actionId: string;
+  type: string;
+  status: string;
+  createdAt: string;
+  [key: string]: unknown;
+}
+
+interface ApprovalResponse {
+  success: boolean;
+  message?: string;
+  [key: string]: unknown;
+}
+
+interface RuntimeData {
+  agentStatuses: Record<string, {
+    status: string;
+    currentTask?: {
+      name: string;
+      startedAt?: string;
+    };
+    nextTask?: {
+      name: string;
+      scheduledAt?: string;
+    };
+    recentOutput?: {
+      count: number;
+      lastActivity?: string;
+    };
+    uptime?: number;
+  }>;
+  [key: string]: unknown;
+}
+
 export class OpenClawAPIError extends Error {
   constructor(
     message: string,
@@ -128,68 +221,68 @@ export class OpenClawAPIClient {
     return this.request<MemoryEntry[]>(`/api/memory/search?${queryString}`);
   }
 
-  async getTasks(params?: { limit?: number; offset?: number }): Promise<any[]> {
+  async getTasks(params?: { limit?: number; offset?: number }): Promise<TaskItem[]> {
     const queryParams = new URLSearchParams();
     if (params?.limit) queryParams.append("limit", params.limit.toString());
     if (params?.offset) queryParams.append("offset", params.offset.toString());
     const queryString = queryParams.toString();
-    return this.request<any[]>(`/api/tasks${queryString ? `?${queryString}` : ""}`);
+    return this.request<TaskItem[]>(`/api/tasks${queryString ? `?${queryString}` : ""}`);
   }
 
-  async getUsage(params?: { timeRange?: "today" | "7days" | "30days" }): Promise<any> {
+  async getUsage(params?: { timeRange?: "today" | "7days" | "30days" }): Promise<UsageData> {
     const queryParams = new URLSearchParams();
     if (params?.timeRange) queryParams.append("timeRange", params.timeRange);
     const queryString = queryParams.toString();
-    return this.request<any>(`/api/usage${queryString ? `?${queryString}` : ""}`);
+    return this.request<UsageData>(`/api/usage${queryString ? `?${queryString}` : ""}`);
   }
 
-  async getSubscription(): Promise<any> {
-    return this.request<any>("/api/subscription");
+  async getSubscription(): Promise<SubscriptionData> {
+    return this.request<SubscriptionData>("/api/subscription");
   }
 
-  async getDocuments(agentId?: string): Promise<any> {
+  async getDocuments(agentId?: string): Promise<DocumentsData> {
     const queryParams = new URLSearchParams();
     if (agentId) queryParams.append("agent", agentId);
     const queryString = queryParams.toString();
-    return this.request<any>(`/api/documents${queryString ? `?${queryString}` : ""}`);
+    return this.request<DocumentsData>(`/api/documents${queryString ? `?${queryString}` : ""}`);
   }
 
-  async getFileContent(path: string): Promise<any> {
+  async getFileContent(path: string): Promise<FileContentResponse> {
     const queryParams = new URLSearchParams({ path });
-    return this.request<any>(`/api/files/content?${queryParams.toString()}`);
+    return this.request<FileContentResponse>(`/api/files/content?${queryParams.toString()}`);
   }
 
-  async writeFileContent(path: string, content: string): Promise<any> {
-    return this.request<any>("/api/files/write", {
+  async writeFileContent(path: string, content: string): Promise<WriteFileResponse> {
+    return this.request<WriteFileResponse>("/api/files/write", {
       method: "POST",
       body: JSON.stringify({ path, content }),
     });
   }
 
-  async getApprovals(params?: { status?: string; limit?: number }): Promise<any[]> {
+  async getApprovals(params?: { status?: string; limit?: number }): Promise<ApprovalItem[]> {
     const queryParams = new URLSearchParams();
     if (params?.status) queryParams.append("status", params.status);
     if (params?.limit) queryParams.append("limit", params.limit.toString());
     const queryString = queryParams.toString();
-    return this.request<any[]>(`/api/approvals${queryString ? `?${queryString}` : ""}`);
+    return this.request<ApprovalItem[]>(`/api/approvals${queryString ? `?${queryString}` : ""}`);
   }
 
-  async approveAction(actionId: string, reason?: string): Promise<any> {
-    return this.request<any>(`/api/approvals/${actionId}/approve`, {
+  async approveAction(actionId: string, reason?: string): Promise<ApprovalResponse> {
+    return this.request<ApprovalResponse>(`/api/approvals/${actionId}/approve`, {
       method: "POST",
       body: JSON.stringify({ reason }),
     });
   }
 
-  async rejectAction(actionId: string, reason?: string): Promise<any> {
-    return this.request<any>(`/api/approvals/${actionId}/reject`, {
+  async rejectAction(actionId: string, reason?: string): Promise<ApprovalResponse> {
+    return this.request<ApprovalResponse>(`/api/approvals/${actionId}/reject`, {
       method: "POST",
       body: JSON.stringify({ reason }),
     });
   }
 
-  async getRuntimeData(): Promise<any> {
-    return this.request<any>("/api/runtime");
+  async getRuntimeData(): Promise<RuntimeData> {
+    return this.request<RuntimeData>("/api/runtime");
   }
 }
 

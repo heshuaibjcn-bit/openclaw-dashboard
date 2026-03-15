@@ -2,6 +2,14 @@ import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 
+interface MemoryEntry {
+  id: string;
+  content: string;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+  score: number;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -11,7 +19,7 @@ export async function GET(request: Request) {
     // Try to read from LanceDB memory store
     const memoryPath = path.join(process.env.HOME || '', '.openclaw', 'memory', 'lancedb-pro');
 
-    const memories: any[] = [];
+    const memories: MemoryEntry[] = [];
 
     try {
       // Check if memory directory exists
@@ -35,19 +43,19 @@ export async function GET(request: Request) {
     const paginatedMemories = memories.slice(offset, offset + limit);
 
     return NextResponse.json(paginatedMemories);
-  } catch (error) {
+  } catch {
     return NextResponse.json([], { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const { query, limit = 10 } = await request.json();
+    await request.json();
 
     // Search memory logic would go here
     // For now, return empty results
     return NextResponse.json([]);
-  } catch (error) {
+  } catch {
     return NextResponse.json([], { status: 500 });
   }
 }

@@ -3,6 +3,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import type { Session } from '@/lib/openclaw/types';
 
 const execAsync = promisify(exec);
 
@@ -11,6 +12,11 @@ const GATEWAY_URL = process.env.OPENCLAW_GATEWAY_URL || 'http://127.0.0.1:18789'
 
 interface RouteContext {
   params: Promise<{ id: string }>;
+}
+
+interface SessionData {
+  updatedAt?: string | number;
+  [key: string]: unknown;
 }
 
 /**
@@ -60,7 +66,7 @@ export async function GET(
     } catch {}
 
     // Read sessions
-    const sessions: any[] = [];
+    const sessions: Session[] = [];
     try {
       const sessionsPath = path.join(agentPath, 'sessions', 'sessions.json');
       const sessionsContent = await fs.readFile(sessionsPath, 'utf-8');
@@ -70,14 +76,17 @@ export async function GET(
       for (const [sessionId, sessionData] of Object.entries(sessionsData)) {
         sessions.push({
           id: sessionId,
-          ...(sessionData as object),
-        });
+          sessionKey: sessionId,
+          agentId: agentId,
+          status: 'unknown',
+          ...(sessionData as SessionData),
+        } as Session);
       }
 
       // Sort by updatedAt descending
       sessions.sort((a, b) => {
-        const aTime = new Date((a as any).updatedAt || 0).getTime();
-        const bTime = new Date((b as any).updatedAt || 0).getTime();
+        const aTime = new Date(a.updatedAt || 0).getTime();
+        const bTime = new Date(b.updatedAt || 0).getTime();
         return bTime - aTime;
       });
     } catch {}
@@ -140,7 +149,7 @@ export async function POST(
     if (action === 'start') {
       try {
         // Start agent via openclaw CLI
-        const { stdout, stderr } = await execAsync(`openclaw agent start ${agentId}`);
+        const { stdout } = await execAsync(`openclaw agent start ${agentId}`);
         return NextResponse.json({
           success: true,
           message: `Agent ${agentId} started successfully`,
@@ -148,11 +157,12 @@ export async function POST(
           method: 'local-cli',
           output: stdout,
         });
-      } catch (execError: any) {
+      } catch (execError: unknown) {
+        const error = execError as Error;
         return NextResponse.json(
           {
             error: 'Failed to start agent',
-            details: execError.message,
+            details: error.message,
             method: 'local-cli',
           },
           { status: 500 }
@@ -161,7 +171,7 @@ export async function POST(
     } else if (action === 'stop') {
       try {
         // Stop agent via openclaw CLI
-        const { stdout, stderr } = await execAsync(`openclaw agent stop ${agentId}`);
+        const { stdout } = await execAsync(`openclaw agent stop ${agentId}`);
         return NextResponse.json({
           success: true,
           message: `Agent ${agentId} stopped successfully`,
@@ -169,11 +179,12 @@ export async function POST(
           method: 'local-cli',
           output: stdout,
         });
-      } catch (execError: any) {
+      } catch (execError: unknown) {
+        const error = execError as Error;
         return NextResponse.json(
           {
             error: 'Failed to stop agent',
-            details: execError.message,
+            details: error.message,
             method: 'local-cli',
           },
           { status: 500 }

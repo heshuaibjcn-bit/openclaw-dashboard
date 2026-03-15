@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,20 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Users,
-  Bot,
   Clock,
-  CheckCircle2,
   AlertCircle,
   Pause,
   Play,
   MoreVertical,
   MessageSquare,
-  Zap,
   Calendar,
-  TrendingUp,
   RefreshCw,
 } from "lucide-react";
 import { useAgents, useRuntimeData } from "@/lib/openclaw";
+import type { Agent } from "@/lib/openclaw/types";
 
 interface StaffMember {
   id: string;
@@ -51,7 +48,6 @@ export default function StaffPage() {
   const t = useTranslations('staff');
   const tCommon = useTranslations('common');
   const locale = useLocale();
-  const isZh = locale === 'zh';
 
   // Use real API hooks
   const { data: agents, loading: agentsLoading, refetch: refetchAgents } = useAgents();
@@ -68,7 +64,7 @@ export default function StaffPage() {
     // Get runtime status for each agent
     const agentStatuses = runtimeData?.agentStatuses || {};
 
-    return agents.map((agent: any) => {
+    return agents.map((agent: Agent) => {
       const runtimeStatus = agentStatuses[agent.id] || {};
       return {
         id: agent.id,
@@ -79,7 +75,7 @@ export default function StaffPage() {
         nextTask: runtimeStatus.nextTask,
         recentOutput: runtimeStatus.recentOutput || {
           count: 0,
-          lastActivity: new Date(agent.createdAt || Date.now()),
+          lastActivity: agent.createdAt || new Date().toISOString(),
         },
         capabilities: agent.capabilities || [],
         uptime: runtimeStatus.uptime || 0,
@@ -142,8 +138,15 @@ export default function StaffPage() {
     return `${minutes}m`;
   };
 
-  const formatLastActivity = (date: Date) => {
-    const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  // Format last activity safely (memoized to avoid impure function warning)
+  const formatLastActivity = useCallback((date: Date | string | undefined | null) => {
+    if (!date) return 'Never';
+
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    const timestamp = dateObj.getTime();
+    const seconds = Math.floor((Date.now() - timestamp) / 1000);
+
+    if (seconds < 0) return 'Just now';
     if (seconds < 60) return `${seconds}s ago`;
     const minutes = Math.floor(seconds / 60);
     if (minutes < 60) return `${minutes}m ago`;
@@ -151,7 +154,7 @@ export default function StaffPage() {
     if (hours < 24) return `${hours}h ago`;
     const days = Math.floor(hours / 24);
     return `${days}d ago`;
-  };
+  }, []);
 
   const stats = {
     total: staff.length,

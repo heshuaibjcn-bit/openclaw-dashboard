@@ -2,6 +2,24 @@ import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 
+interface TaskItem {
+  id: string;
+  title: string;
+  description?: string;
+  status: string;
+  priority: string;
+  createdAt: string;
+  updatedAt: string;
+  tags: string[];
+  taskType: string;
+  subtaskCount?: number;
+  completedSubtasks?: number;
+  schedule?: string;
+  cronExpression?: string;
+  timezone?: string;
+  enabled?: boolean;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -11,29 +29,31 @@ export async function GET(request: Request) {
     const projectRoot = process.cwd();
     const homeDir = process.env.HOME || '';
 
-    let tasks: any[] = [];
+    const tasks: TaskItem[] = [];
 
     // 1. Read tasks from project task.json file
     const taskJsonPath = path.join(projectRoot, 'task.json');
     try {
       const taskJsonContent = await fs.readFile(taskJsonPath, 'utf-8');
-      const taskData = JSON.parse(taskJsonContent);
+      const taskData = JSON.parse(taskJsonContent) as Record<string, unknown>;
 
       // Transform task.json format to Dashboard format
-      const projectTasks = (taskData.tasks || []).map((task: any) => ({
-        id: task.id,
-        title: task.title,
-        description: task.description,
-        status: task.status,
-        priority: task.priority,
-        createdAt: task.createdAt || new Date().toISOString(),
-        updatedAt: task.updatedAt || new Date().toISOString(),
-        tags: task.tags || [],
+      const projectTasks = ((taskData.tasks as unknown[]) || []).map((task: unknown) => {
+        const t = task as Record<string, unknown>;
+        return {
+        id: String(t.id || ''),
+        title: String(t.title || ''),
+        description: t.description ? String(t.description) : undefined,
+        status: String(t.status || 'unknown'),
+        priority: String(t.priority || 'medium'),
+        createdAt: t.createdAt ? String(t.createdAt) : new Date().toISOString(),
+        updatedAt: t.updatedAt ? String(t.updatedAt) : new Date().toISOString(),
+        tags: ((t.tags as unknown[]) || []).map(tag => String(tag)),
         taskType: 'project',
         // Map acceptance criteria to subtasks
-        subtaskCount: task.acceptanceCriteria?.length || 0,
-        completedSubtasks: task.status === 'completed' ? (task.acceptanceCriteria?.length || 0) : 0,
-      }));
+        subtaskCount: ((t.acceptanceCriteria as unknown[]) || []).length,
+        completedSubtasks: t.status === 'completed' ? ((t.acceptanceCriteria as unknown[]) || []).length : 0,
+      } as TaskItem});
 
       tasks.push(...projectTasks);
     } catch (error) {
@@ -49,7 +69,7 @@ export async function GET(request: Request) {
       let cronJobsData;
       try {
         cronJobsData = JSON.parse(cronJobsContent);
-      } catch (jsonError) {
+      } catch {
         // If JSON.parse fails due to unescaped newlines, try eval
         try {
           // Only use eval for this trusted local file
@@ -86,28 +106,33 @@ export async function GET(request: Request) {
       }
 
       // Transform cron jobs to Dashboard format
-      const cronTasks = (cronJobsData.jobs || []).map((job: any) => {
+      const cronTasks = ((cronJobsData.jobs as unknown[]) || []).map((job: unknown) => {
+        const j = job as Record<string, unknown>;
+        const schedule = j.schedule as Record<string, unknown> | undefined;
+        const payload = j.payload as Record<string, unknown> | undefined;
         // Parse cron expression to create readable schedule
-        const cronParts = job.schedule.cron.split(' ');
-        const schedule = `Every ${cronParts[1]} minutes - ${job.schedule.tz || 'UTC'}`;
+        const cronExpr = schedule?.cron as string | undefined;
+        const cronParts = cronExpr ? cronExpr.split(' ') : ['*', '*', '*', '*', '*'];
+        const tz = schedule?.tz as string | undefined;
+        const scheduleStr = `Every ${cronParts[1]} minutes - ${tz || 'UTC'}`;
 
         return {
-          id: `cron-${job.id}`,
-          title: `⏰ ${job.name}`,
-          description: job.payload.message || job.payload.kind || 'Scheduled task',
-          status: job.enabled ? 'in-progress' : 'pending',
+          id: `cron-${String(j.id || '')}`,
+          title: `⏰ ${String(j.name || 'Scheduled Task')}`,
+          description: payload?.message ? String(payload.message) : (payload?.kind ? String(payload.kind) : 'Scheduled task'),
+          status: j.enabled === true ? 'in-progress' : 'pending',
           priority: 'medium',
-          createdAt: job.createdAt || new Date().toISOString(),
+          createdAt: j.createdAt ? String(j.createdAt) : new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          tags: ['cron', 'scheduled', job.payload.kind],
+          tags: ['cron', 'scheduled', payload?.kind ? String(payload.kind) : 'scheduled'],
           taskType: 'cron',
-          schedule: schedule,
-          cronExpression: job.schedule.cron,
-          timezone: job.schedule.tz,
-          enabled: job.enabled,
+          schedule: scheduleStr,
+          cronExpression: cronExpr || '* * * * *',
+          timezone: tz || 'UTC',
+          enabled: j.enabled === true,
           subtaskCount: 0,
           completedSubtasks: 0,
-        };
+        } as TaskItem;
       });
 
       tasks.push(...cronTasks);

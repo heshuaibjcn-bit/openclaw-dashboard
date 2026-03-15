@@ -66,7 +66,7 @@ export async function GET() {
 
           const foundTools = new Set<string>();
 
-          for (const { pattern, category } of skillPatterns) {
+          for (const { pattern } of skillPatterns) {
             const matches = indexContent.matchAll(pattern);
             for (const match of matches) {
               if (match[0].includes('registerFeishu')) {
@@ -211,7 +211,6 @@ export async function GET() {
 
                 // Parse frontmatter from SKILL.md
                 const nameMatch = skillContent.match(/^name:\s*(.+)$/m);
-                const descMatch = skillContent.match(/^description:\s*(.+)$/m);
 
                 const skillName = nameMatch ? nameMatch[1].trim() : skillDir;
                 // Handle multi-line descriptions
@@ -244,16 +243,16 @@ export async function GET() {
                   category: 'Native Skill',
                   tools: [],
                 });
-              } catch (skillError) {
+              } catch {
                 // Not a valid skill directory
                 continue;
               }
             }
-          } catch (skillsError) {
+          } catch {
             // No skills directory in this extension
             // Ignore this error
           }
-        } catch (extError) {
+        } catch {
           // Not a valid extension or can't be read
           continue;
         }
@@ -288,10 +287,9 @@ export async function GET() {
 
                 // Parse frontmatter from SKILL.md
                 const nameMatch = skillContent.match(/^name:\s*(.+)$/m);
-                const descMatch = skillContent.match(/^description:\s*(.+)$/m);
 
                 const skillName = nameMatch ? nameMatch[1].trim() : skillDir;
-                const skillDesc = descMatch ? descMatch[1].trim() : `Skill from ${moduleDir}`;
+                const skillDesc = `Skill from ${moduleDir}`;
 
                 skills.push({
                   id: `${moduleDir}-${skillDir}`,
@@ -301,17 +299,17 @@ export async function GET() {
                   category: 'Native Skill',
                   tools: [],
                 });
-              } catch (skillError) {
+              } catch {
                 // Not a valid skill directory
                 continue;
               }
             }
-          } catch (skillsError) {
+          } catch {
             // No skills directory in this module
             continue;
           }
         }
-      } catch (nodeModulesError) {
+      } catch {
         // No node_modules directory
         // Ignore this error
       }
@@ -379,12 +377,12 @@ export async function GET() {
               category: 'Workspace Skill',
               tools,
             });
-          } catch (skillError) {
+          } catch {
             // Not a valid skill directory
             continue;
           }
         }
-      } catch (workspaceError) {
+      } catch {
         // No workspace skills directory
         // Ignore this error
       }
@@ -396,11 +394,18 @@ export async function GET() {
         return a.category.localeCompare(b.category);
       });
 
-      return NextResponse.json({
+      const response = NextResponse.json({
         skills,
         total: skills.length,
         extensions: skills.map(s => s.extension).filter((v, i, a) => a.indexOf(v) === i),
       });
+
+      // Disable caching to ensure fresh data
+      response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+      response.headers.set('Pragma', 'no-cache');
+      response.headers.set('Expires', '0');
+
+      return response;
     } catch (error) {
       console.error('Extensions directory not found or error:', error);
       // Return empty skills if extensions don't exist

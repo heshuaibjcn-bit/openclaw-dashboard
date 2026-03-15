@@ -1,46 +1,21 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  TrendingUp,
-  TrendingDown,
   DollarSign,
-  Clock,
   AlertTriangle,
-  CheckCircle2,
   RefreshCw,
   PieChart,
   BarChart3,
   Zap,
   Calendar,
+  CheckCircle2,
 } from "lucide-react";
 import { useUsage, useSubscription } from "@/lib/openclaw";
-
-// Mock data (will be replaced with real API calls)
-interface UsageData {
-  today: { tokens: number; cost: number };
-  last7days: { tokens: number; cost: number };
-  last30days: { tokens: number; cost: number };
-  quota: {
-    limit: number;
-    used: number;
-    remaining: number;
-    window: string;
-    resetAt: string;
-  };
-  attribution: Array<{
-    id: string;
-    name: string;
-    type: "task" | "agent" | "project";
-    tokens: number;
-    cost: number;
-    percentage: number;
-  }>;
-}
 
 export default function UsagePage() {
   const t = useTranslations('usage');
@@ -90,11 +65,6 @@ export default function UsagePage() {
     return { status: "healthy", color: "text-green-500", bg: "bg-green-50 dark:bg-green-900/20" };
   };
 
-  const getTrendDirection = (current: number, previous: number) => {
-    if (current > previous) return 'up';
-    if (current < previous) return 'down';
-    return 'stable';
-  };
 
   const currentData = getCurrentData();
   const quotaStatus = getQuotaStatus();
@@ -104,7 +74,14 @@ export default function UsagePage() {
     refetchSubscription();
   };
 
-  const filteredAttribution = data?.attribution.filter((item: any) => {
+  const filteredAttribution = data?.attribution.filter((item: {
+    id: string;
+    name: string;
+    type: "task" | "agent" | "project";
+    tokens: number;
+    cost: number;
+    percentage: number;
+  }) => {
     if (view === "tasks") return item.type === "task";
     if (view === "agents") return item.type === "agent";
     if (view === "projects") return item.type === "project";
@@ -305,7 +282,14 @@ export default function UsagePage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {filteredAttribution.map((item: any) => (
+                  {filteredAttribution.map((item: {
+                    id: string;
+                    name: string;
+                    type: "task" | "agent" | "project";
+                    tokens: number;
+                    cost: number;
+                    percentage: number;
+                  }) => (
                     <div key={item.id} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">

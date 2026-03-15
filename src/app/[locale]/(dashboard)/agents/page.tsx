@@ -23,7 +23,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Bot,
   Plus,
   RefreshCw,
   Search,
@@ -43,6 +42,7 @@ import {
   Cpu,
   Clock,
   AlertTriangle,
+  Bot,
 } from "lucide-react";
 import { useAgents, useSkills } from "@/lib/openclaw";
 import type { Agent } from "@/lib/openclaw";
@@ -102,8 +102,9 @@ export default function AgentsPage() {
   const t = useTranslations('agents');
   const tCommon = useTranslations('common');
   const { data: agents, loading, refetch } = useAgents();
-  const { data: skills, loading: skillsLoading, extensions } = useSkills();
+  const { data: skills, loading: skillsLoading, extensions, refetch: refetchSkills } = useSkills();
   const [searchQuery, setSearchQuery] = useState("");
+  const [skillSearchQuery, setSkillSearchQuery] = useState("");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [editingAgent, setEditingAgent] = useState({
@@ -127,8 +128,8 @@ export default function AgentsPage() {
         const config = await response.json();
         setModelConfig(config);
       }
-    } catch (error) {
-      console.error('Failed to fetch model config:', error);
+    } catch {
+      console.error('Failed to fetch model config');
     } finally {
       setModelConfigLoading(false);
     }
@@ -138,6 +139,19 @@ export default function AgentsPage() {
     agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     agent.model.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
+
+  // Filter skills by search query
+  const filteredSkills = skills?.filter((skill) => {
+    if (!skillSearchQuery) return true;
+    const query = skillSearchQuery.toLowerCase();
+    return (
+      skill.name.toLowerCase().includes(query) ||
+      (skill.description?.toLowerCase().includes(query) ?? false) ||
+      (skill.category?.toLowerCase().includes(query) ?? false) ||
+      (skill.extension?.toLowerCase().includes(query) ?? false) ||
+      skill.tools?.some((tool: string) => tool.toLowerCase().includes(query))
+    );
+  }) || [];
 
   const handleRefresh = () => {
     refetch();
@@ -386,7 +400,7 @@ export default function AgentsPage() {
                     {/* Recommended Fallbacks */}
                     {modelConfig.suggestedFallbacks.recommended.length > 0 && (
                       <div className="pl-6 space-y-2">
-                        <div className="text-xs text-muted-foreground">Recommended Configuration:</div>
+                        <div className="text-xs text-muted-foreground">{t('recommendedConfiguration')}:</div>
                         <div className="flex flex-wrap gap-2">
                           {modelConfig.suggestedFallbacks.recommended.map((model, index) => {
                             const isCurrent = modelConfig.suggestedFallbacks.current.includes(model);
@@ -489,20 +503,46 @@ export default function AgentsPage() {
       {/* Available Skills */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Wrench className="h-5 w-5" />
-                {t('availableSkills')}
-              </CardTitle>
-              <CardDescription>
-                {skillsLoading ? t('loading') : t('skillsDescription', { count: skills.length, extensions: extensions.length })}
-              </CardDescription>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Wrench className="h-5 w-5" />
+                  {t('availableSkills')}
+                </CardTitle>
+                <CardDescription>
+                  {skillsLoading ? t('loading') : t('skillsDescription', { count: filteredSkills.length, extensions: extensions.length })}
+                </CardDescription>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => refetchSkills()}
+              >
+                <RefreshCw className={`mr-2 h-4 w-4 ${skillsLoading ? 'animate-spin' : ''}`} />
+                {tCommon('refresh')}
+              </Button>
             </div>
-            <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-              <RefreshCw className={`mr-2 h-4 w-4 ${skillsLoading ? 'animate-spin' : ''}`} />
-              {tCommon('refresh')}
-            </Button>
+
+            {/* Skill Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={t('skillSearchPlaceholder')}
+                value={skillSearchQuery}
+                onChange={(e) => setSkillSearchQuery(e.target.value)}
+                className="pl-9 w-full"
+                disabled={skillsLoading}
+              />
+              {skillSearchQuery && (
+                <button
+                  onClick={() => setSkillSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -510,74 +550,95 @@ export default function AgentsPage() {
             <div className="flex items-center justify-center py-8">
               <p className="text-muted-foreground">{t('loading')}</p>
             </div>
-          ) : skills.length > 0 ? (
+          ) : filteredSkills.length > 0 ? (
             <div className="space-y-6">
-              {/* Group skills by extension */}
-              {extensions.map((ext) => {
-                const extSkills = skills.filter((s) => s.extension === ext);
-                if (extSkills.length === 0) return null;
+              {/* Show search result info */}
+              {skillSearchQuery && (
+                <div className="text-sm text-muted-foreground">
+                  Found {filteredSkills.length} of {skills.length} skills matching &ldquo;{skillSearchQuery}&rdquo;
+                </div>
+              )}
 
-                // Get extension icon based on type
-                const getExtIcon = (extension: string) => {
-                  switch (extension) {
-                    case 'feishu': return <MessageSquare className="h-4 w-4" />;
-                    case 'memory-lancedb-pro': return <Database className="h-4 w-4" />;
-                    case 'openai': return <Sparkles className="h-4 w-4" />;
+              {/* Group skills by category */}
+              {Object.entries(
+                filteredSkills.reduce((acc: Record<string, typeof filteredSkills>, skill) => {
+                  const category = skill.category || 'Other';
+                  if (!acc[category]) acc[category] = [];
+                  acc[category].push(skill);
+                  return acc;
+                }, {})
+              ).map(([category, categorySkills]) => {
+                const getCategoryIcon = (category: string) => {
+                  switch (category) {
+                    case 'Documents': return <FileText className="h-4 w-4" />;
+                    case 'Knowledge': return <Database className="h-4 w-4" />;
+                    case 'Memory': return <Database className="h-4 w-4" />;
+                    case 'Communication': return <MessageSquare className="h-4 w-4" />;
+                    case 'Admin': return <Shield className="h-4 w-4" />;
+                    case 'Data': return <Database className="h-4 w-4" />;
+                    case 'Storage': return <Database className="h-4 w-4" />;
+                    case 'Native Skill': return <Sparkles className="h-4 w-4" />;
+                    case 'Workspace Skill': return <Wrench className="h-4 w-4" />;
                     default: return <Zap className="h-4 w-4" />;
                   }
                 };
 
+                const getCategoryColor = (category: string) => {
+                  switch (category) {
+                    case 'Documents': return 'text-blue-500 bg-blue-50 dark:bg-blue-900/20';
+                    case 'Knowledge': return 'text-purple-500 bg-purple-50 dark:bg-purple-900/20';
+                    case 'Memory': return 'text-cyan-500 bg-cyan-50 dark:bg-cyan-900/20';
+                    case 'Communication': return 'text-green-500 bg-green-50 dark:bg-green-900/20';
+                    case 'Admin': return 'text-red-500 bg-red-50 dark:bg-red-900/20';
+                    case 'Data': return 'text-orange-500 bg-orange-50 dark:bg-orange-900/20';
+                    case 'Storage': return 'text-indigo-500 bg-indigo-50 dark:bg-indigo-900/20';
+                    case 'Native Skill': return 'text-pink-500 bg-pink-50 dark:bg-pink-900/20';
+                    case 'Workspace Skill': return 'text-teal-500 bg-teal-50 dark:bg-teal-900/20';
+                    default: return 'text-gray-500 bg-gray-50 dark:bg-gray-900/20';
+                  }
+                };
+
                 return (
-                  <div key={ext} className="space-y-3">
+                  <div key={category} className="space-y-3">
                     <div className="flex items-center gap-2">
-                      {getExtIcon(ext)}
-                      <h4 className="text-sm font-semibold capitalize">{ext}</h4>
+                      <div className={`flex h-6 w-6 items-center justify-center rounded ${getCategoryColor(category)}`}>
+                        {getCategoryIcon(category)}
+                      </div>
+                      <h4 className="text-sm font-semibold">{category}</h4>
                       <Badge variant="outline" className="text-xs">
-                        {extSkills.length} {t('skills')}
+                        {categorySkills.length} {t('skills')}
                       </Badge>
                     </div>
 
-                    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                      {extSkills.map((skill) => {
-                        const getCategoryIcon = (category: string) => {
-                          switch (category) {
-                            case 'Documents': return <FileText className="h-3 w-3" />;
-                            case 'Knowledge': return <Database className="h-3 w-3" />;
-                            case 'Memory': return <Database className="h-3 w-3" />;
-                            case 'Communication': return <MessageSquare className="h-3 w-3" />;
-                            default: return <Zap className="h-3 w-3" />;
-                          }
-                        };
-
-                        return (
-                          <div
-                            key={skill.id}
-                            className="flex items-start gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors"
-                          >
+                    <div className="space-y-2">
+                      {categorySkills.map((skill) => (
+                        <div
+                          key={skill.id}
+                          className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
-                              {getCategoryIcon(skill.category)}
+                              <Zap className="h-4 w-4 text-primary" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium truncate">{skill.name}</p>
-                              <p className="text-xs text-muted-foreground line-clamp-2">{skill.description}</p>
-                              {skill.tools && skill.tools.length > 0 && (
-                                <div className="flex gap-1 mt-2 flex-wrap">
-                                  {skill.tools.slice(0, 3).map((tool: string) => (
-                                    <Badge key={tool} variant="outline" className="text-xs">
-                                      {tool}
-                                    </Badge>
-                                  ))}
-                                  {skill.tools.length > 3 && (
-                                    <Badge variant="outline" className="text-xs">
-                                      +{skill.tools.length - 3}
-                                    </Badge>
-                                  )}
-                                </div>
-                              )}
+                              <p className="text-xs text-muted-foreground truncate">{skill.description || ''}</p>
                             </div>
                           </div>
-                        );
-                      })}
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            {skill.extension && (
+                              <Badge variant="outline" className="text-xs">
+                                {skill.extension}
+                              </Badge>
+                            )}
+                            {skill.tools && skill.tools.length > 0 && (
+                              <div className="text-xs text-muted-foreground">
+                                {skill.tools.length} tools
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 );
@@ -585,11 +646,31 @@ export default function AgentsPage() {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Wrench className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">{t('noSkills')}</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                {t('noSkillsDesc')}
-              </p>
+              {skillSearchQuery ? (
+                <>
+                  <Search className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">No skills found matching &ldquo;{skillSearchQuery}&rdquo;</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Try adjusting your search terms
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-4"
+                    onClick={() => setSkillSearchQuery('')}
+                  >
+                    Clear search
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Wrench className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">{t('noSkills')}</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {t('noSkillsDesc')}
+                  </p>
+                </>
+              )}
             </div>
           )}
         </CardContent>
@@ -642,9 +723,19 @@ export default function AgentsPage() {
                       </div>
                       <Badge
                         variant={agent.status === "active" ? "default" : "secondary"}
-                        className={agent.status === "active" ? "bg-green-500 hover:bg-green-600" : ""}
+                        className={
+                          agent.status === "active"
+                            ? "bg-green-500 hover:bg-green-600"
+                            : agent.status === "inactive"
+                            ? "bg-yellow-500 hover:bg-yellow-600 text-white"
+                            : "bg-red-500 hover:bg-red-600 text-white"
+                        }
                       >
-                        {agent.status}
+                        {agent.status === "active"
+                          ? t('status.running')
+                          : agent.status === "inactive"
+                          ? t('status.idle')
+                          : t('status.error')}
                       </Badge>
                     </div>
                   </CardHeader>

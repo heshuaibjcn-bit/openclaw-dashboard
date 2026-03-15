@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +28,6 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useLogs } from "@/lib/openclaw";
-import type { LogEntry } from "@/lib/openclaw";
 
 const levelIcons = {
   debug: Bug,
@@ -55,15 +54,17 @@ export default function LogsPage() {
   const t = useTranslations('logs');
   const tCommon = useTranslations('common');
   const { data: logs, loading, refetch } = useLogs();
-  const [filteredLogs, setFilteredLogs] = useState<LogEntry[]>([]);
   const [levelFilter, setLevelFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [autoScroll, setAutoScroll] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
+  const [shouldClearLogs, setShouldClearLogs] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Filter logs based on level and search query
-  useEffect(() => {
+  // Filter logs based on level and search query using useMemo
+  const filteredLogs = useMemo(() => {
+    if (shouldClearLogs) return [];
+
     let filtered = logs || [];
 
     if (levelFilter !== "all") {
@@ -77,8 +78,8 @@ export default function LogsPage() {
       );
     }
 
-    setFilteredLogs(filtered);
-  }, [logs, levelFilter, searchQuery]);
+    return filtered;
+  }, [logs, levelFilter, searchQuery, shouldClearLogs]);
 
   // Auto-scroll to bottom when new logs arrive
   useEffect(() => {
@@ -92,7 +93,7 @@ export default function LogsPage() {
   };
 
   const handleClearLogs = () => {
-    setFilteredLogs([]);
+    setShouldClearLogs(true);
   };
 
   const handleExportLogs = () => {
@@ -110,11 +111,6 @@ export default function LogsPage() {
     a.download = `openclaw-logs-${new Date().toISOString()}.log`;
     a.click();
     URL.revokeObjectURL(url);
-  };
-
-  const getLevelIcon = (level: string) => {
-    const Icon = levelIcons[level as keyof typeof levelIcons] || Info;
-    return <Icon className={`h-4 w-4 ${levelColors[level as keyof typeof levelColors]}`} />;
   };
 
   const stats = {

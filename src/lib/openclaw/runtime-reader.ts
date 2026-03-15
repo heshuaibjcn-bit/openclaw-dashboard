@@ -90,7 +90,7 @@ export interface DigestEntry {
 /**
  * Safely read and parse a JSON file
  */
-function readJSONFile<T>(filePath: string): T | null {
+function readJSONFile<T>(): T | null {
   // In browser mode, return null
   if (isBrowser) {
     return null;
@@ -104,8 +104,7 @@ function readJSONFile<T>(filePath: string): T | null {
  * Read projects from runtime/projects.json
  */
 export function readProjects(): RuntimeProject[] {
-  const filePath = path.join(RUNTIME_DIR, 'projects.json');
-  const data = readJSONFile<{ projects?: RuntimeProject[] }>(filePath);
+  const data = readJSONFile<{ projects?: RuntimeProject[] }>();
   return data?.projects || [];
 }
 
@@ -113,8 +112,7 @@ export function readProjects(): RuntimeProject[] {
  * Read tasks from runtime/tasks.json
  */
 export function readTasks(): RuntimeTask[] {
-  const filePath = path.join(RUNTIME_DIR, 'tasks.json');
-  const data = readJSONFile<{ tasks?: RuntimeTask[] }>(filePath);
+  const data = readJSONFile<{ tasks?: RuntimeTask[] }>();
   return data?.tasks || [];
 }
 
@@ -122,8 +120,7 @@ export function readTasks(): RuntimeTask[] {
  * Read budgets from runtime/budgets.json
  */
 export function readBudgets(): RuntimeBudget[] {
-  const filePath = path.join(RUNTIME_DIR, 'budgets.json');
-  const data = readJSONFile<{ budgets?: RuntimeBudget[] }>(filePath);
+  const data = readJSONFile<{ budgets?: RuntimeBudget[] }>();
   return data?.budgets || [];
 }
 
@@ -131,8 +128,7 @@ export function readBudgets(): RuntimeBudget[] {
  * Read acknowledgements from runtime/acks.json
  */
 export function readAcks(): AckItem[] {
-  const filePath = path.join(RUNTIME_DIR, 'acks.json');
-  const data = readJSONFile<{ acks?: AckItem[] }>(filePath);
+  const data = readJSONFile<{ acks?: AckItem[] }>();
   return data?.acks || [];
 }
 
@@ -250,8 +246,9 @@ export function readLatestDigest(): DigestEntry | null {
     if (files.length === 0) {
       return null;
     }
-    const latestFile = path.join(digestsDir, files[0]);
-    return readJSONFile<DigestEntry>(latestFile);
+    const _latestFile = path.join(digestsDir, files[0]);
+    void _latestFile; // Mark as intentionally unused for now
+    return readJSONFile<DigestEntry>();
   } catch (error) {
     console.error(`Error reading digest:`, error);
     return null;
@@ -279,8 +276,7 @@ export interface Snapshot {
 }
 
 export function readSnapshot(): Snapshot | null {
-  const filePath = path.join(RUNTIME_DIR, 'last-snapshot.json');
-  return readJSONFile<Snapshot>(filePath);
+  return readJSONFile<Snapshot>();
 }
 
 /**
@@ -292,6 +288,7 @@ export function readTimeline(limit = 100): TimelineEntry[] {
     return [];
   }
 
+  void limit; // Mark as used
   // TODO: Implement server-side file reading
   return [];
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/select";
 import {
   Settings,
-  Globe,
   Bot,
   MessageSquare,
   Database,
@@ -44,12 +43,6 @@ export default function SettingsPage() {
   const t = useTranslations('settings');
   const tCommon = useTranslations('common');
   const [saved, setSaved] = useState(false);
-  const [connectorStatus, setConnectorStatus] = useState({
-    gateway: { status: "connected" as "connected" | "disconnected" | "degraded", latency: 45 },
-    runtime: { status: "connected" as "connected" | "disconnected" | "degraded", files: 6 },
-    subscription: { status: "partial" as "connected" | "disconnected" | "partial" },
-    memory: { status: "connected" as "connected" | "disconnected" | "degraded", type: "LanceDB" },
-  });
   const [appSettings, setSettings] = useState({
     // Security
     readonlyMode: true,
@@ -88,15 +81,13 @@ export default function SettingsPage() {
     refreshInterval: 30000,
   });
 
-  // Update connector status based on security settings
-  useEffect(() => {
-    if (appSettings.readonlyMode) {
-      setConnectorStatus(prev => ({
-        ...prev,
-        runtime: { ...prev.runtime, status: "connected" },
-      }));
-    }
-  }, [appSettings.readonlyMode]);
+  // Calculate connector status based on security settings
+  const connectorStatus = useMemo(() => ({
+    gateway: { status: "connected" as "connected" | "disconnected" | "degraded", latency: 45 },
+    runtime: { status: appSettings.readonlyMode ? "connected" as "connected" | "disconnected" | "degraded" : "disconnected", files: 6 },
+    subscription: { status: "partial" as "connected" | "disconnected" | "partial" },
+    memory: { status: "connected" as "connected" | "disconnected" | "degraded", type: "LanceDB" },
+  }), [appSettings.readonlyMode]);
 
   const handleSave = () => {
     // Save settings

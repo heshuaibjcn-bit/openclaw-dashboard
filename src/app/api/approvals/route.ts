@@ -5,6 +5,15 @@ import path from 'path';
 // OpenClaw Gateway configuration
 const GATEWAY_URL = process.env.OPENCLAW_GATEWAY_URL || 'http://127.0.0.1:18789';
 
+interface ApprovalItem {
+  id: string;
+  status: string;
+  agentId?: string;
+  type?: string;
+  createdAt?: string;
+  [key: string]: unknown;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -41,7 +50,7 @@ export async function GET(request: Request) {
     }
 
     // Fallback: Read from local files
-    const approvals: any[] = [];
+    const approvals: ApprovalItem[] = [];
 
     // Try to read approvals from ~/.openclaw/approvals/
     const approvalsPath = path.join(process.env.HOME || '', '.openclaw', 'approvals');
@@ -82,7 +91,7 @@ export async function GET(request: Request) {
               riskLevel: approval.riskLevel || approval.risk || 'low',
               details: approval.details || {},
             });
-          } catch (fileError) {
+          } catch {
             // Skip invalid files
             continue;
           }
@@ -94,8 +103,8 @@ export async function GET(request: Request) {
 
     // Sort by createdAt descending
     approvals.sort((a, b) => {
-      const aTime = new Date(a.createdAt).getTime();
-      const bTime = new Date(b.createdAt).getTime();
+      const aTime = new Date(a.createdAt as string).getTime();
+      const bTime = new Date(b.createdAt as string).getTime();
       return bTime - aTime;
     });
 

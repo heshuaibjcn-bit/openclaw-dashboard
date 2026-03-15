@@ -8,7 +8,7 @@ const GATEWAY_URL = process.env.OPENCLAW_GATEWAY_URL || 'http://127.0.0.1:18789'
 interface MemorySearchResult {
   id: string;
   content: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   score: number;
   createdAt?: string;
 }
@@ -85,16 +85,21 @@ async function searchViaGateway(
     throw new Error(`Gateway search failed: ${response.statusText}`);
   }
 
-  const data = await response.json();
+  const data = await response.json() as Record<string, unknown>;
 
   // Transform Gateway response to our format
-  return (data.results || data || []).map((item: any) => ({
-    id: item.id || item.memory_id || `mem-${Date.now()}-${Math.random()}`,
-    content: item.content || item.text || item.message || '',
-    metadata: item.metadata || {},
-    score: item.score || item.similarity || 0,
-    createdAt: item.created_at || item.timestamp,
-  }));
+  const results = data.results as unknown[] | undefined;
+  const items = Array.isArray(results) ? results : (Array.isArray(data) ? data : []);
+  return items.map((item: unknown) => {
+    const i = item as Record<string, unknown>;
+    return {
+      id: String(i.id || i.memory_id || `mem-${Date.now()}-${Math.random()}`),
+      content: String(i.content || i.text || i.message || ''),
+      metadata: (i.metadata as Record<string, unknown>) || {},
+      score: (i.score as number) || (i.similarity as number) || 0,
+      createdAt: i.created_at ? String(i.created_at) : (i.timestamp ? String(i.timestamp) : undefined),
+    };
+  });
 }
 
 /**
@@ -130,7 +135,7 @@ async function searchLocalFiles(
           if (score > 0) {
             results.push({
               id: file.replace('.json', ''),
-              content: extractRelevantContent(data, query),
+              content: extractRelevantContent(data),
               metadata: {
                 source: 'local-file',
                 file: file,
@@ -138,7 +143,7 @@ async function searchLocalFiles(
               score,
             });
           }
-        } catch (fileError) {
+        } catch {
           // Skip files that can't be read
           continue;
         }
@@ -172,11 +177,14 @@ function calculateKeywordScore(query: string, content: string): number {
 /**
  * Extract relevant content from memory data
  */
-function extractRelevantContent(data: any, query: string): string {
+function extractRelevantContent(data: unknown): string {
   if (typeof data === 'string') return data;
-  if (data.content) return data.content;
-  if (data.message) return data.message;
-  if (data.text) return data.text;
+  if (data === null || data === undefined) return '';
+
+  const d = data as Record<string, unknown>;
+  if (d.content) return String(d.content);
+  if (d.message) return String(d.message);
+  if (d.text) return String(d.text);
 
   // Return JSON string with reasonable length
   const str = JSON.stringify(data);

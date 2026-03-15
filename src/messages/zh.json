@@ -497,7 +497,14 @@
     "skillsDescription": "{extensions} 个扩展中的 {count} 个技能",
     "skills": "技能",
     "noSkills": "未找到技能",
-    "noSkillsDesc": "安装 OpenClaw 扩展以启用代理技能"
+    "noSkillsDesc": "安装 OpenClaw 扩展以启用代理技能",
+    "skillSearchPlaceholder": "搜索技能名称、描述、分类...",
+    "status": {
+      "running": "运行中",
+      "idle": "空闲",
+      "offline": "离线",
+      "error": "错误"
+    }
   },
   "channels": {
     "title": "频道",

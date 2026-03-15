@@ -165,7 +165,7 @@ async function calculateSessionUsage(): Promise<SessionUsage> {
 
       try {
         const sessionsContent = await fs.readFile(sessionsJsonPath, 'utf-8');
-        const sessions: Record<string, any> = JSON.parse(sessionsContent);
+        const sessions: Record<string, { sessionFile?: string }> = JSON.parse(sessionsContent);
 
         // Process each session
         for (const session of Object.values(sessions)) {
@@ -177,13 +177,15 @@ async function calculateSessionUsage(): Promise<SessionUsage> {
 
             for (const line of lines) {
               try {
-                const message = JSON.parse(line);
+                const message = JSON.parse(line) as Record<string, unknown>;
 
                 // Only process assistant messages with usage data
-                if (message.message?.role === 'assistant' && message.message.usage) {
-                  const tokenUsage = message.message.usage;
-                  usage.totalTokens += tokenUsage.totalTokens || 0;
-                  usage.totalCost += tokenUsage.cost?.total || 0;
+                const messageData = message.message as Record<string, unknown> | undefined;
+                if (messageData?.role === 'assistant' && messageData.usage) {
+                  const tokenUsage = messageData.usage as Record<string, unknown>;
+                  usage.totalTokens += (tokenUsage.totalTokens as number) || 0;
+                  const cost = tokenUsage.cost as Record<string, unknown> | undefined;
+                  usage.totalCost += (cost?.total as number) || 0;
                   usage.messageCount++;
                 }
               } catch {

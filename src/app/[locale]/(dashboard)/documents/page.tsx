@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -101,7 +101,7 @@ export default function DocumentsPage() {
     return mockContent;
   };
 
-  const handleFileClick = async (node: DocumentNode, event?: React.MouseEvent) => {
+  const handleFileClick = async (node: DocumentNode) => {
     if (node.type === "folder") {
       toggleFolder(node.path);
       return;
@@ -202,7 +202,7 @@ export default function DocumentsPage() {
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
-                handleFileClick(node, e);
+                handleFileClick(node);
               }}
               className="h-7 w-7 p-0"
             >

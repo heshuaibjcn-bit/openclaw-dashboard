@@ -6,6 +6,20 @@ import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
+interface PendingItem {
+  id: string;
+  title: string;
+  status: string;
+  [key: string]: unknown;
+}
+
+interface Risk {
+  id: string;
+  description: string;
+  severity: string;
+  [key: string]: unknown;
+}
+
 export async function GET() {
   try {
     // Get system metrics
@@ -15,8 +29,8 @@ export async function GET() {
     const agentStatuses = await getAgentStatuses();
 
     // Get pending items and risks (if workspace state exists)
-    let pendingItems: any[] = [];
-    let risks: any[] = [];
+    let pendingItems: PendingItem[] = [];
+    let risks: Risk[] = [];
 
     try {
       const workspaceStatePath = path.join(process.env.HOME || '', '.openclaw', 'workspace', '.openclaw', 'workspace-state.json');
@@ -183,20 +197,40 @@ async function getDiskInfo(): Promise<{ used: number; total: number; percentage:
   }
 }
 
-async function getAgentStatuses() {
+interface AgentStatus {
+  id: string;
+  name: string;
+  status: string;
+  lastActivity: string | null;
+  uptime: number;
+  sessionCount: number;
+  currentTask: string | null;
+  error?: string;
+}
+
+async function getAgentStatuses(): Promise<Record<string, AgentStatus>> {
   try {
+    // Check if OpenClaw Gateway is running
+    let gatewayRunning = false;
+    try {
+      const { stdout } = await execAsync('pgrep -f "openclaw-gateway"');
+      gatewayRunning = stdout.trim().length > 0;
+    } catch {
+      gatewayRunning = false;
+    }
+
     const agentsPath = path.join(process.env.HOME || '', '.openclaw', 'agents');
     const agentDirs = await fs.readdir(agentsPath);
     const validAgentDirs = agentDirs.filter(dir => !dir.startsWith('.'));
 
-    const statuses: Record<string, any> = {};
+    const statuses: Record<string, AgentStatus> = {};
 
     for (const agentId of validAgentDirs) {
       try {
         // Get session info
         const sessionsPath = path.join(agentsPath, agentId, 'sessions', 'sessions.json');
         const sessionsContent = await fs.readFile(sessionsPath, 'utf-8');
-        const sessions = JSON.parse(sessionsContent);
+        const sessions = JSON.parse(sessionsContent) as Record<string, { updatedAt?: number }>;
         const sessionKeys = Object.keys(sessions);
 
         if (sessionKeys.length > 0) {
@@ -212,10 +246,18 @@ async function getAgentStatuses() {
           const now = Date.now();
           const hourAgo = now - 60 * 60 * 1000;
 
+          // Determine status based on gateway running state and recent activity
+          let status: string;
+          if (gatewayRunning) {
+            status = lastActivity > hourAgo ? 'working' : 'standby';
+          } else {
+            status = 'offline';
+          }
+
           statuses[agentId] = {
             id: agentId,
             name: agentId === 'main' ? 'Main' : agentId,
-            status: lastActivity > hourAgo ? 'working' : 'standby',
+            status,
             lastActivity: new Date(lastActivity).toISOString(),
             uptime: now - lastActivity,
             sessionCount: sessionKeys.length,
@@ -238,6 +280,10 @@ async function getAgentStatuses() {
           id: agentId,
           name: agentId,
           status: 'error',
+          lastActivity: null,
+          uptime: 0,
+          sessionCount: 0,
+          currentTask: null,
           error: 'Failed to get status',
         };
       }

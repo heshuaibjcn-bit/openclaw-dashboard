@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -50,7 +50,6 @@ export default function ChannelsPage() {
   const tCommon = useTranslations('common');
   const { data: channels, loading, refetch } = useChannels();
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
-  const locale = useLocale();
 
   const channelNames = {
     imessage: t('imessage'),

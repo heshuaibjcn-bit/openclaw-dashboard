@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { Readable } from 'stream';
+import type { LogEntry } from '@/lib/openclaw/types';
 
 // OpenClaw Gateway configuration
 const GATEWAY_URL = process.env.OPENCLAW_GATEWAY_URL || 'http://127.0.0.1:18789';
@@ -36,13 +36,13 @@ export async function GET(
           agentId,
         });
       }
-    } catch (gatewayError) {
-      console.warn('Gateway unavailable, using local fallback:', gatewayError);
+    } catch {
+      console.warn('Gateway unavailable, using local fallback');
     }
 
     // Fallback: Read from local log files
     const agentPath = path.join(process.env.HOME || '', '.openclaw', 'agents', agentId);
-    const logs: any[] = [];
+    const logs: Array<LogEntry & Record<string, unknown>> = [];
 
     try {
       // Try to find log files in common locations
@@ -64,16 +64,18 @@ export async function GET(
             try {
               const logEntry = JSON.parse(line);
               logs.push({
-                timestamp: logEntry.timestamp || logEntry.time || new Date().toISOString(),
-                level: logEntry.level || logEntry.severity || 'info',
+                id: `log-${logs.length}`,
+                timestamp: new Date(logEntry.timestamp || logEntry.time || new Date().toISOString()),
+                level: (logEntry.level || logEntry.severity || 'info') as "debug" | "info" | "warn" | "error",
                 message: logEntry.message || logEntry.msg || line,
                 ...logEntry,
               });
             } catch {
               // Not JSON, treat as plain text
               logs.push({
-                timestamp: new Date().toISOString(),
-                level: 'info',
+                id: `log-${logs.length}`,
+                timestamp: new Date(),
+                level: 'info' as "debug" | "info" | "warn" | "error",
                 message: line,
               });
             }
@@ -113,7 +115,7 @@ export async function GET(
         agentId,
         count: logs.length,
       });
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         {
           logs: [],
@@ -124,8 +126,8 @@ export async function GET(
         { status: 200 }
       );
     }
-  } catch (error) {
-    console.error('Error getting agent logs:', error);
+  } catch {
+    console.error('Error getting agent logs');
     return NextResponse.json(
       { error: 'Failed to get agent logs' },
       { status: 500 }

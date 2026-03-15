@@ -1,6 +1,25 @@
 import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
+
+interface SessionEntry {
+  updatedAt?: string | number;
+  [key: string]: unknown;
+}
+
+// Check if OpenClaw Gateway is running
+async function isGatewayRunning(): Promise<boolean> {
+  try {
+    const { stdout } = await execAsync('pgrep -f "openclaw-gateway"');
+    return stdout.trim().length > 0;
+  } catch {
+    return false;
+  }
+}
 
 interface OpenClawConfig {
   agents?: {
@@ -31,6 +50,9 @@ export async function GET() {
     const agentsPath = path.join(process.env.HOME || '', '.openclaw', 'agents');
     const agentDirs = await fs.readdir(agentsPath);
     const validAgentDirs = agentDirs.filter(dir => !dir.startsWith('.'));
+
+    // Check if OpenClaw Gateway is running
+    const gatewayRunning = await isGatewayRunning();
 
     // Read OpenClaw config for default model
     let defaultModel: string | undefined;
@@ -77,36 +99,41 @@ export async function GET() {
         const sessionsPath = path.join(agentsPath, agentId, 'sessions', 'sessions.json');
         let totalSessions = 0;
         let recentActivity = new Date().toISOString();
-        let activeSession: any = null;
-        let lastMessageTime = recentActivity;
+        let activeSession: SessionEntry | null = null;
 
         try {
           const sessionsContent = await fs.readFile(sessionsPath, 'utf-8');
-          const sessions: Record<string, any> = JSON.parse(sessionsContent);
+          const sessions: Record<string, SessionEntry> = JSON.parse(sessionsContent);
           const sessionKeys = Object.keys(sessions);
           totalSessions = sessionKeys.length;
 
           if (sessionKeys.length > 0) {
             // Sort by updatedAt descending
             sessionKeys.sort((a, b) => {
-              const aTime = sessions[a].updatedAt || 0;
-              const bTime = sessions[b].updatedAt || 0;
+              const aTime = (sessions[a].updatedAt || 0) as number;
+              const bTime = (sessions[b].updatedAt || 0) as number;
               return bTime - aTime;
             });
 
             activeSession = sessions[sessionKeys[0]];
             const latestTime = activeSession.updatedAt || 0;
             recentActivity = new Date(latestTime).toISOString();
-            lastMessageTime = recentActivity;
           }
         } catch (sessionError) {
           console.warn(`Failed to read sessions for ${agentId}:`, sessionError);
         }
 
-        // Determine agent status based on recent activity
+        // Determine agent status based on gateway running state and recent activity
         const lastActivityTime = new Date(recentActivity).getTime();
         const oneHourAgo = Date.now() - 60 * 60 * 1000;
-        const status = lastActivityTime > oneHourAgo ? 'active' : 'inactive';
+        let status: string;
+        if (gatewayRunning) {
+          // Gateway is running: check if agent has recent activity
+          status = lastActivityTime > oneHourAgo ? 'active' : 'idle';
+        } else {
+          // Gateway is not running: agent is offline
+          status = 'offline';
+        }
 
         return {
           id: agentId,

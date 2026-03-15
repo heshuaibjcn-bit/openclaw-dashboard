@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,11 +19,9 @@ import {
   X,
   Download,
   ExternalLink,
-  Calendar,
   HardDrive,
   Clock,
 } from "lucide-react";
-import { useTranslations } from 'next-intl';
 
 interface DocumentPreviewProps {
   open: boolean;
@@ -44,10 +42,39 @@ export function DocumentPreview({
   document,
   content = "",
 }: DocumentPreviewProps) {
-  const tCommon = useTranslations('common');
-  const [previewContent, setPreviewContent] = useState(content);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Helper functions
+  const getFileExtension = (filename: string) => {
+    const parts = filename.split('.');
+    return parts.length > 1 ? parts[parts.length - 1] : '';
+  };
+
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return "Unknown";
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "Unknown";
+    try {
+      return new Date(dateString).toLocaleString();
+    } catch {
+      return dateString;
+    }
+  };
+
+  // Calculate preview content using useMemo
+  const previewContent = useMemo(() => {
+    if (open && document && !content) {
+      // Generate placeholder content
+      const placeholderContent = `// ${document.name}\n// File path: ${document.path}\n// Size: ${formatFileSize(document.size || 0)}\n// Modified: ${formatDate(document.modified || '')}\n\n${getFileExtension(document.name).toUpperCase()} file content preview...\n\n[Note: This is a placeholder. Implement actual file reading in production.]`;
+      return placeholderContent;
+    }
+    return content;
+  }, [open, document, content]);
 
   const getFileIcon = () => {
     if (!document) return <FileText className="h-5 w-5" />;
@@ -74,22 +101,6 @@ export function DocumentPreview({
     return "text";
   };
 
-  const formatFileSize = (bytes?: number) => {
-    if (!bytes) return "Unknown";
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "Unknown";
-    try {
-      return new Date(dateString).toLocaleString();
-    } catch {
-      return dateString;
-    }
-  };
-
   const renderPreview = () => {
     if (error) {
       return (
@@ -110,6 +121,7 @@ export function DocumentPreview({
     if (fileType === "image" && previewContent) {
       return (
         <div className="flex items-center justify-center h-full">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`data:image/${getFileExtension(document.name)};base64,${previewContent}`}
             alt={document.name}
@@ -137,11 +149,6 @@ export function DocumentPreview({
     );
   };
 
-  const getFileExtension = (filename: string) => {
-    const ext = filename.split(".").pop();
-    return ext || "txt";
-  };
-
   const handleDownload = () => {
     if (!previewContent) return;
 
@@ -162,19 +169,6 @@ export function DocumentPreview({
     const vscodeUrl = `vscode://file/${document.path}`;
     window.open(vscodeUrl, "_blank");
   };
-
-  useEffect(() => {
-    if (open && document && !content) {
-      // Load content when dialog opens
-      setPreviewContent("");
-      setError(null);
-
-      // For now, use placeholder content
-      // In production, you would fetch the actual file content
-      const placeholderContent = `// ${document.name}\n// File path: ${document.path}\n// Size: ${formatFileSize(document.size)}\n// Modified: ${formatDate(document.modified)}\n\n${getFileExtension(document.name).toUpperCase()} file content preview...\n\n[Note: This is a placeholder. Implement actual file reading in production.]`;
-      setPreviewContent(placeholderContent);
-    }
-  }, [open, document, content]);
 
   if (!document) return null;
 
@@ -228,13 +222,7 @@ export function DocumentPreview({
         </div>
 
         <ScrollArea className="flex-1 px-6">
-          {loading ? (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-muted-foreground">Loading preview...</p>
-            </div>
-          ) : (
-            renderPreview()
-          )}
+          {renderPreview()}
         </ScrollArea>
       </DialogContent>
     </Dialog>

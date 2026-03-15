@@ -68,7 +68,7 @@ describe('React Hooks', () => {
     });
 
     it('sets loading to true during search', async () => {
-      let resolveSearch: (value: any[]) => void;
+      let resolveSearch: (value: Array<{ id: string; content: string; score: number }>) => void;
       const searchPromise = new Promise((resolve) => {
         resolveSearch = resolve;
       });

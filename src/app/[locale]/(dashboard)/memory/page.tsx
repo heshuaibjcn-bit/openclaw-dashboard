@@ -26,7 +26,6 @@ import {
   Save,
   X,
   Brain,
-  Calendar,
   Bot,
   Home,
   MessageSquare,
@@ -39,7 +38,7 @@ export default function MemoryPage() {
   const t = useTranslations('memory');
   const tCommon = useTranslations('common');
   const locale = useLocale();
-  const { data: searchResults, loading: searchLoading, search } = useMemorySearch();
+  const { loading: searchLoading, search } = useMemorySearch();
   const { data: memories, loading: memoriesLoading, refetch, total, hasMore } = useMemoryList({ limit: 100 });
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAgent, setSelectedAgent] = useState<string>("all");

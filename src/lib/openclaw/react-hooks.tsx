@@ -3,7 +3,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getAPIClient, type OpenClawAPIClient, OpenClawAPIError } from "./api-client";
+import { getAPIClient } from "./api-client";
 import type {
   GatewayHealth,
   Agent,
@@ -12,6 +12,84 @@ import type {
   LogEntry,
   MemoryEntry,
 } from "./types";
+
+// Type definitions for API responses
+interface SkillItem {
+  id: string;
+  name: string;
+  description?: string;
+  extension: string;
+  category?: string;
+  tags?: string[];
+  tools?: string[];
+  [key: string]: unknown;
+}
+
+interface UsageData {
+  today: { tokens: number; cost: number };
+  last7days: { tokens: number; cost: number };
+  last30days: { tokens: number; cost: number };
+  attribution?: Array<{
+    id: string;
+    name: string;
+    type: "task" | "agent" | "project";
+    tokens: number;
+    cost: number;
+    percentage: number;
+  }>;
+  [key: string]: unknown;
+}
+
+interface SubscriptionData {
+  quota?: {
+    limit: number;
+    used: number;
+    remaining: number;
+    window: string;
+    resetAt: string;
+  };
+  [key: string]: unknown;
+}
+
+interface RuntimeData {
+  agentStatuses: Record<string, {
+    status: 'working' | 'standby' | 'offline';
+    currentTask?: {
+      taskId: string;
+      title: string;
+      progress: number;
+      startedAt: string;
+    };
+    nextTask?: {
+      taskId: string;
+      title: string;
+      scheduledAt: string;
+    };
+    recentOutput?: {
+      count: number;
+      lastActivity: string;
+    };
+    uptime?: number;
+  }>;
+  pendingItems?: Array<{
+    id: string;
+    type: 'approval' | 'exception' | 'alert';
+    title: string;
+    description?: string;
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    timestamp: string;
+    source?: string;
+  }>;
+  risks?: Array<{
+    id: string;
+    type: 'budget' | 'stalled' | 'system';
+    title: string;
+    description: string;
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    affected?: string[];
+  }>;
+  [key: string]: unknown;
+}
 
 export function useGatewayHealth(options?: { enabled?: boolean; interval?: number }) {
   const { enabled = true, interval = 30000 } = options || {};
@@ -163,7 +241,7 @@ export function useLogs(options: { level?: string; limit?: number } = {}) {
     } finally {
       setLoading(false);
     }
-  }, [JSON.stringify(options)]);
+  }, [options]);
 
   useEffect(() => {
     fetchLogs();
@@ -238,7 +316,7 @@ export function useMemoryList(options?: { limit?: number; offset?: number; enabl
 }
 
 export function useSkills() {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<SkillItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [extensions, setExtensions] = useState<string[]>([]);
@@ -248,7 +326,8 @@ export function useSkills() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/skills');
+      // Add timestamp to prevent caching
+      const response = await fetch(`/api/skills?_t=${Date.now()}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch skills: ${response.statusText}`);
       }
@@ -271,7 +350,7 @@ export function useSkills() {
 }
 
 export function useTasks(params?: { limit?: number; offset?: number }) {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -289,7 +368,7 @@ export function useTasks(params?: { limit?: number; offset?: number }) {
     } finally {
       setLoading(false);
     }
-  }, [JSON.stringify(params)]);
+  }, [params]);
 
   useEffect(() => {
     fetchTasks();
@@ -299,7 +378,7 @@ export function useTasks(params?: { limit?: number; offset?: number }) {
 }
 
 export function useUsage(timeRange: "today" | "7days" | "30days" = "7days") {
-  const [data, setData] = useState<any | null>(null);
+  const [data, setData] = useState<UsageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -309,7 +388,7 @@ export function useUsage(timeRange: "today" | "7days" | "30days" = "7days") {
       setError(null);
       const client = getAPIClient();
       const usage = await client.getUsage({ timeRange });
-      setData(usage);
+      setData(usage as unknown as UsageData);
     } catch (e) {
       setError(e instanceof Error ? e : new Error("Failed to fetch usage"));
     } finally {
@@ -328,7 +407,7 @@ export function useUsage(timeRange: "today" | "7days" | "30days" = "7days") {
 }
 
 export function useSubscription() {
-  const [data, setData] = useState<any | null>(null);
+  const [data, setData] = useState<SubscriptionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -338,7 +417,7 @@ export function useSubscription() {
       setError(null);
       const client = getAPIClient();
       const subscription = await client.getSubscription();
-      setData(subscription);
+      setData(subscription as unknown as SubscriptionData);
     } catch (e) {
       setError(e instanceof Error ? e : new Error("Failed to fetch subscription"));
     } finally {
@@ -357,7 +436,13 @@ export function useSubscription() {
 }
 
 export function useDocuments(agentId?: string) {
-  const [data, setData] = useState<any | null>(null);
+  const [data, setData] = useState<Record<string, Array<{
+    name: string;
+    path: string;
+    type: "file" | "folder";
+    size?: number;
+    modified?: string;
+  }>> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -367,7 +452,13 @@ export function useDocuments(agentId?: string) {
       setError(null);
       const client = getAPIClient();
       const documents = await client.getDocuments(agentId);
-      setData(documents);
+      setData(documents as unknown as Record<string, Array<{
+        name: string;
+        path: string;
+        type: "file" | "folder";
+        size?: number;
+        modified?: string;
+      }>>);
     } catch (e) {
       setError(e instanceof Error ? e : new Error("Failed to fetch documents"));
     } finally {
@@ -383,7 +474,7 @@ export function useDocuments(agentId?: string) {
 }
 
 export function useApprovals(statusFilter?: string) {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -434,7 +525,7 @@ export function useApprovals(statusFilter?: string) {
 }
 
 export function useRuntimeData() {
-  const [data, setData] = useState<any | null>(null);
+  const [data, setData] = useState<RuntimeData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -444,7 +535,7 @@ export function useRuntimeData() {
       setError(null);
       const client = getAPIClient();
       const runtime = await client.getRuntimeData();
-      setData(runtime);
+      setData(runtime as unknown as RuntimeData);
     } catch (e) {
       setError(e instanceof Error ? e : new Error("Failed to fetch runtime data"));
     } finally {

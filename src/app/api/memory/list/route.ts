@@ -190,7 +190,6 @@ function extractMemoriesFromText(
   timestamp: string
 ): MemoryEntry[] {
   const memories: MemoryEntry[] = [];
-  const lowerText = text.toLowerCase();
 
   // Pattern 1: User preferences (preferences, settings, config)
   const preferencePatterns = [

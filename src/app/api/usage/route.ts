@@ -23,17 +23,11 @@ interface SessionMessage {
   message?: {
     usage?: TokenUsage;
     role?: string;
-    content?: any[];
+    content?: Array<Record<string, unknown>>;
   };
 }
 
 interface SessionInfo {
-  sessionId: string;
-  updatedAt: number;
-  sessionFile: string;
-}
-
-interface AgentSession {
   sessionId: string;
   updatedAt: number;
   sessionFile: string;
@@ -119,8 +113,9 @@ async function collectUsageStats(startTime: number): Promise<UsageStats> {
           if (!session.sessionFile || session.updatedAt < startTime) continue;
 
           await processSessionFile(session.sessionFile, startTime, agentId, stats);
+          void sessionKey; // Mark as used
         }
-      } catch (error) {
+      } catch {
         // Agent might not have sessions or error reading
         continue;
       }
@@ -179,12 +174,12 @@ async function processSessionFile(
           agentDateStats.messages++;
           agentDateMap.set(dateKey, agentDateStats);
         }
-      } catch (parseError) {
+      } catch {
         // Skip invalid JSON lines
         continue;
       }
     }
-  } catch (error) {
+  } catch {
     // Skip files that can't be read
   }
 }

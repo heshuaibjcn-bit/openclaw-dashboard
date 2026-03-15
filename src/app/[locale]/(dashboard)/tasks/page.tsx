@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState } from "react";
 import { useTranslations, useLocale } from 'next-intl';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,16 +32,12 @@ import {
   Pause,
   Search,
   Plus,
-  Filter,
   Calendar,
   User,
   Tag,
   ArrowUpDown,
   RefreshCw,
-  X,
   Edit,
-  Trash2,
-  ExternalLink,
 } from "lucide-react";
 import { useTasks } from "@/lib/openclaw";
 
@@ -73,10 +69,9 @@ export default function TasksPage() {
   const tCommon = useTranslations('common');
   const tSeverity = useTranslations('severity');
   const locale = useLocale();
-  const isZh = locale === 'zh';
 
   // Use real API for tasks data
-  const { data: apiTasks, loading, error, refetch } = useTasks();
+  const { data: apiTasks, loading, refetch } = useTasks();
 
   const tasks = apiTasks || [];
   const [searchQuery, setSearchQuery] = useState("");
@@ -159,44 +154,47 @@ export default function TasksPage() {
   };
 
   const filteredTasks = tasks
-    .filter(task => {
-      if (searchQuery && !task.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-          !task.description?.toLowerCase().includes(searchQuery.toLowerCase()) &&
-          !task.tags?.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase()))) {
+    .filter((task) => {
+      const t = task as Task;
+      if (searchQuery && !t.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          !t.description?.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          !t.tags?.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase()))) {
         return false;
       }
-      if (taskTypeFilter !== "all" && task.taskType !== taskTypeFilter) {
+      if (taskTypeFilter !== "all" && t.taskType !== taskTypeFilter) {
         return false;
       }
-      if (statusFilter !== "all" && task.status !== statusFilter) {
+      if (statusFilter !== "all" && t.status !== statusFilter) {
         return false;
       }
-      if (priorityFilter !== "all" && task.priority !== priorityFilter) {
+      if (priorityFilter !== "all" && t.priority !== priorityFilter) {
         return false;
       }
       return true;
     })
     .sort((a, b) => {
+      const taskA = a as Task;
+      const taskB = b as Task;
       switch (sortBy) {
         case "updated":
-          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+          return new Date(taskB.updatedAt).getTime() - new Date(taskA.updatedAt).getTime();
         case "created":
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return new Date(taskB.createdAt).getTime() - new Date(taskA.createdAt).getTime();
         case "priority":
-          return getPriorityOrder(a.priority) - getPriorityOrder(b.priority);
+          return getPriorityOrder(taskA.priority as "low" | "medium" | "high" | "critical") - getPriorityOrder(taskB.priority as "low" | "medium" | "high" | "critical");
         case "due":
-          if (!a.dueDate) return 1;
-          if (!b.dueDate) return -1;
-          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+          if (!taskA.dueDate) return 1;
+          if (!taskB.dueDate) return -1;
+          return new Date(taskA.dueDate as string || '').getTime() - new Date(taskB.dueDate as string || '').getTime();
       }
     });
 
   const stats = {
     total: tasks.length,
-    pending: tasks.filter(t => t.status === "pending").length,
-    inProgress: tasks.filter(t => t.status === "in-progress").length,
-    completed: tasks.filter(t => t.status === "completed").length,
-    blocked: tasks.filter(t => t.status === "blocked").length,
+    pending: tasks.filter(t => (t as Task).status === "pending").length,
+    inProgress: tasks.filter(t => (t as Task).status === "in-progress").length,
+    completed: tasks.filter(t => (t as Task).status === "completed").length,
+    blocked: tasks.filter(t => (t as Task).status === "blocked").length,
   };
 
   const formatDate = (dateStr: string) => {
@@ -221,15 +219,6 @@ export default function TasksPage() {
   const handleCloseDetailDialog = () => {
     setIsDetailDialogOpen(false);
     setSelectedTask(null);
-  };
-
-  const getOriginalTaskData = (task: Task) => {
-    // Try to get original task data from task.json for project tasks
-    if (task.taskType === 'project') {
-      // For now, return the task as-is since we don't have the full acceptance criteria
-      return task;
-    }
-    return task;
   };
 
   return (
@@ -274,7 +263,7 @@ export default function TasksPage() {
             <CheckSquare className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{tasks.filter(t => t.taskType === 'project').length}</div>
+            <div className="text-2xl font-bold">{tasks.filter(t => (t as Task).taskType === 'project').length}</div>
             <p className="text-xs text-muted-foreground mt-1">
               来自 task.json
             </p>
@@ -287,7 +276,7 @@ export default function TasksPage() {
             <Clock className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{tasks.filter(t => t.taskType === 'cron').length}</div>
+            <div className="text-2xl font-bold">{tasks.filter(t => (t as Task).taskType === 'cron').length}</div>
             <p className="text-xs text-muted-foreground mt-1">
               定时任务
             </p>
@@ -440,86 +429,88 @@ export default function TasksPage() {
             </CardContent>
           </Card>
         ) : (
-          filteredTasks.map((task) => (
-            <Card
-              key={task.id}
-              className={`hover:shadow-md transition-shadow ${
-                task.taskType === 'cron' ? 'border-orange-200 bg-orange-50/30 dark:border-orange-900 dark:bg-orange-950/20' : ''
-              }`}
-            >
+          filteredTasks.map((task) => {
+            const t = task as Task;
+            return (
+              <Card
+                key={t.id}
+                className={`hover:shadow-md transition-shadow ${
+                  t.taskType === 'cron' ? 'border-orange-200 bg-orange-50/30 dark:border-orange-900 dark:bg-orange-950/20' : ''
+                }`}
+              >
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 space-y-2">
                     <div className="flex items-start gap-2">
-                      {getStatusIcon(task.status)}
+                      {getStatusIcon(t.status as Task["status"])}
                       <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-semibold">{task.title}</h3>
-                          {task.taskType === 'cron' && (
+                          <h3 className="font-semibold">{t.title}</h3>
+                          {t.taskType === 'cron' && (
                             <Badge variant="outline" className="text-xs bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900 dark:text-orange-300 dark:border-orange-700">
                               ⏰ 定时
                             </Badge>
                           )}
-                          {getStatusBadge(task.status)}
-                          {getPriorityBadge(task.priority)}
+                          {getStatusBadge(t.status as Task["status"])}
+                          {getPriorityBadge(t.priority as "low" | "medium" | "high" | "critical")}
                         </div>
-                        {task.description && (
-                          <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
+                        {t.description && (
+                          <p className="text-sm text-muted-foreground mt-1">{t.description}</p>
                         )}
                       </div>
                     </div>
 
                     <div className="flex items-center gap-4 flex-wrap text-sm text-muted-foreground">
-                      {task.taskType === 'cron' && (
+                      {t.taskType === 'cron' && (
                         <>
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3 text-orange-500" />
-                            <span className="font-mono text-xs">{task.schedule}</span>
+                            <span className="font-mono text-xs">{t.schedule}</span>
                           </div>
-                          {task.cronExpression && (
+                          {t.cronExpression && (
                             <div className="flex items-center gap-1">
                               <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded dark:bg-orange-900 dark:text-orange-300">
-                                {task.cronExpression}
+                                {t.cronExpression}
                               </span>
-                              {task.timezone && (
+                              {t.timezone && (
                                 <span className="text-xs text-muted-foreground">
-                                  ({task.timezone})
+                                  ({t.timezone})
                                 </span>
                               )}
                             </div>
                           )}
-                          {task.enabled !== undefined && (
+                          {t.enabled !== undefined && (
                             <div className="flex items-center gap-1">
-                              <span className={`text-xs px-2 py-0.5 rounded ${task.enabled ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'}`}>
-                                {task.enabled ? '已启用' : '已禁用'}
+                              <span className={`text-xs px-2 py-0.5 rounded ${t.enabled ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'}`}>
+                                {t.enabled ? '已启用' : '已禁用'}
                               </span>
                             </div>
                           )}
                         </>
                       )}
-                      {task.taskType === 'project' && task.projectTitle && (
+                      {t.taskType === 'project' && (t.projectTitle as string | undefined) && (
                         <div className="flex items-center gap-1">
                           <Tag className="h-3 w-3" />
-                          <span>{task.projectTitle}</span>
+                          <span>{t.projectTitle as string}</span>
                         </div>
                       )}
-                      {task.assigneeName && (
+                      {(t.assigneeName as string | undefined) && (
                         <div className="flex items-center gap-1">
                           <User className="h-3 w-3" />
-                          <span>{task.assigneeName}</span>
+                          <span>{t.assigneeName as string}</span>
                         </div>
                       )}
-                      {task.dueDate && (
+                      {(t.dueDate as string | undefined) && (
                         <div className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
-                          <span>{formatDate(task.dueDate)}</span>
+                          <span>{formatDate(t.dueDate as string)}</span>
                         </div>
                       )}
                     </div>
 
-                    {task.tags && task.tags.length > 0 && (
+                    {t.tags && t.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1">
-                        {task.tags.map((tag: string) => (
+                        {t.tags.map((tag: string) => (
                           <Badge key={tag} variant="outline" className="text-xs">
                             {getTagName(tag)}
                           </Badge>
@@ -527,26 +518,27 @@ export default function TasksPage() {
                       </div>
                     )}
 
-                    {task.subtaskCount && task.subtaskCount > 0 && (
+                    {t.subtaskCount && t.subtaskCount > 0 && (
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <div className="relative h-1.5 w-24 overflow-hidden rounded-full bg-secondary">
                           <div
                             className="h-full bg-primary transition-all"
-                            style={{ width: `${(task.completedSubtasks || 0) / task.subtaskCount * 100}%` }}
+                            style={{ width: `${(t.completedSubtasks || 0) / t.subtaskCount * 100}%` }}
                           />
                         </div>
-                        <span>{task.completedSubtasks || 0} / {task.subtaskCount} subtasks</span>
+                        <span>{t.completedSubtasks || 0} / {t.subtaskCount} subtasks</span>
                       </div>
                     )}
                   </div>
 
-                  <Button variant="ghost" size="sm" onClick={() => handleViewDetails(task)}>
+                  <Button variant="ghost" size="sm" onClick={() => handleViewDetails(t)}>
                     View Details
                   </Button>
                 </div>
               </CardContent>
             </Card>
-          ))
+            );
+          })
         )}
       </div>
 

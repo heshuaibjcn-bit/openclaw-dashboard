@@ -2,12 +2,21 @@ import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 
+interface DocumentItem {
+  name: string;
+  path: string;
+  type: 'folder' | 'file';
+  size?: number;
+  modified?: string;
+  children?: DocumentItem[];
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const agentId = searchParams.get('agent');
 
-    const documents: Record<string, any[]> = {};
+    const documents: Record<string, DocumentItem[]> = {};
 
     // Main documents
     const mainDocs = await getDocumentsFromDir('~/.openclaw');
@@ -34,17 +43,17 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json(documents);
-  } catch (error) {
+  } catch {
     return NextResponse.json({}, { status: 500 });
   }
 }
 
-async function getDocumentsFromDir(dirPath: string): Promise<any[]> {
+async function getDocumentsFromDir(dirPath: string): Promise<DocumentItem[]> {
   try {
     const resolvedPath = dirPath.replace('~', process.env.HOME || '');
     const entries = await fs.readdir(resolvedPath, { withFileTypes: true });
 
-    const result: any[] = [];
+    const result: DocumentItem[] = [];
 
     for (const entry of entries) {
       if (entry.name.startsWith('.')) continue;

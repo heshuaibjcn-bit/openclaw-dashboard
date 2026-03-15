@@ -497,7 +497,14 @@
     "skillsDescription": "{count} skills from {extensions} extensions",
     "skills": "skills",
     "noSkills": "No skills found",
-    "noSkillsDesc": "Install OpenClaw extensions to enable agent skills"
+    "noSkillsDesc": "Install OpenClaw extensions to enable agent skills",
+    "skillSearchPlaceholder": "Search skills by name, description, category...",
+    "status": {
+      "running": "Running",
+      "idle": "Idle",
+      "offline": "Offline",
+      "error": "Error"
+    }
   },
   "channels": {
     "title": "Channels",

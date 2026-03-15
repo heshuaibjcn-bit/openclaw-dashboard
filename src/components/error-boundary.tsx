@@ -4,7 +4,6 @@ import * as React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { AlertCircle, RefreshCw, ArrowLeft, Bug } from "lucide-react"
-import { useTranslations } from 'next-intl'
 
 interface ErrorBoundaryProps {
   children: React.ReactNode
@@ -72,7 +71,6 @@ interface ErrorFallbackProps {
 }
 
 function ErrorFallback({ error, errorInfo, onRetry, onGoBack }: ErrorFallbackProps) {
-  const t = useTranslations('common');
   const [showDetails, setShowDetails] = React.useState(false);
 
   return (
