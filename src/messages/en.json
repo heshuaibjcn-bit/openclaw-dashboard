@@ -485,6 +485,7 @@
     "noAgentsConfigured": "No agents configured",
     "createYourFirstAgent": "Create Your First Agent",
     "editAgent": "Edit Agent",
+    "view": "View",
     "createAgent": "Create Agent",
     "editAgentDesc": "Update agent configuration",
     "createAgentDesc": "Configure a new AI agent",

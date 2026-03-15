@@ -106,6 +106,7 @@ export default function AgentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [skillSearchQuery, setSkillSearchQuery] = useState("");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [editingAgent, setEditingAgent] = useState({
     name: "",
@@ -165,6 +166,11 @@ export default function AgentsPage() {
       capabilities: [...agent.capabilities],
     });
     setEditDialogOpen(true);
+  };
+
+  const handleView = (agent: Agent) => {
+    setSelectedAgent(agent);
+    setViewDialogOpen(true);
   };
 
   const handleSave = () => {
@@ -363,17 +369,6 @@ export default function AgentsPage() {
                   <Badge variant="default" className="text-sm">
                     {modelConfig.primaryModel}
                   </Badge>
-                </div>
-
-                {/* Disaster Recovery Flowchart */}
-                <div className="mt-4 p-4 border rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-                  <div className="flex items-center gap-2 text-sm font-medium mb-4">
-                    <Shield className="h-4 w-4 text-purple-500" />
-                    Disaster Recovery Flow
-                  </div>
-                  <div className="flex flex-col items-center">
-                    {renderFlowchart(modelConfig)}
-                  </div>
                 </div>
 
                 {modelConfig.fallbackModels.length > 0 || modelConfig.suggestedFallbacks.recommended.length > 0 ? (
@@ -768,6 +763,14 @@ export default function AgentsPage() {
                         variant="outline"
                         size="sm"
                         className="flex-1"
+                        onClick={() => handleView(agent)}
+                      >
+                        {t('view')}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
                         onClick={() => handleEdit(agent)}
                       >
                         <Edit className="mr-1 h-3 w-3" />
@@ -882,6 +885,153 @@ export default function AgentsPage() {
             </Button>
             <Button onClick={handleSave}>
               {selectedAgent ? t('saveChanges') : t('createAgent')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Agent Dialog */}
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bot className="h-5 w-5" />
+              {selectedAgent?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Agent details and disaster recovery configuration
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedAgent && (
+            <div className="space-y-6">
+              {/* Agent Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground text-xs">Model</Label>
+                  <p className="text-sm font-medium">{selectedAgent.model}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground text-xs">Status</Label>
+                  <Badge variant={
+                    selectedAgent.status === "active" ? "default" :
+                    selectedAgent.status === "inactive" ? "secondary" : "destructive"
+                  }>
+                    {selectedAgent.status}
+                  </Badge>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground text-xs">Created</Label>
+                  <p className="text-sm font-medium">
+                    {new Date(selectedAgent.createdAt).toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground text-xs">Capabilities</Label>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {selectedAgent.capabilities.map((cap) => (
+                      <Badge key={cap} variant="outline" className="text-xs">
+                        {cap}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Disaster Recovery Configuration */}
+              {modelConfig && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-purple-500" />
+                    Model Disaster Recovery
+                  </h3>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      Primary Model
+                    </div>
+                    <div className="pl-6">
+                      <Badge variant="default" className="text-sm">
+                        {modelConfig.primaryModel}
+                      </Badge>
+                    </div>
+
+                    {/* Disaster Recovery Flowchart */}
+                    <div className="mt-4 p-4 border rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+                      <div className="flex items-center gap-2 text-sm font-medium mb-4">
+                        <Shield className="h-4 w-4 text-purple-500" />
+                        Disaster Recovery Flow
+                      </div>
+                      <div className="flex flex-col items-center">
+                        {renderFlowchart(modelConfig)}
+                      </div>
+                    </div>
+
+                    {modelConfig.fallbackModels.length > 0 || modelConfig.suggestedFallbacks.recommended.length > 0 ? (
+                      <>
+                        <div className="flex items-center gap-2 text-sm font-medium">
+                          <Server className="h-4 w-4 text-orange-500" />
+                          Fallback Models
+                        </div>
+
+                        {/* Current Fallbacks */}
+                        {modelConfig.suggestedFallbacks.current.length > 0 && (
+                          <div className="pl-6 space-y-2">
+                            <div className="text-xs text-muted-foreground">Current Configuration:</div>
+                            <div className="flex flex-wrap gap-2">
+                              {modelConfig.suggestedFallbacks.current.map((model, index) => (
+                                <Badge key={model} variant="outline" className="text-xs">
+                                  {index + 1}. {model}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Recommended Fallbacks */}
+                        {modelConfig.suggestedFallbacks.recommended.length > 0 && (
+                          <div className="pl-6 space-y-2">
+                            <div className="text-xs text-muted-foreground">{t('recommendedConfiguration')}:</div>
+                            <div className="flex flex-wrap gap-2">
+                              {modelConfig.suggestedFallbacks.recommended.map((model, index) => {
+                                const isCurrent = modelConfig.suggestedFallbacks.current.includes(model);
+                                return (
+                                  <Badge
+                                    key={model}
+                                    variant={isCurrent ? "default" : "secondary"}
+                                    className="text-xs"
+                                  >
+                                    {index + 1}. {model}
+                                    {!isCurrent && index < modelConfig.suggestedFallbacks.current.length && (
+                                      <span className="ml-1 text-yellow-500">*</span>
+                                    )}
+                                  </Badge>
+                                );
+                              })}
+                            </div>
+                            {modelConfig.suggestedFallbacks.reason && (
+                              <div className="text-xs text-muted-foreground mt-2 p-2 bg-muted rounded">
+                                💡 {modelConfig.suggestedFallbacks.reason}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="text-sm text-muted-foreground pl-6">
+                        No fallback models configured
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button onClick={() => setViewDialogOpen(false)}>
+              {tCommon('close')}
             </Button>
           </DialogFooter>
         </DialogContent>

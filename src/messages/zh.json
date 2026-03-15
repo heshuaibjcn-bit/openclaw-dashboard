@@ -485,6 +485,7 @@
     "noAgentsConfigured": "未配置代理",
     "createYourFirstAgent": "创建您的第一个代理",
     "editAgent": "编辑代理",
+    "view": "查看",
     "createAgent": "创建代理",
     "editAgentDesc": "更新代理配置",
     "createAgentDesc": "配置新的 AI 代理",
