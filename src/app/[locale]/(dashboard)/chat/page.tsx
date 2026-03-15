@@ -69,13 +69,6 @@ export default function ChatPage() {
     loadSessions();
   }, []);
 
-  // Load messages when session is selected
-  useEffect(() => {
-    if (selectedSession) {
-      loadMessages(selectedSession);
-    }
-  }, [selectedSession]);
-
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (scrollRef.current) {
@@ -87,6 +80,24 @@ export default function ChatPage() {
       }, 100);
     }
   }, [messages]);
+
+  // Auto-refresh messages periodically for real-time updates
+  useEffect(() => {
+    if (!selectedSession) return;
+
+    // Initial load
+    loadMessages(selectedSession);
+
+    // Set up polling interval
+    const intervalId = setInterval(() => {
+      loadMessages(selectedSession);
+    }, 2000); // Refresh every 2 seconds
+
+    // Cleanup interval on unmount or when session changes
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [selectedSession]);
 
   const loadSessions = async () => {
     try {
@@ -159,13 +170,8 @@ export default function ChatPage() {
 
         setMessages((prev) => [...prev, systemMessage]);
 
-        // Refresh sessions after a delay to get new messages
-        setTimeout(() => {
-          loadSessions();
-          if (selectedSession) {
-            loadMessages(selectedSession);
-          }
-        }, 2000);
+        // Auto-refresh will be handled by the polling interval
+        loadSessions();
       } else {
         // Show error message
         const errorMessage: ChatMessage = {
