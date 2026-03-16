@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +43,22 @@ export default function SettingsPage() {
   const t = useTranslations('settings');
   const tCommon = useTranslations('common');
   const [saved, setSaved] = useState(false);
+
+  // OpenClaw version state
+  const [openclawVersion, setOpenclawVersion] = useState<{
+    localVersion: string | null;
+    latestVersion: string | null;
+    hasUpdate: boolean | null;
+    loading: boolean;
+    error: string | null;
+  }>({
+    localVersion: null,
+    latestVersion: null,
+    hasUpdate: null,
+    loading: true,
+    error: null,
+  });
+
   const [appSettings, setSettings] = useState({
     // Security
     readonlyMode: true,
@@ -80,6 +96,39 @@ export default function SettingsPage() {
     autoRefresh: true,
     refreshInterval: 30000,
   });
+
+  // Load OpenClaw version information
+  useEffect(() => {
+    const loadVersionInfo = async () => {
+      try {
+        setOpenclawVersion(prev => ({ ...prev, loading: true }));
+
+        // Fetch update check
+        const response = await fetch('/api/openclaw/check-update');
+        if (response.ok) {
+          const data = await response.json();
+          setOpenclawVersion({
+            localVersion: data.localVersion,
+            latestVersion: data.latestVersion,
+            hasUpdate: data.hasUpdate,
+            loading: false,
+            error: null,
+          });
+        } else {
+          throw new Error('Failed to fetch version info');
+        }
+      } catch (error) {
+        console.error('Error loading version info:', error);
+        setOpenclawVersion(prev => ({
+          ...prev,
+          loading: false,
+          error: error instanceof Error ? error.message : 'Failed to load version info',
+        }));
+      }
+    };
+
+    loadVersionInfo();
+  }, []);
 
   // Calculate connector status based on security settings
   const connectorStatus = useMemo(() => ({
@@ -242,6 +291,108 @@ export default function SettingsPage() {
                 )}
               </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* OpenClaw Version Info */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Brain className="h-5 w-5" />
+              <CardTitle>{t('openclawVersion')}</CardTitle>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.open('https://github.com/heshuaibjcn-bit/openclaw/releases', '_blank')}
+            >
+              <TrendingUp className="mr-2 h-4 w-4" />
+              {t('viewReleases')}
+            </Button>
+          </div>
+          <CardDescription>
+            {t('openclawVersionDesc')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {openclawVersion.loading ? (
+            <div className="flex items-center justify-center py-4">
+              <RefreshCw className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : openclawVersion.error ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <AlertTriangle className="h-4 w-4" />
+              {openclawVersion.error}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('currentVersion')}</p>
+                  <p className="text-2xl font-bold">{openclawVersion.localVersion || '-'}</p>
+                </div>
+                {openclawVersion.hasUpdate && (
+                  <Badge variant="default" className="bg-green-500 animate-pulse">
+                    {t('updateAvailable')}
+                  </Badge>
+                )}
+              </div>
+
+              {openclawVersion.latestVersion && (
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-muted-foreground">{t('latestVersion')}:</span>
+                  <span className="font-medium">{openclawVersion.latestVersion}</span>
+                </div>
+              )}
+
+              {openclawVersion.hasUpdate && openclawVersion.localVersion && (
+                <div className="rounded-lg border border-yellow-200 bg-yellow-50 dark:border-yellow-900 dark:bg-yellow-900/20 p-4">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-500 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1 space-y-2">
+                      <div>
+                        <h4 className="font-medium text-yellow-900 dark:text-yellow-100">
+                          {t('newVersionAvailable')}
+                        </h4>
+                        <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
+                          {t('updateAvailableMessage', {
+                            current: openclawVersion.localVersion || '-',
+                            latest: openclawVersion.latestVersion || '-',
+                          })}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('https://github.com/heshuaibjcn-bit/openclaw/releases/latest', '_blank')}
+                        >
+                          {t('viewReleaseNotes')}
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => window.open('https://github.com/heshuaibjcn-bit/openclaw#upgrade', '_blank')}
+                        >
+                          <TrendingUp className="mr-2 h-4 w-4" />
+                          {t('upgradeNow')}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {!openclawVersion.hasUpdate && (
+                <div className="rounded-lg border border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-900/20 p-4">
+                  <div className="flex items-center gap-2 text-sm text-green-900 dark:text-green-100">
+                    <CheckCircle className="h-4 w-4" />
+                    {t('upToDate')}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 

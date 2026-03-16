@@ -291,7 +291,18 @@
     "automaticallyRefreshData": "Automatically refresh dashboard data",
     "light": "Light",
     "dark": "Dark",
-    "system": "System"
+    "system": "System",
+    "openclawVersion": "OpenClaw Version",
+    "openclawVersionDesc": "Current OpenClaw installation version and available updates",
+    "currentVersion": "Current Version",
+    "latestVersion": "Latest Version",
+    "updateAvailable": "Update Available",
+    "upToDate": "You're using the latest version of OpenClaw",
+    "newVersionAvailable": "New Version Available",
+    "updateAvailableMessage": "Version {{latest}} is available! You're currently using version {{current}}.",
+    "viewReleases": "View Releases",
+    "viewReleaseNotes": "Release Notes",
+    "upgradeNow": "Upgrade Now"
   },
   "tasks": {
     "title": "Tasks",

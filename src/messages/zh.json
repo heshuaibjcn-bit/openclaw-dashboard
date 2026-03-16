@@ -291,7 +291,18 @@
     "automaticallyRefreshData": "自动刷新仪表板数据",
     "light": "浅色",
     "dark": "深色",
-    "system": "系统"
+    "system": "系统",
+    "openclawVersion": "OpenClaw 版本",
+    "openclawVersionDesc": "当前 OpenClaw 安装版本和可用更新",
+    "currentVersion": "当前版本",
+    "latestVersion": "最新版本",
+    "updateAvailable": "有更新可用",
+    "upToDate": "您正在使用最新版本的 OpenClaw",
+    "newVersionAvailable": "发现新版本",
+    "updateAvailableMessage": "版本 {{latest}} 已发布！您当前使用的是版本 {{current}}。",
+    "viewReleases": "查看发布版本",
+    "viewReleaseNotes": "发布说明",
+    "upgradeNow": "立即升级"
   },
   "tasks": {
     "title": "任务",
