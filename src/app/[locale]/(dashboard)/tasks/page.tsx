@@ -29,7 +29,7 @@ import {
   Circle,
   CheckCircle2,
   XCircle,
-  Pause,
+  Play,
   Search,
   Plus,
   Calendar,
@@ -38,8 +38,21 @@ import {
   ArrowUpDown,
   RefreshCw,
   Edit,
+  Trash2,
+  MoreVertical,
 } from "lucide-react";
 import { useTasks } from "@/lib/openclaw";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 interface Task {
   id: string;
@@ -83,6 +96,36 @@ export default function TasksPage() {
   // Task detail dialog state
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+
+  // Create task dialog state
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [createFormData, setCreateFormData] = useState({
+    title: '',
+    description: '',
+    priority: 'medium' as 'low' | 'medium' | 'high' | 'critical',
+    status: 'pending' as Task['status'],
+    tags: '',
+    dueDate: '',
+    assignedTo: '',
+    acceptanceCriteria: '',
+  });
+
+  // Edit task dialog state
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    title: '',
+    description: '',
+    priority: 'medium' as 'low' | 'medium' | 'high' | 'critical',
+    status: 'pending' as Task['status'],
+    tags: '',
+    dueDate: '',
+    assignedTo: '',
+    acceptanceCriteria: '',
+  });
+
+  // Delete task dialog state
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
 
   // Translate tag codes to display names
   const getTagName = (tag: string): string => {
@@ -211,6 +254,130 @@ export default function TasksPage() {
     return date.toLocaleDateString();
   };
 
+  // Quick status update handler
+  const handleQuickStatusUpdate = async (task: Task, newStatus: Task['status']) => {
+    if (task.taskType === 'cron') {
+      // For cron tasks, toggle enabled status instead
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/tasks', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: task.id,
+          status: newStatus,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update status');
+
+      refetch();
+    } catch (error) {
+      console.error('Error updating task status:', error);
+    }
+  };
+
+  // Create task handlers
+  const handleOpenCreateDialog = () => {
+    setCreateFormData({
+      title: '',
+      description: '',
+      priority: 'medium',
+      status: 'pending',
+      tags: '',
+      dueDate: '',
+      assignedTo: '',
+      acceptanceCriteria: '',
+    });
+    setIsCreateDialogOpen(true);
+  };
+
+  const handleCreateTask = async () => {
+    if (!createFormData.title.trim()) return;
+
+    try {
+      const response = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(createFormData),
+      });
+
+      if (!response.ok) throw new Error('Failed to create task');
+
+      setIsCreateDialogOpen(false);
+      refetch();
+    } catch (error) {
+      console.error('Error creating task:', error);
+    }
+  };
+
+  // Edit task handlers
+  const handleOpenEditDialog = (task: Task) => {
+    setSelectedTask(task);
+    setEditFormData({
+      title: task.title,
+      description: task.description || '',
+      priority: task.priority,
+      status: task.status,
+      tags: task.tags?.join(', ') || '',
+      dueDate: task.dueDate || '',
+      assignedTo: task.assignedTo || '',
+      acceptanceCriteria: '',
+    });
+    setIsEditDialogOpen(true);
+    setIsDetailDialogOpen(false);
+  };
+
+  const handleEditTask = async () => {
+    if (!selectedTask || !editFormData.title.trim()) return;
+
+    try {
+      const response = await fetch('/api/tasks', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: selectedTask.id,
+          ...editFormData,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update task');
+
+      setIsEditDialogOpen(false);
+      setSelectedTask(null);
+      refetch();
+    } catch (error) {
+      console.error('Error updating task:', error);
+    }
+  };
+
+  // Delete task handlers
+  const handleOpenDeleteDialog = (task: Task) => {
+    setTaskToDelete(task);
+    setIsDeleteDialogOpen(true);
+    setIsDetailDialogOpen(false);
+  };
+
+  const handleDeleteTask = async () => {
+    if (!taskToDelete) return;
+
+    try {
+      const response = await fetch(`/api/tasks?id=${taskToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('Failed to delete task');
+
+      setIsDeleteDialogOpen(false);
+      setTaskToDelete(null);
+      refetch();
+    } catch (error) {
+      console.error('Error deleting task:', error);
+    }
+  };
+
   const handleViewDetails = (task: Task) => {
     setSelectedTask(task);
     setIsDetailDialogOpen(true);
@@ -235,7 +402,7 @@ export default function TasksPage() {
             <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             {tCommon('refresh')}
           </Button>
-          <Button>
+          <Button onClick={handleOpenCreateDialog}>
             <Plus className="mr-2 h-4 w-4" />
             {tCommon('create')} {t('title')}
           </Button>
@@ -430,87 +597,87 @@ export default function TasksPage() {
           </Card>
         ) : (
           filteredTasks.map((task) => {
-            const t = task as Task;
+            const taskItem = task as Task;
             return (
               <Card
-                key={t.id}
+                key={taskItem.id}
                 className={`hover:shadow-md transition-shadow ${
-                  t.taskType === 'cron' ? 'border-orange-200 bg-orange-50/30 dark:border-orange-900 dark:bg-orange-950/20' : ''
+                  taskItem.taskType === 'cron' ? 'border-orange-200 bg-orange-50/30 dark:border-orange-900 dark:bg-orange-950/20' : ''
                 }`}
               >
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 space-y-2">
                     <div className="flex items-start gap-2">
-                      {getStatusIcon(t.status as Task["status"])}
+                      {getStatusIcon(taskItem.status as Task["status"])}
                       <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-semibold">{t.title}</h3>
-                          {t.taskType === 'cron' && (
+                          <h3 className="font-semibold">{taskItem.title}</h3>
+                          {taskItem.taskType === 'cron' && (
                             <Badge variant="outline" className="text-xs bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900 dark:text-orange-300 dark:border-orange-700">
                               ⏰ 定时
                             </Badge>
                           )}
-                          {getStatusBadge(t.status as Task["status"])}
-                          {getPriorityBadge(t.priority as "low" | "medium" | "high" | "critical")}
+                          {getStatusBadge(taskItem.status as Task["status"])}
+                          {getPriorityBadge(taskItem.priority as "low" | "medium" | "high" | "critical")}
                         </div>
-                        {t.description && (
-                          <p className="text-sm text-muted-foreground mt-1">{t.description}</p>
+                        {taskItem.description && (
+                          <p className="text-sm text-muted-foreground mt-1">{taskItem.description}</p>
                         )}
                       </div>
                     </div>
 
                     <div className="flex items-center gap-4 flex-wrap text-sm text-muted-foreground">
-                      {t.taskType === 'cron' && (
+                      {taskItem.taskType === 'cron' && (
                         <>
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3 text-orange-500" />
-                            <span className="font-mono text-xs">{t.schedule}</span>
+                            <span className="font-mono text-xs">{taskItem.schedule}</span>
                           </div>
-                          {t.cronExpression && (
+                          {taskItem.cronExpression && (
                             <div className="flex items-center gap-1">
                               <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded dark:bg-orange-900 dark:text-orange-300">
-                                {t.cronExpression}
+                                {taskItem.cronExpression}
                               </span>
-                              {t.timezone && (
+                              {taskItem.timezone && (
                                 <span className="text-xs text-muted-foreground">
-                                  ({t.timezone})
+                                  ({taskItem.timezone})
                                 </span>
                               )}
                             </div>
                           )}
-                          {t.enabled !== undefined && (
+                          {taskItem.enabled !== undefined && (
                             <div className="flex items-center gap-1">
-                              <span className={`text-xs px-2 py-0.5 rounded ${t.enabled ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'}`}>
-                                {t.enabled ? '已启用' : '已禁用'}
+                              <span className={`text-xs px-2 py-0.5 rounded ${taskItem.enabled ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'}`}>
+                                {taskItem.enabled ? '已启用' : '已禁用'}
                               </span>
                             </div>
                           )}
                         </>
                       )}
-                      {t.taskType === 'project' && (t.projectTitle as string | undefined) && (
+                      {taskItem.taskType === 'project' && (taskItem.projectTitle as string | undefined) && (
                         <div className="flex items-center gap-1">
                           <Tag className="h-3 w-3" />
-                          <span>{t.projectTitle as string}</span>
+                          <span>{taskItem.projectTitle as string}</span>
                         </div>
                       )}
-                      {(t.assigneeName as string | undefined) && (
+                      {(taskItem.assigneeName as string | undefined) && (
                         <div className="flex items-center gap-1">
                           <User className="h-3 w-3" />
-                          <span>{t.assigneeName as string}</span>
+                          <span>{taskItem.assigneeName as string}</span>
                         </div>
                       )}
-                      {(t.dueDate as string | undefined) && (
+                      {(taskItem.dueDate as string | undefined) && (
                         <div className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
-                          <span>{formatDate(t.dueDate as string)}</span>
+                          <span>{formatDate(taskItem.dueDate as string)}</span>
                         </div>
                       )}
                     </div>
 
-                    {t.tags && t.tags.length > 0 && (
+                    {taskItem.tags && taskItem.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1">
-                        {t.tags.map((tag: string) => (
+                        {taskItem.tags.map((tag: string) => (
                           <Badge key={tag} variant="outline" className="text-xs">
                             {getTagName(tag)}
                           </Badge>
@@ -518,22 +685,99 @@ export default function TasksPage() {
                       </div>
                     )}
 
-                    {t.subtaskCount && t.subtaskCount > 0 && (
+                    {taskItem.subtaskCount && taskItem.subtaskCount > 0 && (
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <div className="relative h-1.5 w-24 overflow-hidden rounded-full bg-secondary">
                           <div
                             className="h-full bg-primary transition-all"
-                            style={{ width: `${(t.completedSubtasks || 0) / t.subtaskCount * 100}%` }}
+                            style={{ width: `${(taskItem.completedSubtasks || 0) / taskItem.subtaskCount * 100}%` }}
                           />
                         </div>
-                        <span>{t.completedSubtasks || 0} / {t.subtaskCount} subtasks</span>
+                        <span>{taskItem.completedSubtasks || 0} / {taskItem.subtaskCount} subtasks</span>
                       </div>
                     )}
                   </div>
 
-                  <Button variant="ghost" size="sm" onClick={() => handleViewDetails(t)}>
-                    View Details
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    {/* Quick status update buttons for project tasks */}
+                    {taskItem.taskType === 'project' && (
+                      <div className="flex items-center gap-1">
+                        {taskItem.status === 'pending' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleQuickStatusUpdate(taskItem, 'in-progress')}
+                            title="Start task"
+                          >
+                            <Play className="h-4 w-4 text-blue-500" />
+                          </Button>
+                        )}
+                        {taskItem.status === 'in-progress' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleQuickStatusUpdate(taskItem, 'completed')}
+                            title="Complete task"
+                          >
+                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                          </Button>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Action menu */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger className="flex items-center justify-center p-2 hover:bg-accent rounded-md">
+                        <MoreVertical className="h-4 w-4" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>{t('actions.quickUpdate')}</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {taskItem.taskType === 'project' && (
+                          <>
+                            <DropdownMenuGroup>
+                              <DropdownMenuItem onClick={() => handleQuickStatusUpdate(taskItem, 'pending')}>
+                                <Circle className="mr-2 h-4 w-4 text-gray-500" />
+                                {t('actions.markAs')} {t('status.pending')}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleQuickStatusUpdate(taskItem, 'in-progress')}>
+                                <Clock className="mr-2 h-4 w-4 text-blue-500" />
+                                {t('actions.markAs')} {t('status.inProgress')}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleQuickStatusUpdate(taskItem, 'completed')}>
+                                <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+                                {t('actions.markAs')} {t('status.completed')}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleQuickStatusUpdate(taskItem, 'blocked')}>
+                                <AlertTriangle className="mr-2 h-4 w-4 text-red-500" />
+                                {t('actions.markAs')} {t('status.blocked')}
+                              </DropdownMenuItem>
+                            </DropdownMenuGroup>
+                            <DropdownMenuSeparator />
+                          </>
+                        )}
+                        <DropdownMenuItem onClick={() => handleViewDetails(taskItem)}>
+                          <Search className="mr-2 h-4 w-4" />
+                          {tCommon('viewDetails')}
+                        </DropdownMenuItem>
+                        {taskItem.taskType === 'project' && (
+                          <>
+                            <DropdownMenuItem onClick={() => handleOpenEditDialog(taskItem)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              {t('actions.editTask')}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleOpenDeleteDialog(taskItem)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              {t('actions.deleteTask')}
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -664,20 +908,271 @@ export default function TasksPage() {
 
           <DialogFooter>
             <Button variant="outline" onClick={handleCloseDetailDialog}>
-              关闭
+              {tCommon('close')}
             </Button>
             {selectedTask?.taskType === 'project' && (
-              <Button>
-                <Edit className="mr-2 h-4 w-4" />
-                编辑
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => handleOpenEditDialog(selectedTask)}
+                >
+                  <Edit className="mr-2 h-4 w-4" />
+                  {t('actions.editTask')}
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleOpenDeleteDialog(selectedTask)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  {t('actions.deleteTask')}
+                </Button>
+              </>
             )}
-            {selectedTask?.taskType === 'cron' && selectedTask.enabled && (
-              <Button variant="destructive">
-                <Pause className="mr-2 h-4 w-4" />
-                禁用
-              </Button>
-            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Task Dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t('create.title')}</DialogTitle>
+            <DialogDescription>{t('create.description')}</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="create-title">{t('create.titlePlaceholder')} *</Label>
+              <Input
+                id="create-title"
+                value={createFormData.title}
+                onChange={(e) => setCreateFormData({ ...createFormData, title: e.target.value })}
+                placeholder={t('create.titlePlaceholder')}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="create-description">{tCommon('description')}</Label>
+              <Textarea
+                id="create-description"
+                value={createFormData.description}
+                onChange={(e) => setCreateFormData({ ...createFormData, description: e.target.value })}
+                placeholder={t('create.descriptionPlaceholder')}
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="create-priority">{t('create.priority')}</Label>
+                <Select
+                  value={createFormData.priority}
+                  onValueChange={(value) => setCreateFormData({ ...createFormData, priority: value as 'low' | 'medium' | 'high' | 'critical' })}
+                >
+                  <SelectTrigger id="create-priority">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">{t('priority.low')}</SelectItem>
+                    <SelectItem value="medium">{t('priority.medium')}</SelectItem>
+                    <SelectItem value="high">{t('priority.high')}</SelectItem>
+                    <SelectItem value="critical">{t('priority.critical')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="create-status">{t('create.status')}</Label>
+                <Select
+                  value={createFormData.status}
+                  onValueChange={(value) => setCreateFormData({ ...createFormData, status: value as Task['status'] })}
+                >
+                  <SelectTrigger id="create-status">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">{t('status.pending')}</SelectItem>
+                    <SelectItem value="in-progress">{t('status.inProgress')}</SelectItem>
+                    <SelectItem value="completed">{t('status.completed')}</SelectItem>
+                    <SelectItem value="blocked">{t('status.blocked')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="create-tags">{t('create.tags')}</Label>
+              <Input
+                id="create-tags"
+                value={createFormData.tags}
+                onChange={(e) => setCreateFormData({ ...createFormData, tags: e.target.value })}
+                placeholder={t('create.tags')}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="create-dueDate">{t('create.dueDate')}</Label>
+                <Input
+                  id="create-dueDate"
+                  type="date"
+                  value={createFormData.dueDate}
+                  onChange={(e) => setCreateFormData({ ...createFormData, dueDate: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="create-assignee">{t('create.assignee')}</Label>
+                <Input
+                  id="create-assignee"
+                  value={createFormData.assignedTo}
+                  onChange={(e) => setCreateFormData({ ...createFormData, assignedTo: e.target.value })}
+                  placeholder={t('create.assignee')}
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+              {tCommon('cancel')}
+            </Button>
+            <Button onClick={handleCreateTask} disabled={!createFormData.title.trim()}>
+              {t('create.submit')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Task Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t('edit.title')}</DialogTitle>
+            <DialogDescription>{t('edit.description')}</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-title">{t('create.titlePlaceholder')} *</Label>
+              <Input
+                id="edit-title"
+                value={editFormData.title}
+                onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                placeholder={t('create.titlePlaceholder')}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="edit-description">{tCommon('description')}</Label>
+              <Textarea
+                id="edit-description"
+                value={editFormData.description}
+                onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                placeholder={t('create.descriptionPlaceholder')}
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-priority">{t('create.priority')}</Label>
+                <Select
+                  value={editFormData.priority}
+                  onValueChange={(value) => setEditFormData({ ...editFormData, priority: value as 'low' | 'medium' | 'high' | 'critical' })}
+                >
+                  <SelectTrigger id="edit-priority">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">{t('priority.low')}</SelectItem>
+                    <SelectItem value="medium">{t('priority.medium')}</SelectItem>
+                    <SelectItem value="high">{t('priority.high')}</SelectItem>
+                    <SelectItem value="critical">{t('priority.critical')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="edit-status">{t('create.status')}</Label>
+                <Select
+                  value={editFormData.status}
+                  onValueChange={(value) => setEditFormData({ ...editFormData, status: value as Task['status'] })}
+                >
+                  <SelectTrigger id="edit-status">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">{t('status.pending')}</SelectItem>
+                    <SelectItem value="in-progress">{t('status.inProgress')}</SelectItem>
+                    <SelectItem value="completed">{t('status.completed')}</SelectItem>
+                    <SelectItem value="blocked">{t('status.blocked')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="edit-tags">{t('create.tags')}</Label>
+              <Input
+                id="edit-tags"
+                value={editFormData.tags}
+                onChange={(e) => setEditFormData({ ...editFormData, tags: e.target.value })}
+                placeholder={t('create.tags')}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-dueDate">{t('create.dueDate')}</Label>
+                <Input
+                  id="edit-dueDate"
+                  type="date"
+                  value={editFormData.dueDate}
+                  onChange={(e) => setEditFormData({ ...editFormData, dueDate: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="edit-assignee">{t('create.assignee')}</Label>
+                <Input
+                  id="edit-assignee"
+                  value={editFormData.assignedTo}
+                  onChange={(e) => setEditFormData({ ...editFormData, assignedTo: e.target.value })}
+                  placeholder={t('create.assignee')}
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              {tCommon('cancel')}
+            </Button>
+            <Button onClick={handleEditTask} disabled={!editFormData.title.trim()}>
+              {t('edit.submit')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('delete.title')}</DialogTitle>
+            <DialogDescription>
+              {taskToDelete?.title ? `${t('delete.confirm')} "${taskToDelete.title}"?` : t('delete.confirm')}
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              {t('delete.cancel')}
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteTask}>
+              {t('delete.confirmDelete')}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

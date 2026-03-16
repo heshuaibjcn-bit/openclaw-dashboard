@@ -20,6 +20,7 @@ interface TaskItem {
   enabled?: boolean;
 }
 
+// GET endpoint - fetch all tasks
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -154,5 +155,187 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Error in tasks API:', error);
     return NextResponse.json([], { status: 500 });
+  }
+}
+
+// POST endpoint - create a new task
+export async function POST(request: Request) {
+  try {
+    const body = await request.json() as Record<string, unknown>;
+
+    // Validate required fields
+    if (!body.title || typeof body.title !== 'string') {
+      return NextResponse.json({ error: 'Title is required' }, { status: 400 });
+    }
+
+    const projectRoot = process.cwd();
+    const taskJsonPath = path.join(projectRoot, 'task.json');
+
+    // Read existing tasks
+    let taskData: Record<string, unknown> = { tasks: [] };
+    try {
+      const taskJsonContent = await fs.readFile(taskJsonPath, 'utf-8');
+      taskData = JSON.parse(taskJsonContent);
+    } catch {
+      // File doesn't exist or is invalid, start with empty structure
+    }
+
+    const tasks = (taskData.tasks as unknown[]) || [];
+
+    // Create new task
+    const newTask = {
+      id: body.id || `task-${Date.now()}`,
+      title: body.title,
+      description: body.description || undefined,
+      status: body.status || 'pending',
+      priority: body.priority || 'medium',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      tags: body.tags ? String(body.tags).split(',').map(t => t.trim()).filter(Boolean) : [],
+      acceptanceCriteria: body.acceptanceCriteria ? String(body.acceptanceCriteria).split('\n').filter(Boolean) : [],
+      projectId: body.projectId || undefined,
+      assignedTo: body.assignedTo || undefined,
+      dueDate: body.dueDate || undefined,
+    };
+
+    // Add to tasks array
+    tasks.push(newTask);
+    taskData.tasks = tasks;
+
+    // Write back to file
+    await fs.writeFile(taskJsonPath, JSON.stringify(taskData, null, 2), 'utf-8');
+
+    // Return the created task in the expected format
+    const responseTask = {
+      ...newTask,
+      taskType: 'project',
+      subtaskCount: newTask.acceptanceCriteria?.length || 0,
+      completedSubtasks: newTask.status === 'completed' ? (newTask.acceptanceCriteria?.length || 0) : 0,
+    };
+
+    return NextResponse.json(responseTask, { status: 201 });
+  } catch (error) {
+    console.error('Error creating task:', error);
+    return NextResponse.json({ error: 'Failed to create task' }, { status: 500 });
+  }
+}
+
+// PUT endpoint - update an existing task
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json() as Record<string, unknown>;
+
+    if (!body.id || typeof body.id !== 'string') {
+      return NextResponse.json({ error: 'Task ID is required' }, { status: 400 });
+    }
+
+    const projectRoot = process.cwd();
+    const taskJsonPath = path.join(projectRoot, 'task.json');
+
+    // Read existing tasks
+    let taskData: Record<string, unknown> = { tasks: [] };
+    try {
+      const taskJsonContent = await fs.readFile(taskJsonPath, 'utf-8');
+      taskData = JSON.parse(taskJsonContent);
+    } catch {
+      return NextResponse.json({ error: 'Task file not found' }, { status: 404 });
+    }
+
+    const tasks = (taskData.tasks as unknown[]) || [];
+    const taskIndex = tasks.findIndex(t => (t as Record<string, unknown>).id === body.id);
+
+    if (taskIndex === -1) {
+      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
+    }
+
+    // Update task
+    const existingTask = tasks[taskIndex] as Record<string, unknown>;
+    const updatedTask = {
+      ...existingTask,
+      title: body.title !== undefined ? body.title : existingTask.title,
+      description: body.description !== undefined ? body.description : existingTask.description,
+      status: body.status !== undefined ? body.status : existingTask.status,
+      priority: body.priority !== undefined ? body.priority : existingTask.priority,
+      updatedAt: new Date().toISOString(),
+      tags: body.tags !== undefined
+        ? String(body.tags).split(',').map(t => t.trim()).filter(Boolean)
+        : existingTask.tags,
+      acceptanceCriteria: body.acceptanceCriteria !== undefined
+        ? String(body.acceptanceCriteria).split('\n').filter(Boolean)
+        : existingTask.acceptanceCriteria,
+      assignedTo: body.assignedTo !== undefined ? body.assignedTo : existingTask.assignedTo,
+      dueDate: body.dueDate !== undefined ? body.dueDate : existingTask.dueDate,
+    };
+
+    tasks[taskIndex] = updatedTask;
+    taskData.tasks = tasks;
+
+    // Write back to file
+    await fs.writeFile(taskJsonPath, JSON.stringify(taskData, null, 2), 'utf-8');
+
+    // Return the updated task in the expected format
+    const responseTask: TaskItem = {
+      id: String(existingTask.id || ''),
+      title: String(updatedTask.title || ''),
+      description: updatedTask.description ? String(updatedTask.description) : undefined,
+      status: String(updatedTask.status || 'unknown'),
+      priority: String(updatedTask.priority || 'medium'),
+      createdAt: String(existingTask.createdAt || new Date().toISOString()),
+      updatedAt: String(updatedTask.updatedAt),
+      tags: ((updatedTask.tags as unknown[]) || []).map(tag => String(tag)),
+      taskType: 'project',
+      subtaskCount: (updatedTask.acceptanceCriteria as unknown[])?.length || 0,
+      completedSubtasks: updatedTask.status === 'completed'
+        ? ((updatedTask.acceptanceCriteria as unknown[])?.length || 0)
+        : 0,
+    };
+
+    return NextResponse.json(responseTask);
+  } catch (error) {
+    console.error('Error updating task:', error);
+    return NextResponse.json({ error: 'Failed to update task' }, { status: 500 });
+  }
+}
+
+// DELETE endpoint - delete a task
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const taskId = searchParams.get('id');
+
+    if (!taskId) {
+      return NextResponse.json({ error: 'Task ID is required' }, { status: 400 });
+    }
+
+    const projectRoot = process.cwd();
+    const taskJsonPath = path.join(projectRoot, 'task.json');
+
+    // Read existing tasks
+    let taskData: Record<string, unknown> = { tasks: [] };
+    try {
+      const taskJsonContent = await fs.readFile(taskJsonPath, 'utf-8');
+      taskData = JSON.parse(taskJsonContent);
+    } catch {
+      return NextResponse.json({ error: 'Task file not found' }, { status: 404 });
+    }
+
+    const tasks = (taskData.tasks as unknown[]) || [];
+    const taskIndex = tasks.findIndex(t => (t as Record<string, unknown>).id === taskId);
+
+    if (taskIndex === -1) {
+      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
+    }
+
+    // Remove task
+    tasks.splice(taskIndex, 1);
+    taskData.tasks = tasks;
+
+    // Write back to file
+    await fs.writeFile(taskJsonPath, JSON.stringify(taskData, null, 2), 'utf-8');
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting task:', error);
+    return NextResponse.json({ error: 'Failed to delete task' }, { status: 500 });
   }
 }

@@ -334,6 +334,58 @@
       "medium": "Medium",
       "high": "High",
       "critical": "Critical"
+    },
+    "actions": {
+      "quickUpdate": "Quick Update",
+      "markAs": "Mark as",
+      "startTask": "Start",
+      "completeTask": "Complete",
+      "blockTask": "Block",
+      "cancelTask": "Cancel",
+      "deleteTask": "Delete",
+      "editTask": "Edit",
+      "createTask": "Create Task",
+      "batchActions": "Batch Actions",
+      "selectTasks": "Select tasks",
+      "deleteSelected": "Delete Selected",
+      "updateSelected": "Update Status"
+    },
+    "create": {
+      "title": "Create New Task",
+      "description": "Create a new task to track",
+      "titlePlaceholder": "Task title",
+      "descriptionPlaceholder": "Task description (optional)",
+      "priority": "Priority",
+      "status": "Status",
+      "tags": "Tags (comma separated)",
+      "dueDate": "Due Date (optional)",
+      "assignee": "Assignee (optional)",
+      "project": "Project (optional)",
+      "acceptanceCriteria": "Acceptance Criteria",
+      "addCriteria": "Add Criteria",
+      "submit": "Create Task"
+    },
+    "edit": {
+      "title": "Edit Task",
+      "description": "Update task details",
+      "submit": "Save Changes"
+    },
+    "delete": {
+      "title": "Delete Task",
+      "confirm": "Are you sure you want to delete this task?",
+      "cancel": "Cancel",
+      "confirmDelete": "Delete"
+    },
+    "success": {
+      "created": "Task created successfully",
+      "updated": "Task updated successfully",
+      "deleted": "Task deleted successfully",
+      "statusUpdated": "Status updated successfully"
+    },
+    "error": {
+      "createFailed": "Failed to create task",
+      "updateFailed": "Failed to update task",
+      "deleteFailed": "Failed to delete task"
     }
   },
   "usage": {
