@@ -4,6 +4,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { getAPIClient } from "./api-client";
+import { apiCache, CacheKeys } from "./cache";
 import type {
   GatewayHealth,
   Agent,
@@ -99,14 +100,26 @@ export function useGatewayHealth(options?: { enabled?: boolean; interval?: numbe
   const [lastChecked, setLastChecked] = useState<Date | null>(null);
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(true);
 
-  const fetchHealth = useCallback(async () => {
+  const fetchHealth = useCallback(async (useCache = true) => {
     if (!enabled) return;
 
     try {
-      setLoading(true);
+      // Try to get cached data first for instant display
+      if (useCache) {
+        const cached = apiCache.get<GatewayHealth>(CacheKeys.GATEWAY_HEALTH);
+        if (cached) {
+          setData(cached);
+          setLoading(false);
+        }
+      }
+
       setError(null);
       const client = getAPIClient();
       const health = await client.getHealth();
+
+      // Update cache
+      apiCache.set(CacheKeys.GATEWAY_HEALTH, health, interval);
+
       setData(health);
       setLastChecked(new Date());
     } catch (e) {
@@ -115,16 +128,16 @@ export function useGatewayHealth(options?: { enabled?: boolean; interval?: numbe
     } finally {
       setLoading(false);
     }
-  }, [enabled]);
+  }, [enabled, interval]);
 
   useEffect(() => {
     if (!enabled) return;
 
-    fetchHealth();
+    fetchHealth(true);
 
     // Only set up interval if auto-refresh is enabled
     if (isAutoRefreshing) {
-      const intervalId = setInterval(fetchHealth, interval);
+      const intervalId = setInterval(() => fetchHealth(false), interval);
       return () => clearInterval(intervalId);
     }
   }, [fetchHealth, interval, isAutoRefreshing, enabled]);
@@ -133,7 +146,7 @@ export function useGatewayHealth(options?: { enabled?: boolean; interval?: numbe
     data,
     loading,
     error,
-    refetch: fetchHealth,
+    refetch: () => fetchHealth(false),
     lastChecked,
     isAutoRefreshing,
     toggleAutoRefresh: () => setIsAutoRefreshing(prev => !prev),

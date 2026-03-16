@@ -19,8 +19,13 @@ const nextConfig: NextConfig = {
 
   // Experimental features for better performance
   experimental: {
-    optimizePackageImports: ['lucide-react'],
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    optimizeCss: true,
+    scrollRestoration: true,
   },
+
+  // Production optimizations
+  productionBrowserSourceMaps: false,
 
   // Webpack 5 optimizations (for fallback)
   webpack: (config, { isServer }) => {
@@ -38,6 +43,7 @@ const nextConfig: NextConfig = {
               chunks: 'all',
               test: /node_modules/,
               priority: 10,
+              enforce: true,
             },
             // Common UI components
             ui: {
@@ -45,6 +51,23 @@ const nextConfig: NextConfig = {
               chunks: 'all',
               test: /@\/components\/ui/,
               priority: 20,
+              enforce: true,
+            },
+            // Framework chunks
+            framework: {
+              name: 'framework',
+              chunks: 'all',
+              test: /[\\/]node_modules[\\/](react|react-dom|scheduler|use-subscription)[\\/]/,
+              priority: 30,
+              enforce: true,
+            },
+            // lib chunks
+            lib: {
+              name: 'lib',
+              chunks: 'all',
+              test: /[\\/]src[\\/]lib/,
+              priority: 25,
+              enforce: true,
             },
           },
         },
